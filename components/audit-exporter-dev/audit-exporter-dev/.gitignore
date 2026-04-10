@@ -1,0 +1,10 @@
+.idea
+.venv
+__pycache__
+
+.coverage
+coverage.xml
+.env
+.envrc
+.ralph-tui
+tasks

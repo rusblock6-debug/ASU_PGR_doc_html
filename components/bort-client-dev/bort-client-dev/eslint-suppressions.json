@@ -1,0 +1,7 @@
+{
+  "src/shared/lib/assert-never.ts": {
+    "@typescript-eslint/restrict-template-expressions": {
+      "count": 1
+    }
+  }
+}

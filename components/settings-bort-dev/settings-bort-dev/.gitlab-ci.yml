@@ -1,0 +1,45 @@
+  stages:
+    - trigger
+
+  default:
+    tags:
+      - infra-cluster
+
+  variables:
+    MAIN_PROJECT_ID: "71"
+    TRIGGER_TOKEN: "glptt-89c88cd7aabea932456b5e966bfe1d43d949d357"
+    MAIN_PROJECT_URL: "https://git.dmi-msk.ru/api/v4/projects/${MAIN_PROJECT_ID}/trigger/pipeline"
+
+  .trigger_base:
+    stage: trigger
+    image: dockerhub.timeweb.cloud/alpine:latest
+    script:
+      - apk add --no-cache curl
+      - |
+        echo "===> Триггерим server-repo"
+        echo "Репозиторий: ${CI_PROJECT_NAME}"
+        echo "Сервис: ${SERVICE_NAME}"
+        echo "Целевое окружение: ${TARGET_ENV}"
+
+        curl -X POST --fail \
+              -F token="${TRIGGER_TOKEN}" \
+              -F ref="${CI_COMMIT_REF_NAME}" \
+              -F "variables[REPO_NAME]=${CI_PROJECT_NAME}" \
+              -F "variables[SERVICE_NAME]=${SERVICE_NAME}" \
+              -F "variables[TARGET_ENV]=${TARGET_ENV}" \
+              -F "variables[TRIGGERED_COMMIT]=${CI_COMMIT_SHA}" \
+              -F "variables[TRIGGERED_BRANCH]=${CI_COMMIT_REF_NAME}" \
+              "${MAIN_PROJECT_URL}"
+        
+    rules:
+      - if: '$CI_COMMIT_REF_NAME == "dev"'
+      - if: '$CI_COMMIT_REF_NAME == "staging"'
+      - if: '$CI_COMMIT_REF_NAME == "main"'
+    allow_failure: true
+
+  bort-repo:
+    extends: .trigger_base
+    variables:
+      SERVICE_NAME: "settings-service"
+      COMPOSE_TARGET: "settings-bort"
+      TARGET_ENV: "bort"

@@ -1,0 +1,11 @@
+# Build outputs
+dist/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Files
+src/pages/simulation/ui/styles.css
+
+src/app/styles/main.css

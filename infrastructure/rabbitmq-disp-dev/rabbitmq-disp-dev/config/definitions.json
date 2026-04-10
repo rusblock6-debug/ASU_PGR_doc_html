@@ -1,0 +1,224 @@
+{
+  "vhosts": [
+    { "name": "/" }
+  ],
+
+  "users": [
+    {
+      "name": "admin",
+      "password": "public",
+      "tags": "administrator"
+    },
+    {
+      "name": "sync_service_user",
+      "password": "sync_service_pass",
+      "tags": ""
+    },
+    {
+      "name": "s3_minio_user",
+      "password": "s3_minio_pass",
+      "tags": ""
+    },
+    {
+      "name": "analytics_service_user",
+      "password": "analytics_service_pass",
+      "tags": ""
+    },
+    {
+      "name": "debezium_graph_service",
+      "password": "debezium_graph_service",
+      "tags": ""
+    },
+    {
+      "name": "debezium_enterprise_service",
+      "password": "debezium_enterprise_service",
+      "tags": ""
+    },
+    {
+      "name": "debezium_trip_service",
+      "password": "debezium_trip_service",
+      "tags": ""
+    },
+    {
+      "name": "debezium_auth_service",
+      "password": "debezium_auth_service",
+      "tags": ""
+    },
+    {
+      "name": "wifi_dispatcher_event_server",
+      "password": "wifi_dispatcher_event_server",
+      "tags": "administrator"
+    },
+    {
+      "name": "transport_service",
+      "password": "transport_service",
+      "tags": "management"
+    },
+    {
+      "name": "cdc_bort_4",
+      "password": "cdc_bort_4",
+      "tags": ""
+    },
+    {
+      "name": "cdc_distributor",
+      "password": "cdc_distributor",
+      "tags": ""
+    }
+  ],
+
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "sync_service_user",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "s3_minio_user",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "analytics_service_user",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "debezium_graph_service",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "debezium_enterprise_service",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "debezium_trip_service",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "debezium_auth_service",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "wifi_dispatcher_event_server",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "transport_service",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "cdc_bort_4",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "cdc_distributor",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+
+  "exchanges": [
+    {
+      "name": "minio.events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+
+  "queues": [
+    {
+      "name": "minio-events",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "cdc-graph-service",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "stream"
+      }
+    },
+    {
+      "name": "cdc-enterprise-service",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "stream"
+      }
+    },
+    {
+      "name": "cdc-trip-service",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "stream"
+      }
+    },
+    {
+      "name": "cdc-auth-service",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "stream"
+      }
+    }
+  ],
+
+  "bindings": [
+    {
+      "source": "minio.events",
+      "vhost": "/",
+      "destination": "minio-events",
+      "destination_type": "queue",
+      "routing_key": "minio.*",
+      "arguments": {}
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+.wrapper {
+  --input-bg: transparent;
+}
+
+/* По дефолту data-variant='default' = input_clear https://www.figma.com/design/yYTzipisVmqxISBKJejsdJ/%D0%90%D0%A1%D0%A3-%D0%93%D0%A2%D0%9A-for-me?node-id=1404-148201&t=RsdQw60KSOmMVNTQ-4 */
+.input {
+  height: var(--input-size);
+  min-height: var(--input-height);
+  padding-inline-start: var(--input-padding);
+  text-overflow: ellipsis;
+  font-size: var(--input-fz);
+  line-height: var(--input-lh);
+  color: var(--base-white);
+  caret-color: var(--primary);
+  border: 1px solid transparent;
+  border-radius: var(--input-radius, 8px);
+  transition: all 0.2s ease;
+
+  --input-placeholder-color: var(--text-placeholder);
+  --input-bg-color: transparent;
+
+  &::placeholder,
+  .placeholder {
+    font-size: var(--input-fz);
+    line-height: var(--input-lh);
+  }
+
+  &:disabled,
+  &[data-disabled] {
+    cursor: not-allowed;
+    opacity: 1;
+  }
+
+  /* input_clear */
+  &[data-variant='default'] {
+    background-color: var(--input-bg-color);
+
+    &[data-error],
+    &:hover,
+    &:focus {
+      background-color: var(--orem-netural-01);
+
+      --input-placeholder-color: var(--text-primary);
+    }
+
+    &:disabled,
+    &[data-disabled] {
+      --input-placeholder-color: var(--text-placeholder);
+
+      &:hover,
+      &:focus {
+        background-color: transparent;
+      }
+    }
+  }
+
+  &[data-variant='filled'] {
+    background-color: var(--bg-widget-hover);
+
+    &::placeholder {
+      --input-placeholder-color: var(--text-primary);
+    }
+
+    &:hover,
+    &:focus {
+      background-color: var(--bg-widget-hover-2);
+    }
+
+    &[data-error] {
+      background-color: var(--bg-widget-hover);
+    }
+
+    &:disabled,
+    &[data-disabled] {
+      &::placeholder {
+        --input-placeholder-color: var(--text-secondary-2);
+      }
+    }
+  }
+
+  &[data-variant='outline'] {
+    background-color: transparent;
+    border: 1px solid var(--text-secondary);
+
+    &::placeholder {
+      --input-placeholder-color: var(--text-primary);
+    }
+
+    &:hover {
+      border: 1px solid var(--text-primary);
+    }
+
+    &:focus {
+      border: 1px solid var(--primary);
+    }
+
+    &:disabled,
+    &[data-disabled] {
+      &:hover {
+        border: 1px solid var(--text-secondary);
+      }
+
+      &::placeholder {
+        --input-placeholder-color: var(--text-secondary);
+      }
+    }
+  }
+
+  &[data-variant='unstyled'] {
+    background-color: transparent;
+    border: 1px solid transparent;
+
+    &:hover,
+    &:focus {
+      background-color: var(--orem-netural-20);
+    }
+
+    &:disabled,
+    &[data-disabled] {
+      &:hover,
+      &:focus {
+        background-color: transparent;
+      }
+    }
+  }
+
+  &[data-variant='combobox-primary'] {
+    background-color: var(--orem-bw-950);
+    border: 1px solid var(--orem-bw-950);
+
+    &::placeholder {
+      --input-placeholder-color: var(--text-secondary);
+    }
+
+    &:hover {
+      &::placeholder {
+        --input-placeholder-color: var(--text-secondary-2);
+      }
+    }
+
+    &:focus {
+      border: 1px solid var(--primary);
+    }
+
+    &:disabled,
+    &[data-disabled] {
+      color: var(--text-primary);
+
+      &:hover {
+        --input-placeholder-color: var(--text-secondary-2);
+      }
+
+      &::placeholder {
+        --input-placeholder-color: var(--text-secondary);
+      }
+    }
+  }
+
+  &[data-error] {
+    border-color: var(--orem-red-400);
+
+    &:hover,
+    &:focus {
+      border-color: var(--orem-red-400);
+    }
+
+    &::placeholder,
+    .placeholder {
+      --input-placeholder-color: var(--text-primary);
+    }
+  }
+}

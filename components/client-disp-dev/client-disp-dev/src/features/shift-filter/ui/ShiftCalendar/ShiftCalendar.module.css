@@ -1,0 +1,93 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputs_container {
+  display: flex;
+  gap: 8px;
+}
+
+.calendar_container {
+  display: flex;
+  gap: 4px;
+}
+
+.buttons_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.shift_buttons_container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 40px;
+}
+
+.radio_inner {
+  display: none;
+}
+
+.radio_label_wrapper {
+  border-radius: 6px;
+}
+
+.radio_label {
+  padding: 5px 12px;
+  font-size: var(--font-size-xs);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.shift_checked {
+  .radio_label_wrapper {
+    background: var(--base-orange);
+  }
+
+  .radio_label {
+    color: var(--base-white);
+    cursor: initial;
+  }
+}
+
+.shift_disabled {
+  .radio_label_wrapper {
+    background: transparent;
+  }
+
+  .radio_label {
+    color: var(--text-secondary);
+    cursor: not-allowed;
+  }
+}
+
+.confirm_button_container {
+  display: flex;
+  justify-content: end;
+}
+
+.datetime_root {
+  width: 100%;
+  appearance: none;
+
+  ::-webkit-calendar-picker-indicator {
+    display: none;
+    appearance: none;
+  }
+}
+
+.datetime_label {
+  margin-bottom: 4px;
+}
+
+.datetime_wrapper {
+  border: 1px solid var(--text-secondary);
+  border-radius: 6px;
+
+  &.checked {
+    border: 1px solid var(--base-orange-2);
+  }
+}

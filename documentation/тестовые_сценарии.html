@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Детальные тестовые сценарии АСУ ПГР</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 11px;
+            color: #333;
+        }
+        h2, h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            vertical-align: top;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            text-align: center;
+            font-size: 10px;
+        }
+        .subheader {
+            background-color: #e6e6e6;
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+        }
+        .test-type-unit {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .test-type-integration {
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .test-type-e2e {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .test-type-load {
+            background-color: #f8d7da;
+            color: #721c24;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .code {
+            font-family: 'Courier New', monospace;
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            font-size: 10px;
+        }
+        .priority-high {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .priority-medium {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .priority-low {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>ДЕТАЛЬНЫЕ ТЕСТОВЫЕ СЦЕНАРИИ АСУ ПГР</h2>
+<h3>Полный набор тестов для проверки функционала системы</h3>
+
+<p><strong>Дата составления:</strong> 24 марта 2026 г.</p>
+<p><strong>Версия:</strong> 1.0</p>
+
+<p><strong>Типы тестов:</strong></p>
+<ul>
+    <li><span class="test-type-unit">UNIT</span> - Модульные тесты (отдельные функции/методы)</li>
+    <li><span class="test-type-integration">INTEGRATION</span> - Интеграционные тесты (взаимодействие компонентов)</li>
+    <li><span class="test-type-e2e">E2E</span> - End-to-End тесты (полный сценарий пользователя)</li>
+    <li><span class="test-type-load">LOAD</span> - Нагрузочные тесты (производительность)</li>
+</ul>
+
+<p><strong>Приоритеты:</strong></p>
+<ul>
+    <li><span class="priority-high">ВЫСОКИЙ</span> - Критичные для работы системы</li>
+    <li><span class="priority-medium">СРЕДНИЙ</span> - Важные, но не блокирующие</li>
+    <li><span class="priority-low">НИЗКИЙ</span> - Желательные для полноты покрытия</li>
+</ul>
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 5%;">ID</th>
+            <th style="width: 8%;">Тип</th>
+            <th style="width: 6%;">Приоритет</th>
+            <th style="width: 15%;">Название теста</th>
+            <th style="width: 25%;">Шаги выполнения</th>
+            <th style="width: 20%;">Ожидаемый результат</th>
+            <th style="width: 21%;">Команды/API</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- БЛОК 1: БОРТОВОЕ ОБОРУДОВАНИЕ -->
+        <tr class="subheader"><td colspan="7">БЛОК 1: БОРТОВОЕ ОБОРУДОВАНИЕ</td></tr>
+        
+        <tr>
+            <td>T1.1</td>
+            <td><span class="test-type-unit">UNIT</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Health Check - Базовая проверка</td>
+            <td>
+                1. Запустить сервис<br>
+                2. Выполнить GET /health<br>
+                3. Проверить статус код
+            </td>
+            <td>
+                • Статус код: 200 OK<br>
+                • JSON: {"status": "healthy"}<br>
+                • Время ответа < 100ms
+            </td>
+            <td>
+                <span class="code">curl http://localhost:8000/health</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T1.2</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Health Check - Проверка зависимостей</td>
+            <td>
+                1. Запустить все сервисы<br>
+                2. Выполнить GET /health/ready<br>
+                3. Проверить подключение к Redis, MQTT, PostgreSQL
+            </td>
+            <td>
+                • Статус код: 200 OK<br>
+                • JSON содержит статусы всех зависимостей<br>
+                • Все зависимости "connected"
+            </td>
+            <td>
+                <span class="code">curl http://localhost:8000/health/ready</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T1.3</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Health Check - Отказ Redis</td>
+            <td>
+                1. Остановить Redis<br>
+                2. Выполнить GET /health/ready<br>
+                3. Проверить статус
+            </td>
+            <td>
+                • Статус код: 503 Service Unavailable<br>
+                • JSON: {"redis": "disconnected"}<br>
+                • Логи содержат ошибку подключения
+            </td>
+            <td>
+                <span class="code">docker stop redis<br>
+                curl http://localhost:8000/health/ready</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T1.4</td>
+            <td><span class="test-type-e2e">E2E</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Буферизация при отсутствии связи</td>
+            <td>
+                1. Запустить систему<br>
+                2. Отключить сеть (имитация "мертвой зоны")<br>
+                3. Выполнить рейс (погрузка → разгрузка)<br>
+                4. Проверить локальное хранилище<br>
+                5. Восстановить сеть<br>
+                6. Проверить синхронизацию
+            </td>
+            <td>
+                • Данные сохранены в Redis<br>
+                • Данные сохранены в PostgreSQL<br>
+                • После восстановления связи данные отправлены на сервер<br>
+                • Нет потери данных<br>
+                • Нет дубликатов
+            </td>
+            <td>
+                <span class="code"># Отключить сеть<br>
+                sudo ifconfig eth0 down<br>
+                # Выполнить рейс<br>
+                # Проверить Redis<br>
+                redis-cli GET trip-service:vehicle:1:state<br>
+                # Включить сеть<br>
+                sudo ifconfig eth0 up</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T1.5</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Восстановление после перезапуска</td>
+            <td>
+                1. Запустить активный рейс<br>
+                2. Убить процесс сервиса (kill -9)<br>
+                3. Перезапустить сервис<br>
+                4. Проверить восстановление состояния
+            </td>
+            <td>
+                • Состояние восстановлено из Redis<br>
+                • Активный рейс продолжается<br>
+                • Нет потери данных<br>
+                • Логи содержат "State recovered from Redis"
+            </td>
+            <td>
+                <span class="code">kill -9 $(pgrep -f trip-service)<br>
+                docker restart trip-service<br>
+                curl http://localhost:8000/api/active-trip</span>
+            </td>
+        </tr>
+
+        <!-- БЛОК 2: АВТОРИЗАЦИЯ И ИНТЕРФЕЙС -->
+        <tr class="subheader"><td colspan="7">БЛОК 2: АВТОРИЗАЦИЯ И ИНТЕРФЕЙС МАШИНИСТА</td></tr>
+        
+        <tr>
+            <td>T2.1</td>
+            <td><span class="test-type-unit">UNIT</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Авторизация - Успешный вход</td>
+            <td>
+                1. POST /login с валидными credentials<br>
+                2. Проверить получение токенов
+            </td>
+            <td>
+                • Статус код: 200 OK<br>
+                • JSON содержит access_token и refresh_token<br>
+                • Токены валидны (JWT формат)
+            </td>
+            <td>
+                <span class="code">curl -X POST http://localhost:8000/login \<br>
+                -H "Content-Type: application/json" \<br>
+                -d '{"username":"operator","password":"pass123"}'</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T2.2</td>
+            <td><span class="test-type-unit">UNIT</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Авторизация - Неверные credentials</td>
+            <td>
+                1. POST /login с неверным паролем<br>
+                2. Проверить ошибку
+            </td>
+            <td>
+                • Статус код: 401 Unauthorized<br>
+                • JSON: {"error": "Invalid credentials"}
+            </td>
+            <td>
+                <span class="code">curl -X POST http://localhost:8000/login \<br>
+                -d '{"username":"operator","password":"wrong"}'</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T2.3</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Авторизация - Проверка токена через Gateway</td>
+            <td>
+                1. Получить access_token через /login<br>
+                2. Выполнить запрос к API с токеном<br>
+                3. Выполнить запрос без токена
+            </td>
+            <td>
+                • С токеном: 200 OK<br>
+                • Без токена: 401 Unauthorized<br>
+                • Gateway проверяет токен автоматически
+            </td>
+            <td>
+                <span class="code">TOKEN=$(curl -X POST ... | jq -r .access_token)<br>
+                curl -H "Authorization: Bearer $TOKEN" \<br>
+                http://localhost:8000/api/v1/trip-service/active-task</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T2.4</td>
+            <td><span class="test-type-e2e">E2E</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Принятие наряда</td>
+            <td>
+                1. Авторизоваться<br>
+                2. GET /api/shift-tasks (список нарядов)<br>
+                3. PUT /api/tasks/{task_id}/activate<br>
+                4. Проверить статус
+            </td>
+            <td>
+                • Наряд со статусом pending виден<br>
+                • После активации статус → in_progress<br>
+                • MQTT событие task_activated отправлено<br>
+                • GET /api/active-task возвращает активное задание
+            </td>
+            <td>
+                <span class="code">curl http://localhost:8000/api/shift-tasks<br>
+                curl -X PUT http://localhost:8000/api/tasks/123/activate<br>
+                curl http://localhost:8000/api/active-task</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T2.5</td>
+            <td><span class="test-type-e2e">E2E</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Отмена наряда</td>
+            <td>
+                1. Активировать наряд<br>
+                2. DELETE /api/shift-tasks/{shift_id}<br>
+                3. Проверить статус
+            </td>
+            <td>
+                • Статус наряда → cancelled<br>
+                • MQTT событие shift_task_cancelled отправлено<br>
+                • Активное задание очищено<br>
+                • Попытка активировать отмененный наряд → ошибка
+            </td>
+            <td>
+                <span class="code">curl -X DELETE \<br>
+                http://localhost:8000/api/shift-tasks/shift123</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T2.6</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Главный экран - Real-time обновления</td>
+            <td>
+                1. Подключиться к SSE /api/events/{vehicle_id}<br>
+                2. Изменить состояние State Machine<br>
+                3. Проверить получение события
+            </td>
+            <td>
+                • SSE соединение установлено<br>
+                • События приходят в реальном времени<br>
+                • JSON содержит state, timestamp, vehicle_id<br>
+                • Задержка < 1 сек
+            </td>
+            <td>
+                <span class="code">curl -N http://localhost:8000/api/events/1<br>
+                # В другом терминале<br>
+                curl -X PUT http://localhost:8000/api/state \<br>
+                -d '{"state":"moving_empty"}'</span>
+            </td>
+        </tr>
+
+        <!-- БЛОК 3: ДАТЧИКИ И ТЕЛЕМЕТРИЯ -->
+        <tr class="subheader"><td colspan="7">БЛОК 3: ДАТЧИКИ И ТЕЛЕМЕТРИЯ</td></tr>
+        
+        <tr>
+            <td>T3.1</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Позиционирование - Фиксация метки</td>
+            <td>
+                1. Отправить MQTT событие tag/raw с point_id<br>
+                2. Проверить запись в cycle_tag_history<br>
+                3. Проверить временную метку
+            </td>
+            <td>
+                • Запись создана в cycle_tag_history<br>
+                • point_id корректен<br>
+                • Timestamp фиксации < 2 сек от события<br>
+                • Redis Stream содержит событие
+            </td>
+            <td>
+                <span class="code">mosquitto_pub -h localhost -p 1883 \<br>
+                -t "truck/1/sensor/tag/raw" \<br>
+                -m '{"point_id":"tag_001","timestamp":1234567890}'<br>
+                # Проверить БД<br>
+                psql -c "SELECT * FROM cycle_tag_history \<br>
+                WHERE point_id='tag_001' ORDER BY timestamp DESC LIMIT 1"</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T3.2</td>
+            <td><span class="test-type-e2e">E2E</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Фиксация цикла погрузки</td>
+            <td>
+                1. Отправить speed.stopped<br>
+                2. Отправить vibro.active + weight.empty<br>
+                3. Отправить vibro.inactive + weight.loaded<br>
+                4. Проверить State Machine и trip
+            </td>
+            <td>
+                • State: stopped_empty → loading → loading_complete<br>
+                • Trip создан автоматически<br>
+                • loading_timestamp заполнен<br>
+                • loading_place_id привязан (если есть метка)<br>
+                • MQTT событие trip_started отправлено
+            </td>
+            <td>
+                <span class="code">mosquitto_pub -t "truck/1/sensor/speed/events" \<br>
+                -m '{"status":"stopped"}'<br>
+                mosquitto_pub -t "truck/1/sensor/vibro/events" \<br>
+                -m '{"status":"active"}'<br>
+                mosquitto_pub -t "truck/1/sensor/weight/events" \<br>
+                -m '{"status":"empty"}'<br>
+                # Подождать 5 сек<br>
+                mosquitto_pub -t "truck/1/sensor/vibro/events" \<br>
+                -m '{"status":"inactive"}'<br>
+                mosquitto_pub -t "truck/1/sensor/weight/events" \<br>
+                -m '{"status":"loaded"}'<br>
+                curl http://localhost:8000/api/active-trip</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T3.3</td>
+            <td><span class="test-type-e2e">E2E</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Полный цикл рейса</td>
+            <td>
+                1. Выполнить погрузку (T3.2)<br>
+                2. Отправить speed.moving<br>
+                3. Проехать метку разгрузки<br>
+                4. Выполнить разгрузку<br>
+                5. Проверить завершение trip
+            </td>
+            <td>
+                • State: loading_complete → moving_loaded → stopped_loaded → unloading → unloading_complete<br>
+                • Trip завершен (status: completed)<br>
+                • unloading_timestamp заполнен<br>
+                • unloading_place_id привязан<br>
+                • cycle_completed_at заполнен<br>
+                • MQTT событие trip_completed отправлено
+            </td>
+            <td>
+                <span class="code"># После погрузки<br>
+                mosquitto_pub -t "truck/1/sensor/speed/events" \<br>
+                -m '{"status":"moving"}'<br>
+                mosquitto_pub -t "truck/1/sensor/tag/raw" \<br>
+                -m '{"point_id":"unload_001"}'<br>
+                mosquitto_pub -t "truck/1/sensor/speed/events" \<br>
+                -m '{"status":"stopped"}'<br>
+                mosquitto_pub -t "truck/1/sensor/vibro/events" \<br>
+                -m '{"status":"active"}'<br>
+                # Подождать 5 сек<br>
+                mosquitto_pub -t "truck/1/sensor/vibro/events" \<br>
+                -m '{"status":"inactive"}'<br>
+                mosquitto_pub -t "truck/1/sensor/weight/events" \<br>
+                -m '{"status":"empty"}'<br>
+                curl http://localhost:8000/api/trips</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T3.4</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Телеметрия - Сбор данных CAN-шины</td>
+            <td>
+                1. Отправить MQTT события fuel, speed<br>
+                2. Проверить Redis Streams<br>
+                3. Проверить TTL
+            </td>
+            <td>
+                • Данные в Redis Stream telemetry-service:fuel:1<br>
+                • Данные в Redis Stream telemetry-service:speed:1<br>
+                • TTL = 7200 сек (2 часа)<br>
+                • Формат JSON корректен
+            </td>
+            <td>
+                <span class="code">mosquitto_pub -t "truck/1/sensor/fuel/events" \<br>
+                -m '{"level":75.5,"timestamp":1234567890}'<br>
+                redis-cli XRANGE telemetry-service:fuel:1 - + COUNT 10<br>
+                redis-cli TTL telemetry-service:fuel:1</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T3.5</td>
+            <td><span class="test-type-unit">UNIT</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Определение движения - Нет ложных срабатываний</td>
+            <td>
+                1. Отправить speed.stopped<br>
+                2. Отправить vibro.active (двигатель работает)<br>
+                3. Проверить State Machine
+            </td>
+            <td>
+                • State остается stopped_empty/stopped_loaded<br>
+                • Нет перехода в moving<br>
+                • Логи не содержат ошибок
+            </td>
+            <td>
+                <span class="code">mosquitto_pub -t "truck/1/sensor/speed/events" \<br>
+                -m '{"status":"stopped"}'<br>
+                mosquitto_pub -t "truck/1/sensor/vibro/events" \<br>
+                -m '{"status":"active"}'<br>
+                curl http://localhost:8000/api/state</span>
+            </td>
+        </tr>
+
+        <!-- БЛОК 4: ДИСПЕТЧЕРСКИЙ ФУНКЦИОНАЛ -->
+        <tr class="subheader"><td colspan="7">БЛОК 4: ДИСПЕТЧЕРСКИЙ ФУНКЦИОНАЛ</td></tr>
+        
+        <tr>
+            <td>T4.1</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>НСИ - Создание техники</td>
+            <td>
+                1. POST /api/vehicles с данными техники<br>
+                2. GET /api/vehicles<br>
+                3. Проверить созданную технику
+            </td>
+            <td>
+                • Статус код: 201 Created<br>
+                • Техника в списке<br>
+                • Все поля заполнены корректно<br>
+                • vehicle_id уникален
+            </td>
+            <td>
+                <span class="code">curl -X POST http://localhost:8001/api/vehicles \<br>
+                -H "Content-Type: application/json" \<br>
+                -d '{"model":"ПДМ-1","status":"active"}'<br>
+                curl http://localhost:8001/api/vehicles</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T4.2</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>НСИ - Создание горизонта и меток</td>
+            <td>
+                1. POST /api/levels (создать горизонт)<br>
+                2. POST /api/levels/{id}/nodes (создать узлы)<br>
+                3. POST /api/tags (создать метки)<br>
+                4. GET /api/levels/{id}/graph
+            </td>
+            <td>
+                • Горизонт создан<br>
+                • Узлы привязаны к горизонту<br>
+                • Метки созданы с координатами<br>
+                • Граф содержит все узлы и метки
+            </td>
+            <td>
+                <span class="code">curl -X POST http://localhost:5001/api/levels \<br>
+                -d '{"name":"Горизонт -50м","height":-50}'<br>
+                curl -X POST http://localhost:5001/api/levels/1/nodes \<br>
+                -d '{"x":100,"y":200,"type":"regular"}'<br>
+                curl -X POST http://localhost:5001/api/tags \<br>
+                -d '{"mac":"AA:BB:CC:DD:EE:FF","x":100,"y":200,"radius":25}'</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T4.3</td>
+            <td><span class="test-type-e2e">E2E</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Планирование наряда</td>
+            <td>
+                1. POST /api/shift-tasks (создать смену)<br>
+                2. POST /api/tasks (создать задания)<br>
+                3. Проверить MQTT событие<br>
+                4. Проверить наряд на борту
+            </td>
+            <td>
+                • Смена создана со статусом pending<br>
+                • Задания привязаны к смене<br>
+                • MQTT событие shift_task_received отправлено<br>
+                • GET /api/shift-tasks на борту возвращает наряд
+            </td>
+            <td>
+                <span class="code">curl -X POST http://localhost:8000/api/shift-tasks \<br>
+                -d '{"vehicle_id":1,"shift_date":"2026-03-24", \<br>
+                "shift_num":1,"route_tasks":[...]}'<br>
+                # Подписаться на MQTT<br>
+                mosquitto_sub -t "truck/1/trip-service/events"</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T4.4</td>
+            <td><span class="test-type-e2e">E2E</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Внеплановый рейс</td>
+            <td>
+                1. DELETE /api/active-task (очистить задание)<br>
+                2. Выполнить полный цикл рейса<br>
+                3. GET /api/trips?shift_id=null
+            </td>
+            <td>
+                • Рейс создан с shift_id = NULL<br>
+                • Рейс помечен как "Внеплановый"<br>
+                • Учтен в статистике отдельно<br>
+                • Все временные метки корректны
+            </td>
+            <td>
+                <span class="code">curl -X DELETE http://localhost:8000/api/active-task<br>
+                # Выполнить рейс (T3.3)<br>
+                curl "http://localhost:8000/api/trips?shift_id=null"</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T4.5</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Визуализация - DXF подложка</td>
+            <td>
+                1. Загрузить DXF файл<br>
+                2. POST /api/substrates<br>
+                3. GET /api/levels/{id}/graph<br>
+                4. Проверить отображение
+            </td>
+            <td>
+                • Substrate создан<br>
+                • Файл сохранен в S3<br>
+                • Координаты корректны<br>
+                • План отображается на карте
+            </td>
+            <td>
+                <span class="code">curl -X POST http://localhost:5001/api/substrates \<br>
+                -F "file=@plan.dxf" \<br>
+                -F "level_id=1"</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T4.6</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Отчетность - Формирование КТГ/КИО</td>
+            <td>
+                1. Выполнить смену с рейсами и простоями<br>
+                2. Запросить данные из cycle_state_history<br>
+                3. Вычислить КТГ и КИО<br>
+                4. Проверить формулы
+            </td>
+            <td>
+                • КТГ = (время работы) / (общее время смены)<br>
+                • КИО = (время в движении) / (время работы)<br>
+                • Формулы соответствуют ТЗ<br>
+                • Цифры сходятся с журналом событий
+            </td>
+            <td>
+                <span class="code">psql -c "SELECT state, \<br>
+                SUM(EXTRACT(EPOCH FROM (ended_at - started_at))) \<br>
+                FROM cycle_state_history \<br>
+                WHERE shift_id='shift123' GROUP BY state"</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T4.7</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Экспорт - Формирование дампа</td>
+            <td>
+                1. Завершить рейс<br>
+                2. Дождаться создания дампа<br>
+                3. Проверить MinIO<br>
+                4. Скачать и проверить содержимое
+            </td>
+            <td>
+                • Дамп создан в MinIO<br>
+                • Формат: tar.gz<br>
+                • Содержит parquet файлы<br>
+                • Данные корректны
+            </td>
+            <td>
+                <span class="code"># Проверить MinIO<br>
+                mc ls minio/mybucket/<br>
+                # Скачать<br>
+                mc cp minio/mybucket/dump_123.tar.gz .<br>
+                tar -xzf dump_123.tar.gz</span>
+            </td>
+        </tr>
+
+        <!-- БЛОК 5: НАДЕЖНОСТЬ И ОТКАЗОУСТОЙЧИВОСТЬ -->
+        <tr class="subheader"><td colspan="7">БЛОК 5: НАДЕЖНОСТЬ И ОТКАЗОУСТОЙЧИВОСТЬ</td></tr>
+        
+        <tr>
+            <td>T5.1</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Непрерывная работа 24/7</td>
+            <td>
+                1. Запустить систему<br>
+                2. Выполнять реальные сменные задания 24 часа<br>
+                3. Мониторить метрики<br>
+                4. Проверить логи
+            </td>
+            <td>
+                • Нет критических сбоев<br>
+                • Memory usage стабилен (нет утечек)<br>
+                • CPU usage в пределах нормы<br>
+                • Коэффициент готовности >= 99.9%<br>
+                • Все рейсы обработаны корректно
+            </td>
+            <td>
+                <span class="code"># Мониторинг<br>
+                docker stats<br>
+                # Логи<br>
+                docker logs -f trip-service | grep ERROR<br>
+                # Метрики<br>
+                curl http://localhost:8000/metrics</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T5.2</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Множественные перезапуски</td>
+            <td>
+                1. Запустить активный рейс<br>
+                2. Перезапустить сервис 10 раз<br>
+                3. Проверить целостность данных
+            </td>
+            <td>
+                • Состояние восстанавливается после каждого перезапуска<br>
+                • Нет потери данных<br>
+                • Нет дубликатов<br>
+                • БД не повреждена
+            </td>
+            <td>
+                <span class="code">for i in {1..10}; do<br>
+                &nbsp;&nbsp;docker restart trip-service<br>
+                &nbsp;&nbsp;sleep 5<br>
+                &nbsp;&nbsp;curl http://localhost:8000/api/active-trip<br>
+                done</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T5.3</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Синхронизация после "мертвой зоны"</td>
+            <td>
+                1. Выполнить 10 рейсов без связи<br>
+                2. Восстановить связь<br>
+                3. Проверить синхронизацию<br>
+                4. Проверить время синхронизации
+            </td>
+            <td>
+                • Все 10 рейсов синхронизированы<br>
+                • Нет дубликатов<br>
+                • Порядок событий сохранен<br>
+                • Время синхронизации < 30 сек
+            </td>
+            <td>
+                <span class="code"># Отключить сеть<br>
+                sudo ifconfig eth0 down<br>
+                # Выполнить 10 рейсов<br>
+                # Включить сеть<br>
+                sudo ifconfig eth0 up<br>
+                # Проверить<br>
+                curl http://server/api/trips?vehicle_id=1</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T5.4</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Работа меток - Ресурс батареи</td>
+            <td>
+                1. Оставить метки в активном режиме на 1 неделю<br>
+                2. Мониторить battery_level<br>
+                3. Проверить работоспособность
+            </td>
+            <td>
+                • battery_level не упал ниже 20%<br>
+                • Метки продолжают передавать ID<br>
+                • Метки фиксируются в cycle_tag_history<br>
+                • Расчетный срок работы соответствует ТЗ
+            </td>
+            <td>
+                <span class="code">curl http://localhost:5001/api/tags<br>
+                # Проверить battery_level для всех меток<br>
+                psql -c "SELECT mac, battery_level, battery_updated_at \<br>
+                FROM tags WHERE battery_level < 20"</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T5.5</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Целостность данных при сбое</td>
+            <td>
+                1. Запустить транзакцию (создание trip)<br>
+                2. Убить процесс во время транзакции<br>
+                3. Перезапустить<br>
+                4. Проверить БД
+            </td>
+            <td>
+                • Нет частичных записей<br>
+                • Транзакция либо завершена, либо откачена<br>
+                • ACID свойства соблюдены<br>
+                • БД консистентна
+            </td>
+            <td>
+                <span class="code"># Во время создания trip<br>
+                kill -9 $(pgrep -f trip-service)<br>
+                docker restart trip-service<br>
+                psql -c "SELECT * FROM trips WHERE status='in_progress'"</span>
+            </td>
+        </tr>
+
+        <!-- БЛОК 6: БЕЗОПАСНОСТЬ И ПРАВА ДОСТУПА -->
+        <tr class="subheader"><td colspan="7">БЛОК 6: БЕЗОПАСНОСТЬ И ПРАВА ДОСТУПА</td></tr>
+        
+        <tr>
+            <td>T6.1</td>
+            <td><span class="test-type-unit">UNIT</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Права доступа - Роль машиниста</td>
+            <td>
+                1. Авторизоваться под ролью "машинист"<br>
+                2. Попытка доступа к админским endpoint<br>
+                3. Проверить ошибку
+            </td>
+            <td>
+                • Статус код: 403 Forbidden<br>
+                • JSON: {"error": "Insufficient permissions"}<br>
+                • Логи содержат попытку несанкционированного доступа
+            </td>
+            <td>
+                <span class="code">TOKEN=$(curl -X POST /login \<br>
+                -d '{"username":"operator","password":"pass"}' \<br>
+                | jq -r .access_token)<br>
+                curl -H "Authorization: Bearer $TOKEN" \<br>
+                http://localhost:8000/api/users</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T6.2</td>
+            <td><span class="test-type-unit">UNIT</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Права доступа - Без токена</td>
+            <td>
+                1. Выполнить запрос к защищенному endpoint без токена<br>
+                2. Проверить ошибку
+            </td>
+            <td>
+                • Статус код: 401 Unauthorized<br>
+                • JSON: {"error": "Unauthorized"}<br>
+                • Доступ запрещен
+            </td>
+            <td>
+                <span class="code">curl http://localhost:8000/api/active-task</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T6.3</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Проверка разрешений</td>
+            <td>
+                1. POST /permissions/check с permission_id<br>
+                2. Проверить результат для разных ролей
+            </td>
+            <td>
+                • Для админа: true<br>
+                • Для машиниста: false (если нет разрешения)<br>
+                • JSON: {"has_permission": true/false}
+            </td>
+            <td>
+                <span class="code">curl -X POST http://localhost:8000/permissions/check \<br>
+                -H "Authorization: Bearer $TOKEN" \<br>
+                -d '{"permission_id":"admin.users.delete"}'</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T6.4</td>
+            <td><span class="test-type-unit">UNIT</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Истечение токена</td>
+            <td>
+                1. Получить access_token<br>
+                2. Дождаться истечения (или изменить время)<br>
+                3. Попытка использовать истекший токен
+            </td>
+            <td>
+                • Статус код: 401 Unauthorized<br>
+                • JSON: {"error": "Token expired"}<br>
+                • Требуется обновление через refresh_token
+            </td>
+            <td>
+                <span class="code"># Получить токен с коротким TTL<br>
+                TOKEN=$(curl -X POST /login ... | jq -r .access_token)<br>
+                # Подождать истечения<br>
+                sleep 3600<br>
+                curl -H "Authorization: Bearer $TOKEN" /api/active-task</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T6.5</td>
+            <td><span class="test-type-integration">INTEGRATION</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Обновление токена</td>
+            <td>
+                1. Получить access_token и refresh_token<br>
+                2. POST /refresh с refresh_token<br>
+                3. Проверить новый access_token
+            </td>
+            <td>
+                • Статус код: 200 OK<br>
+                • Новый access_token получен<br>
+                • Новый токен валиден<br>
+                • Старый токен невалиден
+            </td>
+            <td>
+                <span class="code">REFRESH=$(curl -X POST /login ... | jq -r .refresh_token)<br>
+                curl -X POST http://localhost:8000/refresh \<br>
+                -d '{"refresh_token":"'$REFRESH'"}'</span>
+            </td>
+        </tr>
+
+        <!-- БЛОК 7: ПРОИЗВОДИТЕЛЬНОСТЬ -->
+        <tr class="subheader"><td colspan="7">БЛОК 7: ПРОИЗВОДИТЕЛЬНОСТЬ И НАГРУЗОЧНОЕ ТЕСТИРОВАНИЕ</td></tr>
+        
+        <tr>
+            <td>T7.1</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>Нагрузка - 10 единиц техники одновременно</td>
+            <td>
+                1. Запустить 10 симуляторов техники<br>
+                2. Каждый выполняет рейсы параллельно<br>
+                3. Мониторить метрики<br>
+                4. Проверить обработку всех событий
+            </td>
+            <td>
+                • Все события обработаны<br>
+                • Нет потери данных<br>
+                • CPU usage < 80%<br>
+                • Memory usage стабилен<br>
+                • Latency < 500ms для 95 перцентиля
+            </td>
+            <td>
+                <span class="code"># Запустить симуляторы<br>
+                for i in {1..10}; do<br>
+                &nbsp;&nbsp;python simulator.py --vehicle-id=$i &<br>
+                done<br>
+                # Мониторинг<br>
+                docker stats<br>
+                curl http://localhost:8000/metrics</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T7.2</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Нагрузка - 1000 событий в секунду</td>
+            <td>
+                1. Отправить 1000 MQTT событий/сек<br>
+                2. Мониторить обработку<br>
+                3. Проверить задержки
+            </td>
+            <td>
+                • Все события обработаны<br>
+                • Задержка обработки < 1 сек<br>
+                • Нет переполнения очередей<br>
+                • Redis/PostgreSQL справляются
+            </td>
+            <td>
+                <span class="code"># Нагрузочный тест<br>
+                python load_test.py --rate=1000 --duration=60<br>
+                # Проверить метрики<br>
+                redis-cli INFO stats<br>
+                psql -c "SELECT count(*) FROM cycle_state_history \<br>
+                WHERE created_at > NOW() - INTERVAL '1 minute'"</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T7.3</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Производительность - Формирование отчета</td>
+            <td>
+                1. Создать смену с 50 рейсами<br>
+                2. Запросить сменный отчет<br>
+                3. Измерить время формирования
+            </td>
+            <td>
+                • Время формирования < 5 сек<br>
+                • Отчет содержит все рейсы<br>
+                • Цифры корректны<br>
+                • Нет ошибок
+            </td>
+            <td>
+                <span class="code">time curl http://localhost:8000/api/reports/shift/shift123</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T7.4</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-low">НИЗКИЙ</span></td>
+            <td>Производительность - WebSocket подключения</td>
+            <td>
+                1. Создать 100 WebSocket подключений<br>
+                2. Отправить события<br>
+                3. Проверить доставку всем клиентам
+            </td>
+            <td>
+                • Все клиенты получают события<br>
+                • Задержка < 100ms<br>
+                • Нет разрывов соединений<br>
+                • Memory usage стабилен
+            </td>
+            <td>
+                <span class="code"># Тест WebSocket<br>
+                python ws_load_test.py --connections=100<br>
+                docker stats graph-service</span>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>T7.5</td>
+            <td><span class="test-type-load">LOAD</span></td>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>Производительность - Запросы к БД</td>
+            <td>
+                1. Заполнить БД 10000 рейсами<br>
+                2. Выполнить запросы с фильтрами<br>
+                3. Измерить время ответа
+            </td>
+            <td>
+                • Запросы с индексами < 100ms<br>
+                • Запросы без индексов < 1 сек<br>
+                • Нет блокировок<br>
+                • EXPLAIN ANALYZE показывает использование индексов
+            </td>
+            <td>
+                <span class="code">psql -c "EXPLAIN ANALYZE SELECT * FROM trips \<br>
+                WHERE vehicle_id=1 AND shift_id='shift123'"<br>
+                time curl "http://localhost:8000/api/trips?vehicle_id=1"</span>
+            </td>
+        </tr>
+
+    </tbody>
+</table>
+
+<br>
+<h3>ИТОГОВАЯ СТАТИСТИКА ТЕСТОВ</h3>
+
+<table style="width: 70%; margin: 0 auto;">
+    <thead>
+        <tr>
+            <th>Категория</th>
+            <th>Количество</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><span class="test-type-unit">UNIT тесты</span></td>
+            <td>8</td>
+        </tr>
+        <tr>
+            <td><span class="test-type-integration">INTEGRATION тесты</span></td>
+            <td>15</td>
+        </tr>
+        <tr>
+            <td><span class="test-type-e2e">E2E тесты</span></td>
+            <td>7</td>
+        </tr>
+        <tr>
+            <td><span class="test-type-load">LOAD тесты</span></td>
+            <td>7</td>
+        </tr>
+        <tr>
+            <td><strong>ВСЕГО</strong></td>
+            <td><strong>37</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
+<table style="width: 70%; margin: 0 auto;">
+    <thead>
+        <tr>
+            <th>Приоритет</th>
+            <th>Количество</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><span class="priority-high">ВЫСОКИЙ</span></td>
+            <td>18</td>
+        </tr>
+        <tr>
+            <td><span class="priority-medium">СРЕДНИЙ</span></td>
+            <td>17</td>
+        </tr>
+        <tr>
+            <td><span class="priority-low">НИЗКИЙ</span></td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td><strong>ВСЕГО</strong></td>
+            <td><strong>37</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+<h3>РЕКОМЕНДАЦИИ ПО ВЫПОЛНЕНИЮ ТЕСТОВ</h3>
+
+<ol>
+    <li><strong>Последовательность выполнения:</strong>
+        <ul>
+            <li>Сначала UNIT тесты (быстрые, изолированные)</li>
+            <li>Затем INTEGRATION тесты (проверка взаимодействия)</li>
+            <li>Потом E2E тесты (полные сценарии)</li>
+            <li>В конце LOAD тесты (производительность)</li>
+        </ul>
+    </li>
+    
+    <li><strong>Приоритизация:</strong>
+        <ul>
+            <li>Начать с тестов ВЫСОКОГО приоритета</li>
+            <li>Критичные для работы системы</li>
+            <li>Блокирующие для опытной эксплуатации</li>
+        </ul>
+    </li>
+    
+    <li><strong>Автоматизация:</strong>
+        <ul>
+            <li>Создать pytest тесты для UNIT и INTEGRATION</li>
+            <li>Использовать pytest-asyncio для async кода</li>
+            <li>Добавить fixtures для подготовки данных</li>
+            <li>Интегрировать с CI/CD (GitLab CI)</li>
+        </ul>
+    </li>
+    
+    <li><strong>Мониторинг:</strong>
+        <ul>
+            <li>Логировать все тесты</li>
+            <li>Собирать метрики (время выполнения, успешность)</li>
+            <li>Создать dashboard для отслеживания</li>
+            <li>Алерты при падении тестов</li>
+        </ul>
+    </li>
+    
+    <li><strong>Документация:</strong>
+        <ul>
+            <li>Документировать результаты каждого теста</li>
+            <li>Фиксировать найденные баги</li>
+            <li>Обновлять тесты при изменении функционала</li>
+            <li>Вести changelog тестов</li>
+        </ul>
+    </li>
+</ol>
+
+<br>
+<h3>ПРИМЕР АВТОМАТИЗИРОВАННОГО ТЕСТА (pytest)</h3>
+
+<pre style="background-color: #f4f4f4; padding: 10px; border: 1px solid #ddd; font-family: 'Courier New', monospace; font-size: 10px;">
+import pytest
+import httpx
+from datetime import datetime
+
+@pytest.mark.asyncio
+async def test_health_check():
+    """T1.1: Health Check - Базовая проверка"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get("http://localhost:8000/health")
+        assert response.status_code == 200
+        assert response.json() == {"status": "healthy"}
+        assert response.elapsed.total_seconds() < 0.1
+
+@pytest.mark.asyncio
+async def test_full_trip_cycle(mqtt_client, db_session):
+    """T3.3: Полный цикл рейса"""
+    vehicle_id = 1
+    
+    # 1. Погрузка
+    await mqtt_client.publish(f"truck/{vehicle_id}/sensor/speed/events", 
+                              '{"status":"stopped"}')
+    await mqtt_client.publish(f"truck/{vehicle_id}/sensor/vibro/events", 
+                              '{"status":"active"}')
+    await mqtt_client.publish(f"truck/{vehicle_id}/sensor/weight/events", 
+                              '{"status":"empty"}')
+    await asyncio.sleep(5)
+    await mqtt_client.publish(f"truck/{vehicle_id}/sensor/vibro/events", 
+                              '{"status":"inactive"}')
+    await mqtt_client.publish(f"truck/{vehicle_id}/sensor/weight/events", 
+                              '{"status":"loaded"}')
+    
+    # 2. Проверить создание trip
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"http://localhost:8000/api/active-trip")
+        assert response.status_code == 200
+        trip = response.json()
+        assert trip["vehicle_id"] == vehicle_id
+        assert trip["loading_timestamp"] is not None
+    
+    # 3. Движение и разгрузка
+    await mqtt_client.publish(f"truck/{vehicle_id}/sensor/speed/events", 
+                              '{"status":"moving"}')
+    # ... остальные шаги
+    
+    # 4. Проверить завершение
+    trip_id = trip["cycle_id"]
+    response = await client.get(f"http://localhost:8000/api/trips/{trip_id}")
+    assert response.json()["status"] == "completed"
+</pre>
+
+<br>
+<p><strong>Дата составления:</strong> 24 марта 2026 г.</p>
+<p><strong>Версия:</strong> 1.0</p>
+
+</body>
+</html>

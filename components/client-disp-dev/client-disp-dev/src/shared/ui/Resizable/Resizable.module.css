@@ -1,0 +1,73 @@
+.resizable_panel_group {
+  --handle-width: 20px;
+  --handle-height: 1px;
+  --handle-hover-area: 4px;
+  --grip-width: 24px;
+  --grip-height: 24px;
+  --icon-size: 16px;
+  --border: transparent;
+  --ring: transparent;
+
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.resizable_panel_group[data-panel-group-direction='vertical'] {
+  flex-direction: column;
+}
+
+.resizable_handle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--handle-width);
+  background-color: hsl(var(--border));
+}
+
+.resizable_handle::after {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: var(--handle-hover-area);
+  content: '';
+  transform: translateX(-50%);
+}
+
+.resizable_handle:focus-visible {
+  outline: 1px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+.resizable_handle[data-panel-group-direction='vertical'] {
+  width: 100%;
+  height: var(--handle-height);
+}
+
+.resizable_handle[data-panel-group-direction='vertical']::after {
+  left: 0;
+  width: 100%;
+  height: var(--handle-hover-area);
+  transform: translateX(0) translateY(-50%);
+}
+
+.resizable_handle[data-panel-group-direction='vertical'] > div {
+  transform: rotate(90deg);
+}
+
+.handle_grip {
+  z-index: var(--z-sidebar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--grip-width);
+  height: var(--grip-height);
+  background-color: hsl(var(--border));
+  border-radius: 2px;
+}
+
+.grip_icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+}

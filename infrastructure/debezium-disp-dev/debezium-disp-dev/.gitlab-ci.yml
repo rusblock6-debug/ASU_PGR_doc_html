@@ -1,0 +1,32 @@
+stages:
+  - build
+  - trigger-deploy
+
+include:
+  - project: "k8s/gitlab-template"
+    ref: "main"
+    file: "/dispa-build.gitlab-ci.yaml"
+
+trigger-trip-service:
+  stage: trigger-deploy
+  extends: .trigger_dispatching_server
+  variables:
+    SERVICE_NAME: debezium-server-trip-service
+
+trigger-enterprise-service:
+  stage: trigger-deploy
+  extends: .trigger_dispatching_server
+  variables:
+    SERVICE_NAME: debezium-server-enterprise-service
+
+trigger-auth-service:
+  stage: trigger-deploy
+  extends: .trigger_dispatching_server
+  variables:
+    SERVICE_NAME: debezium-server-auth-service
+
+trigger-graph-service:
+  stage: trigger-deploy
+  extends: .trigger_dispatching_server
+  variables:
+    SERVICE_NAME: debezium-server-graph-service

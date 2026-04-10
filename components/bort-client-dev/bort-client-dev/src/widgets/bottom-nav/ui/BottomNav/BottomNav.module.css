@@ -1,0 +1,64 @@
+.root {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--bg-widget);
+  border: 2px solid var(--lines-stokes-card);
+  border-radius: 10px;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 0;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-right: 2px solid var(--lines-stokes-card);
+}
+
+.button:nth-child(3) {
+  border-right: none;
+}
+
+.button:last-child {
+  border-left: 2px solid var(--lines-stokes-card);
+}
+
+.button:disabled {
+  color: var(--text-secondary);
+}
+
+.button:focus-visible {
+  outline: var(--outline-primary);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: var(--kiosk-bottom-nav-icon-size);
+  height: var(--kiosk-bottom-nav-icon-size);
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: var(--kiosk-bottom-nav-icon-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-origin: center;
+}
+
+/* Единый оптический размер: разная плотность штрихов в исходных path */
+.icon_gear {
+  transform: scale(1.06);
+}
+
+.icon_check {
+  transform: scale(0.93);
+}
+
+.icon_menu {
+  stroke-width: var(--kiosk-bottom-nav-icon-stroke-menu);
+  transform: scale(0.88);
+}

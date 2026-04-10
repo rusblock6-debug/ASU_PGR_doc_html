@@ -1,0 +1,49 @@
+---
+- name: Ensure docker registry login settings are complete
+  ansible.builtin.assert:
+    that:
+      - docker_registry_url | length > 0
+      - docker_registry_username | length > 0
+      - docker_registry_password | length > 0
+      - docker_registry_login_users | length > 0
+    fail_msg: docker_registry_login settings are incomplete.
+  when: docker_registry_login_enabled | bool
+  no_log: true
+
+- name: Lookup home directories for docker registry login users
+  ansible.builtin.command: "getent passwd {{ item }}"
+  loop: "{{ docker_registry_login_users }}"
+  register: docker_registry_login_user_entries
+  changed_when: false
+  failed_when: false
+  when: docker_registry_login_enabled | bool
+
+- name: Ensure docker config directories exist
+  ansible.builtin.file:
+    path: "{{ item.stdout.split(':')[5] }}/.docker"
+    state: directory
+    owner: "{{ item.item }}"
+    group: "{{ item.item }}"
+    mode: "0700"
+  loop: "{{ docker_registry_login_user_entries.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - docker_registry_login_enabled | bool
+    - item.rc == 0
+
+- name: Login to docker registry for configured users
+  ansible.builtin.command: "docker login {{ docker_registry_url }} --username {{ docker_registry_username }} --password-stdin"
+  args:
+    stdin: "{{ docker_registry_password }}"
+  environment:
+    HOME: "{{ item.stdout.split(':')[5] }}"
+  become_user: "{{ item.item }}"
+  loop: "{{ docker_registry_login_user_entries.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - docker_registry_login_enabled | bool
+    - item.rc == 0
+  no_log: true
+  changed_when: true

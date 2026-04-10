@@ -1,0 +1,13 @@
+.checkbox_cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.root.root {
+  --checkbox-size: 13px;
+  --mantine-color-dark-6: transparent;
+  --mantine-color-dark-4: #707070;
+  --checkbox-radius: 2px;
+}

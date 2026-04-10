@@ -1,0 +1,38 @@
+<svg width="36" height="36" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Front section - Tractor unit with cab and engine -->
+  <!-- Cab outline -->
+  <path d="M10 50 L10 35 L20 35 L20 30 L30 30 L30 25 L40 25 L40 20 L45 20 L45 25 L50 25 L50 30 L55 30 L55 35 L60 35 L60 50 Z" stroke="#FF6B35" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Engine compartment grille lines -->
+  <line x1="45" y1="25" x2="45" y2="35" stroke="#FF6B35" stroke-width="1.5"/>
+  <line x1="50" y1="25" x2="50" y2="35" stroke="#FF6B35" stroke-width="1.5"/>
+  <line x1="55" y1="25" x2="55" y2="35" stroke="#FF6B35" stroke-width="1.5"/>
+  
+  <!-- Front wheel - large with hub -->
+  <circle cx="30" cy="60" r="14" stroke="#FF6B35" stroke-width="2.5" fill="none"/>
+  <circle cx="30" cy="60" r="7" stroke="#FF6B35" stroke-width="2" fill="none"/>
+  
+  <!-- Articulation joint - visible connection point -->
+  <circle cx="60" cy="45" r="4" stroke="#FF6B35" stroke-width="2.5" fill="none"/>
+  
+  <!-- Rear section - Dump bed -->
+  <!-- Dump bed outline -->
+  <path d="M60 45 L60 30 L75 30 L75 25 L95 25 L95 45 L60 45 Z" stroke="#FF6B35" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Hydraulic cylinders / supports connecting bed to chassis -->
+  <line x1="70" y1="45" x2="70" y2="55" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/>
+  <line x1="80" y1="45" x2="80" y2="55" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/>
+  <line x1="88" y1="45" x2="88" y2="55" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Diagonal support lines -->
+  <line x1="65" y1="45" x2="68" y2="58" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="92" y1="45" x2="90" y2="58" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Rear wheel - large with hub -->
+  <circle cx="82" cy="65" r="14" stroke="#FF6B35" stroke-width="2.5" fill="none"/>
+  <circle cx="82" cy="65" r="7" stroke="#FF6B35" stroke-width="2" fill="none"/>
+  
+  <!-- Chassis connection lines -->
+  <line x1="10" y1="50" x2="60" y2="50" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/>
+  <line x1="60" y1="45" x2="95" y2="45" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,51 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px 8px;
+  border-radius: 8px;
+
+  &.bordered {
+    border: 1px solid var(--text-secondary-2);
+  }
+
+  &:hover {
+    background: var(--orem-bw-000-25);
+  }
+}
+
+.header {
+  display: flex;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.arrow_icon {
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+}
+
+.count {
+  display: flex;
+  align-items: center;
+  margin-left: 2px;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary-2);
+}
+
+.vehicles_container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.closest_sidebar_button_container {
+  display: flex;
+}

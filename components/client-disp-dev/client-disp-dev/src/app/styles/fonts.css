@@ -1,0 +1,6 @@
+/* stylelint-disable scale-unlimited/declaration-strict-value */
+@font-face {
+  font-family: 'Murs Gothic';
+  src: url('/fonts/MursGothic-WideDark.ttf') format('truetype');
+  font-display: swap;
+}

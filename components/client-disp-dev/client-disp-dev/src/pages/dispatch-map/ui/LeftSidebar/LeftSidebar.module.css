@@ -1,0 +1,32 @@
+.sidebar {
+  --offset-left: 14px;
+  --offset-left-with-scrollbar: 6px;
+
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 12px;
+  width: 436px;
+  padding: 14px var(--offset-left-with-scrollbar) 14px 14px;
+  overflow: hidden;
+  background-color: var(--orem-bw-950);
+  border-right: 1px solid var(--bg-widget);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+
+  & .page_header {
+    padding: 0;
+    margin-right: calc(var(--offset-left) - var(--offset-left-with-scrollbar));
+    margin-bottom: 0;
+  }
+
+  & .mode_switcher {
+    margin-right: calc(var(--offset-left) - var(--offset-left-with-scrollbar));
+  }
+
+  & .body {
+    flex: 1;
+    min-height: 0;
+    padding-right: 4px;
+  }
+}

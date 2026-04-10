@@ -1,0 +1,48 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu_item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 8px;
+
+  &:hover {
+    cursor: pointer;
+    background: var(--orem-bw-000-25);
+
+    .label {
+      color: var(--base-white);
+    }
+  }
+}
+
+.input.input {
+  grid-template-columns: 1fr;
+  margin-top: 4px;
+}
+
+.grey_icon {
+  color: var(--text-primary);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--text-primary);
+}
+
+.no_data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 8px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--text-primary);
+}

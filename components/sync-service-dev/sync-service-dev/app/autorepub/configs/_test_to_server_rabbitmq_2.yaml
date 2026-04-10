@@ -1,0 +1,10 @@
+type: rabbitmq
+source_instance_id: null
+target_instances: server
+queue_name: common_2
+
+deduplication: true
+autostart: false
+
+retry_max_attempts: 10
+retry_max_delay: 10000

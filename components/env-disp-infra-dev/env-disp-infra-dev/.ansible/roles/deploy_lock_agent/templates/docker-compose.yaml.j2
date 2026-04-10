@@ -1,0 +1,20 @@
+services:
+  docker-agent:
+    image: {{ deploy_lock_agent_image }}
+    container_name: {{ deploy_lock_agent_container_name }}
+    restart: {{ deploy_lock_agent_restart_policy }}
+    user: {{ deploy_lock_agent_user }}
+    environment:
+      - DEPLOY_LOCK_URL={{ deploy_lock_agent_effective.deploy_lock_url }}
+      - DEPLOY_LOCK_TOKEN={{ deploy_lock_agent_effective.deploy_lock_token }}
+      - DEPLOY_LOCK_ENV_KEY={{ deploy_lock_agent_effective.deploy_lock_env_key }}
+      - SERVER_IP={{ deploy_lock_agent_effective.server_ip }}
+      - HOSTNAME={{ ansible_hostname }}
+    volumes:
+      - {{ deploy_lock_agent_docker_socket }}:{{ deploy_lock_agent_docker_socket }}:ro
+    networks:
+      - {{ deploy_lock_agent_network_name }}
+
+networks:
+  {{ deploy_lock_agent_network_name }}:
+    driver: bridge

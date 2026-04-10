@@ -1,0 +1,32 @@
+.sheet_content {
+  --sidebar-width: 440px;
+
+  gap: 12px;
+  width: var(--sidebar-width);
+  padding: 20px 8px 20px 20px;
+  color: var(--base-white);
+  background-color: var(--bg-table-header);
+  border: none;
+  border-right: 1px solid var(--lines-stokes-fa-connector);
+}
+
+.mobile_header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.mobile_header_link {
+  user-select: none;
+}
+
+.mobile_logo {
+  display: flex;
+  font-family: var(--font-family-murs-gothic);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-extra-bold);
+  line-height: var(--line-height-loose);
+  color: var(--primary);
+  text-transform: uppercase;
+}

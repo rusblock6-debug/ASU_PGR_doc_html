@@ -1,0 +1,49 @@
+.movement_button {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 4.25rem;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: auto;
+  color: var(--base-white);
+  cursor: not-allowed;
+  background-color: var(--orem-orange-900);
+  border: 1px solid var(--base-orange-2);
+  border-radius: var(--radius-sm);
+}
+
+.movement_button:focus-visible {
+  outline: var(--outline-primary);
+}
+
+.movement_text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: flex-start;
+  text-align: left;
+}
+
+.movement_title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--base-white);
+}
+
+.movement_sub {
+  font-size: var(--font-size-lg);
+  color: var(--base-orange-2);
+}
+
+.movement_arrow {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: var(--base-white);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

@@ -1,0 +1,31 @@
+.general {
+  margin-left: 16px;
+
+  &.root {
+    gap: 2px;
+    padding: 0;
+    background-color: var(--orem-bw-800);
+  }
+
+  .control {
+    &::before {
+      display: none;
+    }
+  }
+
+  .indicator {
+    background-color: var(--base-orange);
+  }
+
+  .label {
+    padding: 5px 12px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    color: var(--base-grey);
+
+    &:where([data-active]) {
+      color: var(--primary-foreground);
+    }
+  }
+}

@@ -1,0 +1,7 @@
+type: rabbitmq
+source_instance_id: server
+target_instances: null
+queue_name: enterprise
+
+deduplication: true
+autostart: false

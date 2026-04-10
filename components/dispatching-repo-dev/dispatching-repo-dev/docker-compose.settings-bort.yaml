@@ -1,0 +1,59 @@
+name: dispatching-settings-bort
+
+services:
+  settings-service-volume-init:
+    build:
+      context: ../repos/settings-bort
+      dockerfile: Dockerfile
+    restart: "no"
+    user: "0:0"
+    command:
+      - /bin/sh
+      - -c
+      - >
+        mkdir -p /app/data &&
+        chown -R ${UID:-0}:${GID:-0} /app/data &&
+        chmod 0775 /app/data
+    volumes:
+      - settings-bort-data:/app/data
+
+  # settings-service
+  settings-service:
+    depends_on:
+      settings-service-volume-init:
+        condition: service_completed_successfully
+    build:
+      context: ../repos/settings-bort
+      dockerfile: Dockerfile
+    container_name: dispatching-settings-service
+    restart: unless-stopped
+    user: "${UID:-0}:${GID:-0}"
+    ports:
+      - "8017:8007"
+    environment:
+      SETTINGS_URL: ${SETTINGS_URL:-}
+      ENTERPRISE_SERVER_URL: ${ENTERPRISE_SERVER_URL:-}
+      VEHICLE_ID: ${VEHICLE_ID:-}
+      AUTO_INIT_ENABLED: ${AUTO_INIT_ENABLED:-true}
+      AUTO_INIT_VEHICLE_ID: ${AUTO_INIT_VEHICLE_ID:-}
+      AUTO_INIT_RETRY_INTERVAL_SEC: ${AUTO_INIT_RETRY_INTERVAL_SEC:-30}
+      AUTO_INIT_MAX_ATTEMPTS: ${AUTO_INIT_MAX_ATTEMPTS:-0}
+      AUTO_INIT_FORCE: ${AUTO_INIT_FORCE:-false}
+      AUTO_SYNC_ENABLED: ${AUTO_SYNC_ENABLED:-true}
+      AUTO_SYNC_VEHICLE_ID: ${AUTO_SYNC_VEHICLE_ID:-}
+      AUTO_SYNC_INTERVAL_SEC: ${AUTO_SYNC_INTERVAL_SEC:-30}
+      AUTO_SYNC_FORCE_ON_START: ${AUTO_SYNC_FORCE_ON_START:-false}
+      AUTO_SYNC_SETTINGS_URL: ${AUTO_SYNC_SETTINGS_URL:-}
+      BORT_ENV_OUTPUT_PATH: ${BORT_ENV_OUTPUT_PATH:-/workspace/dispatching/.env.settings.generated}
+    networks:
+      - settings-network
+    volumes:
+      - settings-bort-data:/app/data
+      - ./:/workspace/dispatching
+
+networks:
+  settings-network:
+    driver: bridge
+
+volumes:
+  settings-bort-data:

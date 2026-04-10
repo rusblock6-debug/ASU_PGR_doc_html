@@ -1,0 +1,20 @@
+# ruff: noqa: D100, D101
+
+from enum import StrEnum
+
+
+class QueryOperator(StrEnum):
+    EQUALS = "EQUALS"
+    NOT_EQUAL = "NOT_EQUAL"
+    IN = "IN"
+    NOT_IN = "NOT_IN"
+    GREATER = "GREATER"
+    EQUALS_OR_GREATER = "EQUALS_OR_GREATER"
+    LESS = "LESS"
+    EQUALS_OR_LESS = "EQUALS_OR_LESS"
+    STARTS_WITH = "STARTS_WITH"
+    NOT_START_WITH = "NOT_START_WITH"
+    ENDS_WITH = "ENDS_WITH"
+    NOT_END_WITH = "NOT_END_WITH"
+    CONTAINS = "CONTAINS"
+    NOT_CONTAIN = "NOT_CONTAIN"

@@ -1,0 +1,1 @@
+export { GroupTechnique } from './GroupTechnique';

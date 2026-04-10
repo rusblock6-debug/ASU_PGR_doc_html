@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Удаление переменных</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa, #e4edf5);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e6ed;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            border: 1px solid #d0d9e6;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #b86b6b;
+            box-shadow: 0 0 0 2px rgba(184, 107, 107, 0.2);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 14px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .btn-delete {
+            flex: 1;
+            background: linear-gradient(to right, #b86b6b, #d07a7a);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #555;
+            padding: 0 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #5d87a1;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+            color: #2c3e50;
+        }
+
+        /* Новые стили для результатов и подтверждения */
+        .confirmation-container {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff5f5;
+            border-radius: 8px;
+            border: 1px solid #ffb3b3;
+        }
+
+        .confirmation-title {
+            font-weight: 600;
+            color: #b86b6b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .confirmation-text {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(to right, #b86b6b, #d07a7a);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(184, 107, 107, 0.3);
+            border-radius: 50%;
+            border-top-color: #b86b6b;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            display: none;
+            padding: 15px;
+            background: #fff5f5;
+            border-radius: 8px;
+            border: 1px solid #ffb3b3;
+            color: #b86b6b;
+            margin-top: 15px;
+        }
+
+        .success-message {
+            display: none;
+            padding: 15px;
+            background: #f0f8f5;
+            border-radius: 8px;
+            border: 1px solid #a8d8bd;
+            color: #2e7d32;
+            margin-top: 15px;
+        }
+
+        .vehicle-id-highlight {
+            font-weight: bold;
+            color: #b86b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Удаление переменных</h1>
+
+        <div class="form-group">
+            <label for="vehicle-id">ID транспортного средства</label>
+            <input type="number" id="vehicle-id" placeholder="Введите ID" min="1">
+        </div>
+
+        <div class="btn-container">
+            <button class="btn btn-delete" onclick="showConfirmation()">Удалить переменные</button>
+            <button class="btn btn-secondary" onclick="resetForm()">Сбросить</button>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+        <div class="success-message" id="success-message"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Удаление данных...</p>
+        </div>
+
+        <div class="confirmation-container" id="confirmation-container">
+            <div class="confirmation-title">⚠️ Подтверждение удаления</div>
+            <div class="confirmation-text">
+                Вы действительно хотите удалить все переменные для транспортного средства <span class="vehicle-id-highlight" id="confirmation-vehicle-id"></span>?
+                <br><br>
+                <strong>Внимание:</strong> Эта операция необратима и приведет к полному удалению всех переменных окружения для данного транспортного средства.
+            </div>
+            <div class="confirmation-buttons">
+                <button class="btn btn-confirm" onclick="confirmDeletion()">Да, удалить</button>
+                <button class="btn btn-cancel" onclick="cancelDeletion()">Отмена</button>
+            </div>
+        </div>
+
+        <a href="/admin" class="back-link">← Вернуться в админ-панель</a>
+    </div>
+
+    <script>
+        let currentVehicleId = null;
+
+        // Показать окно подтверждения
+        function showConfirmation() {
+            const vehicleId = document.getElementById('vehicle-id').value.trim();
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+
+            // Сброс сообщений
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Валидация
+            if (!vehicleId || isNaN(vehicleId) || vehicleId <= 0) {
+                errorMessage.textContent = 'Пожалуйста, введите корректный числовой ID (больше 0)';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Сохраняем ID для последующего использования
+            currentVehicleId = vehicleId;
+
+            // Обновляем текст подтверждения
+            document.getElementById('confirmation-vehicle-id').textContent = vehicleId;
+
+            // Показываем окно подтверждения
+            document.getElementById('confirmation-container').style.display = 'block';
+        }
+
+        // Подтвердить удаление
+        function confirmDeletion() {
+            if (!currentVehicleId) return;
+
+            const loading = document.getElementById('loading');
+            const confirmation = document.getElementById('confirmation-container');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+
+            // Скрыть подтверждение, показать загрузку
+            confirmation.style.display = 'none';
+            loading.style.display = 'block';
+
+            // Отправляем DELETE запрос
+            fetch(`/api/secrets/${currentVehicleId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.detail || 'Неизвестная ошибка');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Показать сообщение об успехе
+                successMessage.innerHTML = `Переменные для транспортного средства <strong>${currentVehicleId}</strong> успешно удалены`;
+                successMessage.style.display = 'block';
+
+                // Очистить поле ввода
+                document.getElementById('vehicle-id').value = '';
+                currentVehicleId = null;
+            })
+            .catch(error => {
+                errorMessage.textContent = `Ошибка удаления: ${error.message}`;
+                errorMessage.style.display = 'block';
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+            });
+        }
+
+        // Отменить удаление
+        function cancelDeletion() {
+            document.getElementById('confirmation-container').style.display = 'none';
+            currentVehicleId = null;
+        }
+
+        // Сброс формы
+        function resetForm() {
+            document.getElementById('vehicle-id').value = '';
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('confirmation-container').style.display = 'none';
+            currentVehicleId = null;
+        }
+    </script>
+</body>
+</html>

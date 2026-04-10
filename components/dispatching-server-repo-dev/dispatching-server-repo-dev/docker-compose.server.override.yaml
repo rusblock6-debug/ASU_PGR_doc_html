@@ -1,0 +1,164 @@
+x-trip-service-build: &trip-service-build
+  build:
+    context: ../repos/dispa-backend
+    dockerfile: Dockerfile
+    args:
+      - CI_COMMIT_REF_SLUG=${CI_COMMIT_REF_SLUG}
+      - CI_REGISTRY_USER=${CI_REGISTRY_USER}
+      - CI_REGISTRY_PASSWORD=${CI_REGISTRY_PASSWORD}
+
+services:
+  client-disp:
+    build:
+      context: ../repos/client-disp
+      dockerfile: Dockerfile
+    volumes:
+      - ../repos/client-disp:/app
+    environment:
+      VITE_API_AUTH_SERVICE: http://auth-service-backend:8000
+      VITE_API_ENTERPRISE_SERVICE: http://enterprise-service:8001
+      VITE_API_TRIP_SERVICE: http://trip-service-server:8000
+      VITE_API_GRAPH_SERVICE: http://graph-service-backend:5000
+
+  enterprise-service:
+    build:
+      context: ../repos/enterprise-service
+      dockerfile: Dockerfile
+      args:
+        - CI_COMMIT_REF_SLUG=${CI_COMMIT_REF_SLUG}
+        - CI_REGISTRY_USER=${CI_REGISTRY_USER}
+        - CI_REGISTRY_PASSWORD=${CI_REGISTRY_PASSWORD}
+
+  enterprise-frontend-demo:
+    build:
+      context: ../repos/enterprise-frontend-demo
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../repos/enterprise-frontend-demo:/app
+      - /app/node_modules
+
+  settings-server:
+    build:
+      context: ../repos/settings-server
+      dockerfile: Dockerfile
+
+  telemetry-service:
+    build:
+      context: ../repos/telemetry-service
+      dockerfile: Dockerfile
+    volumes:
+      - ../repos/telemetry-service:/app
+
+  analytics-service:
+    build:
+      context: ../repos/analytics-service
+      dockerfile: Dockerfile
+
+  graph-service-backend:
+    build:
+      context: ../repos/graph-service-backend
+      dockerfile: Dockerfile
+      args:
+        - CI_COMMIT_REF_SLUG=${CI_COMMIT_REF_SLUG}
+        - CI_REGISTRY_USER=${CI_REGISTRY_USER}
+        - CI_REGISTRY_PASSWORD=${CI_REGISTRY_PASSWORD}
+    environment:
+      TRIP_SERVICE_HOST: trip-service-server
+    volumes:
+      - ../repos/graph-service-backend/src:/app/src
+
+  sync-service:
+    build:
+      context: ../repos/sync-service
+      dockerfile: Dockerfile
+    volumes:
+      - ../repos/sync-service:/service/app
+
+  wifi-event-dispatcher-server:
+    build:
+      context: ../repos/wifi-event-dispatcher
+      dockerfile: Dockerfile
+
+  auth-service-backend:
+    build:
+      context: ../repos/auth-service-backend
+      dockerfile: Dockerfile
+
+  nanomq-server:
+    volumes:
+      - nanomq-data:/opt/nanomq/data
+
+  rabbitmq-server:
+    build:
+      context: ../repos/rabbitmq-disp
+      dockerfile: Dockerfile
+    volumes:
+      - rabbitmq-server-data:/var/lib/rabbitmq
+
+  api-gateway:
+    build:
+      context: ../repos/api-gateway
+      dockerfile: Dockerfile
+
+  debezium-server-graph-service:
+    build:
+      context: ../repos/debezium-disp
+      dockerfile: Dockerfile
+
+  debezium-server-enterprise-service:
+    build:
+      context: ../repos/debezium-disp
+      dockerfile: Dockerfile
+
+  debezium-server-auth-service:
+    build:
+      context: ../repos/debezium-disp
+      dockerfile: Dockerfile
+
+  debezium-server-trip-service:
+    build:
+      context: ../repos/debezium-disp
+      dockerfile: Dockerfile
+
+  vault:
+    build:
+      context: ../repos/vault-disp
+      dockerfile: Dockerfile
+
+  minio-setup:
+    build:
+      context: ../repos/minio-disp
+      dockerfile: Dockerfile
+
+  trip-service-server:
+    <<: *trip-service-build
+    volumes:
+      - ../repos/dispa-backend/src:/app/src
+
+  trip-transport-service-server:
+    <<: *trip-service-build
+    volumes:
+      - ../repos/dispa-backend/src:/app/src
+
+  audit-exporter:
+    build:
+      context: ../repos/audit-exporter
+      dockerfile: Dockerfile
+      args:
+        - CI_COMMIT_REF_SLUG=${CI_COMMIT_REF_SLUG}
+        - CI_REGISTRY_USER=${CI_REGISTRY_USER}
+        - CI_REGISTRY_PASSWORD=${CI_REGISTRY_PASSWORD}
+
+  audit-exporter-migrations:
+    build:
+      context: ../repos/audit-exporter
+      dockerfile: Dockerfile
+      args:
+        - CI_COMMIT_REF_SLUG=${CI_COMMIT_REF_SLUG}
+        - CI_REGISTRY_USER=${CI_REGISTRY_USER}
+        - CI_REGISTRY_PASSWORD=${CI_REGISTRY_PASSWORD}
+
+  cdc-distributor:
+    build:
+      context: ../repos/cdc-distributor
+      dockerfile: Dockerfile

@@ -1,0 +1,71 @@
+/* stylelint-disable declaration-no-important */
+
+.vis-item .vis-delete {
+  display: none !important;
+}
+
+.vis-timeline {
+  border-color: var(--line-fa-connector) !important;
+}
+
+.vis-grid.vis-minor {
+  border-color: var(--line-fa-connector) !important;
+}
+
+.vis-panel {
+  border-color: var(--line-fa-connector) !important;
+}
+
+.vis-labelset .vis-label {
+  color: var(--base-white) !important;
+  border-color: var(--line-fa-connector) !important;
+}
+
+.vis-custom-time {
+  pointer-events: none !important;
+  touch-action: none !important;
+  cursor: default !important;
+  user-select: none !important;
+  background: var(--line-fa-connector) !important;
+}
+
+.vis-time-axis .vis-minor {
+  border-top: 1px solid var(--line-fa-connector) !important;
+}
+
+.vis-time-axis .vis-text {
+  color: var(--base-white) !important;
+}
+
+.vis-group-text {
+  font-size: var(--font-size-xs) !important;
+  line-height: 24px !important;
+}
+
+.shift-block {
+  color: var(--base-white) !important;
+  background: var(--bg-widget) !important;
+  border-bottom: 1px solid var(--line-fa-connector) !important;
+}
+
+.vis-foreground .vis-group {
+  border-bottom: 1px solid var(--line-fa-connector) !important;
+}
+
+.vis-label.vehicle-group {
+  border-bottom: 1px solid var(--line-fa-connector) !important;
+
+  .vis-inner {
+    > div {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+
+      > img {
+        flex-shrink: 0;
+        width: 28px;
+        height: 18px;
+      }
+    }
+  }
+}

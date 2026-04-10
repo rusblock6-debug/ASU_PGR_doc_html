@@ -1,0 +1,8 @@
+.idea
+.venv
+.env
+data
+.coverage
+htmlcov
+coverage.xml
+.envrc

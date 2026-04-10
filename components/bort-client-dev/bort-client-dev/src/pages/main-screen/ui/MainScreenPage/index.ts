@@ -1,0 +1,1 @@
+export { MainScreenPage } from './MainScreenPage';

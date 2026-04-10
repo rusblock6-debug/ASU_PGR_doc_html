@@ -1,0 +1,1 @@
+export { ResultsByCargoType } from './ResultsByCargoType';

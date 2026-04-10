@@ -1,0 +1,129 @@
+.vehicle_card {
+  display: flex;
+  padding: 12px;
+  background-color: var(--orem-bw-950);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border: 1px solid var(--bg-widget-hover);
+  }
+
+  &.first {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+
+  &.last {
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+
+  &.maintenance {
+    background-color: var(--bg-error-darker);
+  }
+
+  &.validation_error {
+    border-color: var(--orem-red-400);
+  }
+
+  &.validation_warning {
+    border-color: var(--status-yellow);
+  }
+
+  &.validation_error + .validation_error {
+    border-top: none;
+  }
+
+  &.highlighted {
+    border-color: var(--text-primary);
+  }
+
+  &.disabled {
+    pointer-events: none;
+  }
+}
+
+.vehicle_card + .vehicle_card {
+  border-top: 1px solid var(--bg-widget);
+
+  &:hover {
+    border-top-color: var(--bg-widget-hover);
+  }
+}
+
+.vehicle {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  min-width: 124px;
+  max-width: 312px;
+  margin-right: 6px;
+}
+
+.vehicle_sticky {
+  position: sticky;
+  top: 61px;
+}
+
+.vehicle_summary {
+  --gap-size: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-left: 34px;
+
+  .summary {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--gap-size);
+    align-items: center;
+  }
+
+  .summary_gap {
+    gap: calc(var(--gap-size) / 2);
+  }
+
+  .summary_label {
+    min-width: 63px;
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+    color: var(--text-primary);
+  }
+
+  .summary_field {
+    flex-grow: 1;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-loose);
+    color: var(--base-white);
+  }
+}
+
+.vehicle_action {
+  flex-shrink: 0;
+  margin-top: auto;
+  margin-right: 4px;
+}
+
+.vehicle_routes {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vehicle_title {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  margin-bottom: 4px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-relaxed);
+}
+
+.vehicle_icon {
+  flex-shrink: 0;
+  color: var(--base-orange);
+}

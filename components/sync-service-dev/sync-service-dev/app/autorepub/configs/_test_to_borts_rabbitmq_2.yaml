@@ -1,0 +1,10 @@
+type: rabbitmq
+source_instance_id: server
+target_instances: bort_4,bort_17
+queue_name: common_2
+
+deduplication: true
+autostart: false
+
+retry_max_attempts: 10
+retry_max_delay: 10000

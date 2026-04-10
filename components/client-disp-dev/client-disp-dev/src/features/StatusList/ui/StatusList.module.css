@@ -1,0 +1,58 @@
+.input.input {
+  grid-template-columns: 1fr;
+  margin-bottom: 8px;
+}
+
+.statuses_container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statuses_list_container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statuses_list_title {
+  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary-2);
+}
+
+.status_item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 8px;
+
+  &.selectable {
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--orem-bw-000-25);
+      border-radius: 8px;
+
+      .status_name {
+        color: var(--base-white);
+      }
+    }
+  }
+}
+
+.status_name {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-loose);
+  color: var(--text-primary);
+}
+
+.no_data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+}

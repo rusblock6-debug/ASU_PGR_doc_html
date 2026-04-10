@@ -1,0 +1,17 @@
+.page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+.error {
+  padding: var(--spacing-md);
+  color: var(--orem-red-400);
+}
+
+.loading {
+  padding: var(--spacing-lg);
+  color: var(--text-secondary);
+}

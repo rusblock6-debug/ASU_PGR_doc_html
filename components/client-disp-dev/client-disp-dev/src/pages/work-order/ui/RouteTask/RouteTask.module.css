@@ -1,0 +1,73 @@
+.route_task {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 8px 12px 12px;
+  background-color: var(--bg-widget);
+  border-radius: 8px;
+}
+
+.route_task_header {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.route_task_header_info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 17px;
+  align-items: center;
+}
+
+.route_task_body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.error_warning_msg {
+  margin-left: auto;
+}
+
+.input_small {
+  max-width: 124px;
+}
+
+.input_medium {
+  max-width: 240px;
+
+  @mixin extra_wide {
+    max-width: unset;
+  }
+}
+
+.input_large {
+  max-width: 344px;
+}
+
+.route_task_field {
+  flex: 1;
+  min-width: 124px;
+}
+
+.input_label_disabled {
+  label {
+    color: var(--text-secondary-2);
+  }
+}
+
+.skeleton_task_field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skeleton_route_task_header {
+  display: flex;
+  gap: 24px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}

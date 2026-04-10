@@ -1,0 +1,14 @@
+stages:
+  - build
+  - trigger-deploy
+
+include:
+  - project: "k8s/gitlab-template"
+    ref: "main"
+    file: "/dispa-build.gitlab-ci.yaml"
+
+trigger-server:
+  stage: trigger-deploy
+  extends: .trigger_dispatching_server
+  variables:
+    SERVICE_NAME: minio-setup

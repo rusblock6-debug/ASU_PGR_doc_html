@@ -1,0 +1,101 @@
+[project]
+name = "dispa-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.135.1",
+    "faststream[rabbit,cli]==0.6.6",
+    "gmqtt>=0.7.0",
+    "gunicorn>=25.1.0",
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
+    "pydantic>=2.11.1",
+    "pydantic-settings>=2.13.1",
+    "redis>=7.2.1",
+    "greenlet>=3.0.0",
+    "sqlalchemy>=2.0.40",
+    "uvicorn[standard]>=0.41.0",
+    "audit-lib>=0.1.0a1",
+    "auth-lib>=0.1.0a3",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+    {include-group = "lint"},
+    {include-group = "test"},
+]
+lint = [
+    "mypy>=1.19.1",
+    "ruff>=0.15.4",
+    "types-docutils>=0.22.3",
+    "types-greenlet>=3.3.0",
+    "types-psycopg2>=2.9.21",
+    "types-pygments>=2.19.0",
+    "types-pysocks>=1.7.1",
+    "types-pyyaml>=6.0.12",
+    "types-requests>=2.32.4",
+    "types-ujson>=5.10.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+
+[tool.pytest.ini_options]
+# Один event loop на всю сессию — и тесты, и фикстуры (в т.ч. teardown) в одном loop,
+# иначе закрытие async-сессии БД даёт "Future attached to a different loop".
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+
+
+
+[[tool.uv.index]]
+name = "nexus"
+url = "https://nexus.dmi-msk.ru/repository/pypi-dev-group/simple"
+
+[tool.ruff]
+line-length = 120
+extend-exclude = [
+    "src/migrations",
+]
+force-exclude = true
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E", "W",
+    # pyflakes
+    "F",
+    # isort
+    "I",
+    # tidy imports
+    "TID",
+    # flake8-bugbear
+    "B",
+    # flake8-bandit
+    "S",
+    # pydocstyle
+    "D",
+    # pyugrade
+    "UP"
+]
+ignore = ["D104", "D107", "B008", "E721"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "D100", "D101", "D102", "D103", "F403", "D106"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 120
+max-line-length = 120
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true

@@ -1,0 +1,68 @@
+.row {
+  display: grid;
+  grid-template-columns: 2.5rem 1.2fr 1.2fr 4.5rem 4.5rem 5rem 1fr 8rem;
+  gap: var(--spacing-sm);
+  align-items: center;
+  width: 100%;
+  min-height: 4rem;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  background-color: var(--orem-bw-950);
+  border-radius: var(--radius-sm);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--base-orange);
+  outline-offset: -2px;
+}
+
+.row_selected {
+  background-color: var(--orem-bw-800);
+}
+
+.row_active {
+  border: 2px solid var(--base-orange);
+  border-radius: var(--radius-sm);
+}
+
+.cell_muted {
+  color: var(--text-secondary);
+}
+
+.status_waiting {
+  color: var(--text-secondary);
+}
+
+.status_active {
+  font-weight: var(--font-weight-bold);
+  color: var(--base-orange-2);
+}
+
+.status_paused {
+  color: var(--orem-orange-300);
+}
+
+.status_cancelled {
+  color: var(--orem-red-400);
+}
+
+.status_done {
+  color: var(--text-secondary-2);
+}
+
+.action_pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 var(--spacing-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  border: 2px solid var(--base-orange);
+  border-radius: var(--radius-sm);
+}

@@ -1,0 +1,69 @@
+.root {
+  position: relative;
+}
+
+.dropdown {
+  padding: 8px 4px 8px 8px;
+  overflow: hidden;
+  background-color: var(--bg-widget-hover);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0 20px 0 #3537401f;
+}
+
+.options {
+  overflow: hidden;
+}
+
+.options_editing .option:not([data-combobox-selected]) {
+  pointer-events: none;
+}
+
+.option {
+  padding: 0;
+  margin-bottom: 2px;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 8px;
+
+  &:hover,
+  &[data-combobox-selected] {
+    color: var(--base-white);
+    background-color: var(--orem-bw-000-25);
+  }
+
+  &[data-selected] {
+    background-color: var(--orem-bw-000-25);
+  }
+
+  &:hover [data-menu-button],
+  &[data-combobox-selected] [data-menu-button] {
+    opacity: 1;
+  }
+
+  &[data-combobox-selected] [data-menu-button] {
+    color: var(--base-white);
+    background-color: var(--orem-bw-000-25);
+  }
+}
+
+.option_create {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  max-width: calc(var(--dropdown-width, 100%) - 16px);
+  padding: 5px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 8px 12px;
+  color: var(--text-placeholder);
+  text-align: center;
+}
+
+.input_focused {
+  --input-bg-color: var(--orem-bw-000-25);
+}

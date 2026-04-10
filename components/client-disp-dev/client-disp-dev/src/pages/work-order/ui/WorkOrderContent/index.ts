@@ -1,0 +1,1 @@
+export { WorkOrderContent } from './WorkOrderContent';

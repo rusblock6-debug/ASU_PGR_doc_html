@@ -1,0 +1,29 @@
+stages:                                                                                      
+  - test                                                                                     
+  - scanner                                                                                  
+  - build                                                                                    
+  - trigger-deploy                                                                           
+                                                                                              
+default:                                                                                     
+  tags:                                                                                      
+    - infra-cluster                                                                          
+                                                                                              
+include:                                                                                     
+  # - project: 'k8s/gitlab-template'                                                           
+  #   file: 'pytest.gitlab-ci.yaml'                                                            
+  #   inputs:                                                                                  
+  #     use_testcontainers: true                                                               
+  - project: "k8s/gitlab-template"                                                           
+    ref: "main"                                                                              
+    file: "/dispa-build.gitlab-ci.yaml"                                                      
+                                                                                              
+werf:                                                                                        
+  rules:                                                                                     
+    - if: '$CI_COMMIT_REF_NAME == "dev"'                                                     
+    - if: '$CI_COMMIT_REF_NAME == "staging"'                                                 
+    - if: '$CI_COMMIT_REF_NAME == "main"'                                                    
+                                                                                              
+trigger-bort:                                                                                
+  extends: .trigger_dispatching_bort                                                         
+  variables:                                                                                 
+    SERVICE_NAME_BORT: "dump-service"     

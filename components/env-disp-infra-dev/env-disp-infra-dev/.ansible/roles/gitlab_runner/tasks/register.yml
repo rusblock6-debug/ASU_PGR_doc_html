@@ -1,0 +1,116 @@
+---
+- name: Resolve GitLab Runner token from host token map
+  ansible.builtin.set_fact:
+    gitlab_runner_token_from_map: >-
+      {{
+        (
+          gitlab_runner_tokens.get(inventory_hostname)
+          if gitlab_runner_tokens.get(inventory_hostname) is not none
+          else gitlab_runner_tokens.get(ansible_host | default(inventory_hostname), '')
+        ) | trim
+      }}
+  no_log: true
+
+- name: Ask GitLab Runner token for current host when not provided in inventory
+  ansible.builtin.pause:
+    prompt: >-
+      Enter GitLab Runner token for {{ inventory_hostname }}
+      ({{ ansible_host | default(inventory_hostname) }})
+    echo: no
+  register: gitlab_runner_token_prompt
+  when:
+    - gitlab_runner_token_prompt_enabled | bool
+    - gitlab_token is not defined or gitlab_token | trim == ''
+    - gitlab_runner_token_from_map | length == 0
+  no_log: true
+
+- name: Build effective GitLab Runner token
+  ansible.builtin.set_fact:
+    gitlab_runner_token_effective: >-
+      {{
+        (gitlab_token | default('', true) | trim)
+        if (gitlab_token is defined and gitlab_token | trim != '')
+        else (
+          gitlab_runner_token_from_map
+          if gitlab_runner_token_from_map | length > 0
+          else (gitlab_runner_token_prompt.user_input | default('') | trim)
+        )
+      }}
+  no_log: true
+
+- name: Ensure GitLab Runner token is present
+  ansible.builtin.assert:
+    that:
+      - gitlab_runner_token_effective | length > 0
+    fail_msg: "GitLab Runner token for {{ inventory_hostname }} is empty."
+  no_log: true
+
+- name: Check whether GitLab Runner config already exists
+  ansible.builtin.stat:
+    path: "{{ gitlab_runner_config_path }}"
+  register: gitlab_runner_config_stat
+
+- name: Read existing GitLab Runner config
+  ansible.builtin.slurp:
+    path: "{{ gitlab_runner_config_path }}"
+  register: gitlab_runner_config_content
+  when: gitlab_runner_config_stat.stat.exists
+  no_log: true
+
+- name: Detect whether current token is already registered
+  ansible.builtin.set_fact:
+    gitlab_runner_token_already_registered: >-
+      {{
+        gitlab_runner_config_stat.stat.exists and
+        (
+          gitlab_runner_token_effective in
+          (gitlab_runner_config_content.content | default('') | b64decode)
+        )
+      }}
+  no_log: true
+
+- name: Stop when another GitLab Runner token is already configured
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitlab_runner_config_path }} already exists on {{ inventory_hostname }}
+      and does not contain the provided token.
+      Re-run with -e gitlab_runner_reconfigure=true if you want to replace it.
+  when:
+    - gitlab_runner_config_stat.stat.exists
+    - not gitlab_runner_token_already_registered
+    - not gitlab_runner_reconfigure | bool
+
+- name: Remove previous GitLab Runner config when reconfiguration is requested
+  ansible.builtin.file:
+    path: "{{ gitlab_runner_config_path }}"
+    state: absent
+  when:
+    - gitlab_runner_config_stat.stat.exists
+    - not gitlab_runner_token_already_registered
+    - gitlab_runner_reconfigure | bool
+
+- name: Register GitLab Runner for current host
+  ansible.builtin.command: gitlab-runner register
+  args:
+    stdin: |
+      {{ gitlab_url }}
+      {{ gitlab_runner_token_effective }}
+      {{ gitlab_runner_description }}
+      {{ gitlab_tags }}
+
+      {{ gitlab_executor }}
+  register: gitlab_runner_register_result
+  when: not gitlab_runner_token_already_registered
+  no_log: true
+  changed_when: true
+
+- name: Ensure GitLab Runner service is enabled and started
+  ansible.builtin.service:
+    name: gitlab-runner
+    enabled: true
+    state: started
+
+- name: Verify GitLab Runner binary is installed
+  ansible.builtin.command: gitlab-runner --version
+  register: gitlab_runner_version
+  changed_when: false

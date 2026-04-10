@@ -1,0 +1,23 @@
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  min-height: 64px;
+  padding: 0;
+  font-size: var(--font-size-3xl);
+  color: var(--text-primary);
+  cursor: pointer;
+  background-color: var(--bg-widget);
+  border: 2px solid var(--lines-stokes-card);
+  border-radius: var(--radius-sm);
+}
+
+.root:hover {
+  background-color: var(--bg-widget-hover);
+}
+
+.root:focus-visible {
+  outline: 2px solid var(--base-orange);
+  outline-offset: 2px;
+}

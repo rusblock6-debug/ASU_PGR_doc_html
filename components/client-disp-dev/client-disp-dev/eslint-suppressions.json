@@ -1,0 +1,159 @@
+{
+  "src/features/pin-page/model/PinnedPagesProvider.tsx": {
+    "@typescript-eslint/no-unsafe-assignment": {
+      "count": 1
+    }
+  },
+  "src/main.tsx": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 1
+    }
+  },
+  "src/pages/cargo/ui/CargoPage/CargoPage.tsx": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 3
+    }
+  },
+  "src/pages/horizons/ui/HorizonsPage/HorizonsPage.tsx": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 1
+    },
+    "sonarjs/function-return-type": {
+      "count": 2
+    }
+  },
+  "src/pages/sections/ui/SectionsPage/SectionsPage.tsx": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 1
+    },
+    "sonarjs/function-return-type": {
+      "count": 2
+    }
+  },
+  "src/pages/tags/ui/TagsPage/TagsPage.tsx": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 1
+    }
+  },
+  "src/shared/lib/assert-never.ts": {
+    "@typescript-eslint/restrict-template-expressions": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/CreatableSelect/lib/hooks/useAutoSelectCreateOption.ts": {
+    "sonarjs/no-selector-parameter": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/CreatableSelect/lib/hooks/useEditingClickOutside.ts": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/CreatableSelect/ui/CreatableMultiSelect/CreatableMultiSelect.stories.tsx": {
+    "@typescript-eslint/no-misused-promises": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/CreatableSelect/ui/CreatableSelect/CreatableSelect.stories.tsx": {
+    "@typescript-eslint/no-misused-promises": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/lib/formatters.ts": {
+    "@typescript-eslint/no-base-to-string": {
+      "count": 7
+    },
+    "sonarjs/function-return-type": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/model/TableContext.tsx": {
+    "@typescript-eslint/no-base-to-string": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-return": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/ColorField.tsx": {
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/CoordinatesField.tsx": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-assignment": {
+      "count": 2
+    },
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/DateField.tsx": {
+    "@typescript-eslint/no-unsafe-argument": {
+      "count": 2
+    },
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/DateTimeField.tsx": {
+    "@typescript-eslint/no-unsafe-argument": {
+      "count": 2
+    },
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/EditableSelectField.tsx": {
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/FormField.tsx": {
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/MultiSelectField.tsx": {
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/NumberField.tsx": {
+    "@typescript-eslint/no-unsafe-assignment": {
+      "count": 1
+    },
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/SelectField.tsx": {
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/TextField.tsx": {
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Table/ui/FormField/TimeField.tsx": {
+    "sonarjs/prefer-read-only-props": {
+      "count": 1
+    }
+  },
+  "src/shared/ui/Toast/Toast.stories.tsx": {
+    "@typescript-eslint/no-empty-function": {
+      "count": 1
+    }
+  },
+  "src/widgets/app-header/ui/UserMenu/UserMenu.tsx": {
+    "@typescript-eslint/no-floating-promises": {
+      "count": 1
+    }
+  }
+}

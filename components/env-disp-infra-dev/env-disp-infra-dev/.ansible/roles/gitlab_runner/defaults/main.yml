@@ -1,0 +1,26 @@
+---
+gitlab_url: "https://git.dmi-msk.ru/"
+gitlab_executor: "shell"
+gitlab_tags: ""
+gitlab_runner_description: "{{ inventory_hostname }}"
+gitlab_runner_package: gitlab-runner
+gitlab_runner_repo_script_url: https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh
+gitlab_runner_repo_script_path: /tmp/gitlab-runner-repo.sh
+gitlab_runner_repo_file: /etc/apt/sources.list.d/runner_gitlab-runner.list
+gitlab_runner_config_path: /etc/gitlab-runner/config.toml
+gitlab_runner_reconfigure: false
+gitlab_runner_token_prompt_enabled: true
+gitlab_runner_tokens: {}
+gitlab_runner_ssh_dir: /home/gitlab-runner/.ssh
+gitlab_runner_ssh_generate_keypair: true
+gitlab_runner_ssh_regenerate_keypair: false
+gitlab_runner_ssh_key_type: ed25519
+gitlab_runner_ssh_key_comment: "gitlab-runner@{{ ansible_hostname | default(inventory_hostname) }}"
+gitlab_runner_ssh_private_key_path: "{{ gitlab_runner_ssh_dir }}/id_ed25519"
+gitlab_runner_ssh_public_key_path: "{{ gitlab_runner_ssh_private_key_path }}.pub"
+gitlab_runner_ssh_private_key_content: ""
+gitlab_runner_ssh_public_key_content: ""
+gitlab_runner_ssh_private_key_mode: "0600"
+gitlab_runner_ssh_public_key_mode: "0600"
+gitlab_runner_known_hosts_path: "{{ gitlab_runner_ssh_dir }}/known_hosts"
+gitlab_runner_known_hosts_entries: []

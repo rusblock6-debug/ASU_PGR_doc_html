@@ -1,0 +1,288 @@
+{
+  "title": "Инструкция пользователя АСУ ПГР",
+  "cards": {
+    "quickstart": null,
+    "descriptive": [
+      {
+        "id": "handbooks",
+        "title": "Справочники",
+        "subtitle": "Настройка цифровой модели рудника",
+        "description": "Основной раздел для настройки цифровой модели рудника.",
+        "items": [
+          "Модели техники и единицы оборудования",
+          "Статусы для классификации времени",
+          "Виды груза с параметрами плотности",
+          "Горизонты (уровни рудника)",
+          "Места погрузки и разгрузки",
+          "Метки позиционирования",
+          "Производственные участки"
+        ],
+        "image": "screenshots/main-windows/handbooks.png"
+      },
+      {
+        "id": "operational",
+        "title": "Оперативная работа",
+        "subtitle": "Ежедневное планирование и мониторинг",
+        "description": "Раздел для ежедневного планирования и мониторинга.",
+        "items": [
+          "Наряд-задания — создание сменных заданий",
+          "Управление рейсами — просмотр рейсов",
+          "Карта рабочего времени (КРВ)",
+          "Карта рудника — 2D/3D отображение"
+        ],
+        "image": "screenshots/main-windows/operational.png"
+      },
+      {
+        "id": "analytics",
+        "title": "Аналитика",
+        "subtitle": "Анализ производительности",
+        "description": "Раздел для анализа производительности.",
+        "items": [
+          "Сводка по маршрутам",
+          "По видам груза",
+          "Эффективность техники"
+        ],
+        "image": "screenshots/main-windows/analytics.png"
+      },
+      {
+        "id": "navigation",
+        "title": "Навигация по системе",
+        "subtitle": "Интерфейс и управление",
+        "description": "Общее описание интерфейса системы.",
+        "items": [
+          "Верхняя панель — меню навигации",
+          "Левая боковая панель — фильтры и списки",
+          "Основная рабочая область — таблицы и графики"
+        ],
+        "image": "screenshots/main-windows/navigation.png"
+      }
+    ],
+    "instructions": [
+      {
+        "id": "setup_system",
+        "title": "Как настроить систему с нуля?",
+        "navTitle": "Настройка системы",
+        "description": "Пошаговая настройка всех компонентов системы",
+        "items": [
+          "Создание моделей техники",
+          "Добавление единиц техники",
+          "Настройка статусов",
+          "Создание видов груза",
+          "Настройка горизонтов",
+          "Создание мест работ",
+          "Настройка меток позиционирования"
+        ],
+        "steps": [
+          {
+            "text": "Шаг 1: Создание моделей техники",
+            "images": [
+              "screenshots/instructions/create_model_1.png",
+              "screenshots/instructions/create_model_2.png"
+            ],
+            "horizontal": true
+          },
+          {
+            "text": "Шаг 2: Добавление единиц техники",
+            "images": [
+              "screenshots/instructions/add_vehicle_1.png",
+              "screenshots/instructions/add_vehicle_2.png"
+            ],
+            "horizontal": true
+          },
+          {
+            "text": "Шаг 3: Настройка статусов",
+            "images": [
+              "screenshots/instructions/setup_statuses.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 4: Создание видов груза",
+            "images": [
+              "screenshots/instructions/create_cargo.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 5: Настройка горизонтов",
+            "images": [
+              "screenshots/instructions/create_horizons.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 6: Создание мест работ",
+            "images": [
+              "screenshots/instructions/create_places_1.png",
+              "screenshots/instructions/create_places_2.png"
+            ],
+            "horizontal": true
+          },
+          {
+            "text": "Шаг 7: Настройка меток позиционирования",
+            "images": [
+              "screenshots/instructions/setup_tags.png"
+            ],
+            "horizontal": false
+          }
+        ],
+        "keyIndicators": [
+          "Все справочники настроены",
+          "Техника добавлена в систему",
+          "Система готова к работе"
+        ]
+      },
+      {
+        "id": "create_work_order",
+        "title": "Как создать наряд-задание на смену?",
+        "navTitle": "Создание наряд-заданий",
+        "description": "Планирование сменных заданий",
+        "items": [
+          "Выбор смены",
+          "Создание маршрутного задания",
+          "Активация задания",
+          "Мониторинг выполнения"
+        ],
+        "steps": [
+          {
+            "text": "Шаг 1: Выбор смены",
+            "images": [
+              "screenshots/instructions/select_shift.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 2: Создание маршрутного задания",
+            "images": [
+              "screenshots/instructions/create_work_order_1.png",
+              "screenshots/instructions/create_work_order_2.png"
+            ],
+            "horizontal": true
+          },
+          {
+            "text": "Шаг 3: Активация задания",
+            "images": [
+              "screenshots/instructions/activate_task.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 4: Мониторинг выполнения",
+            "images": [
+              "screenshots/instructions/monitor_execution.png"
+            ],
+            "horizontal": false
+          }
+        ],
+        "keyIndicators": [
+          "Наряд-задание создано",
+          "Задание активировано",
+          "Рейсы выполняются"
+        ]
+      },
+      {
+        "id": "work_with_krv",
+        "title": "Как работать с картой рабочего времени?",
+        "navTitle": "Карта рабочего времени",
+        "description": "Визуализация и анализ использования времени",
+        "items": [
+          "Открытие КРВ",
+          "Добавление статуса",
+          "Редактирование статуса",
+          "Анализ эффективности"
+        ],
+        "steps": [
+          {
+            "text": "Шаг 1: Открытие КРВ",
+            "images": [
+              "screenshots/instructions/open_krv.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 2: Добавление статуса",
+            "images": [
+              "screenshots/instructions/add_status_krv_1.png",
+              "screenshots/instructions/add_status_krv_2.png"
+            ],
+            "horizontal": true
+          },
+          {
+            "text": "Шаг 3: Редактирование статуса",
+            "images": [
+              "screenshots/instructions/edit_status_krv.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 4: Анализ эффективности",
+            "images": [
+              "screenshots/instructions/analyze_krv.png"
+            ],
+            "horizontal": false
+          }
+        ],
+        "keyIndicators": [
+          "КИОВ рассчитан",
+          "Все статусы отражены",
+          "Эффективность оценена"
+        ]
+      },
+      {
+        "id": "analyze_results",
+        "title": "Как анализировать результаты работы?",
+        "navTitle": "Анализ результатов",
+        "description": "Просмотр отчетов и аналитики",
+        "items": [
+          "Сводка по маршрутам",
+          "Анализ по видам груза",
+          "Оценка эффективности",
+          "Экспорт отчетов"
+        ],
+        "steps": [
+          {
+            "text": "Шаг 1: Просмотр сводки по маршрутам",
+            "images": [
+              "screenshots/instructions/route_summary.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 2: Анализ по видам груза",
+            "images": [
+              "screenshots/instructions/cargo_analysis.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 3: Оценка эффективности техники",
+            "images": [
+              "screenshots/instructions/efficiency_analysis.png"
+            ],
+            "horizontal": false
+          },
+          {
+            "text": "Шаг 4: Экспорт отчетов",
+            "images": [
+              "screenshots/instructions/export_reports.png"
+            ],
+            "horizontal": false
+          }
+        ],
+        "keyIndicators": [
+          "Отчеты сформированы",
+          "Показатели проанализированы",
+          "Выявлены области улучшения"
+        ]
+      }
+    ],
+    "about": [
+      {
+        "id": "about-guide",
+        "title": "О руководстве",
+        "navTitle": "О руководстве",
+        "content": "<div class='instruction-content'><p>Полное руководство пользователя АСУ ПГР.</p></div>"
+      }
+    ]
+  }
+}

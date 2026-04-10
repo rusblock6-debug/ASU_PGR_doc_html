@@ -1,0 +1,66 @@
+.arrow_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--base-white);
+  transition: transform 0.2s ease;
+}
+
+.arrow_rotated {
+  transform: rotate(180deg);
+}
+
+.input_multi_arrow_section {
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.input_multi_wrapper {
+  padding: 0;
+  border: none;
+
+  &[data-error] {
+    border: 1px solid var(--orem-red-400);
+
+    &:hover,
+    &:focus {
+      border: 1px solid var(--orem-red-400);
+    }
+  }
+}
+
+.input_field {
+  flex: 1;
+  min-width: 30px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--base-white);
+  outline: none;
+  background: transparent;
+  border: none;
+}
+
+.pills_input {
+  width: 100%;
+
+  &.without_label {
+    display: block;
+  }
+}
+
+.pill_group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  align-items: center;
+  min-height: 24px;
+  padding-right: 32px;
+}

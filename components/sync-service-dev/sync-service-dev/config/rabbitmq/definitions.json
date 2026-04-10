@@ -1,0 +1,50 @@
+{
+  "vhosts": [
+    { "name": "/" }
+  ],
+  "users": [
+    {
+      "name": "admin",
+      "password": "public",
+      "tags": "administrator"
+    },
+    {
+      "name": "anonymous_user",
+      "password": "anonymous_pass",
+      "tags": ""
+    },
+    {
+      "name": "producer_user",
+      "password": "producer_pass",
+      "tags": ""
+    },
+    {
+      "name": "consumer_user",
+      "password": "consumer_pass",
+      "tags": ""
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "producer_user",
+      "vhost": "/",
+      "configure": "",
+      "write": ".*",
+      "read": ""
+    },
+    {
+      "user": "consumer_user",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ]
+}
