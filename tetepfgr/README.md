@@ -6,8 +6,6 @@
 
 ```
 ├── admin.html              # Админ-панель с редактированием
-├── user.html               # Пользовательская версия (только просмотр)
-├── admin_git.html          # Версия для GitHub Pages
 ├── data.json               # Данные карточек
 ├── directory_data.json     # Справочники
 ├── server.js               # Node.js сервер
@@ -19,10 +17,6 @@
 
 **admin.html** - Полная версия с редактированием. Требует локальный сервер Node.js.
 
-**user.html** - Версия для пользователей без кнопок редактирования.
-
-**admin_git.html** - Версия для GitHub Pages, только просмотр.
-
 ## Запуск
 
 Требования: Node.js (любая версия)
@@ -32,9 +26,7 @@ node server.js
 ```
 
 Доступ:
-- Просмотр: http://localhost:3000
 - Админка: http://localhost:3000/admin.html
-- Пользовательская: http://localhost:3000/user.html
 
 ## Функции
 
