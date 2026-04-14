@@ -678,7 +678,7 @@
         .guidde-manual { background: var(--card-bg); }
         .guidde-step { 
             padding: 28px; 
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 3px solid var(--accent-color);
             transition: background 0.2s;
         }
         .guidde-step:hover {
@@ -1443,6 +1443,14 @@
                             <div class="loading">Загрузка</div>
                         </div>
                     </div>
+
+                    <!-- Section 5: Admin Instructions -->
+                    <div id="section-admin" class="content-section">
+                        <h2 class="section-group-title">Администрирование</h2>
+                        <div id="adminCards">
+                            <div class="loading">Загрузка...</div>
+                        </div>
+                    </div>
                 </main>
 
                 <div class="footer-note">
@@ -1732,6 +1740,26 @@
                                 <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButtonQuickstart()" title="Экспорт в PDF">⋮</span>
                             </a>
                         </li>
+                    </div>
+                `;
+            }
+
+            // Добавляем "Администрирование" сразу после Быстрого старта
+            const adminSection = { id: 'admin', title: 'Администрирование', cards: appData.cards.admin_instructions || [] };
+            if (adminSection.cards.length > 0) {
+                tocHTML += `
+                    <div class="toc-level-1">
+                        <div class="toc-group-title">${adminSection.title}</div>
+                        <ul>
+                            ${adminSection.cards.map(card => {
+                                const displayName = card.navTitle || card.title || 'Без названия';
+                                return `<li>
+                                    <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)">${displayName}</a>
+                                    <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF">↓</span>
+                                    <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${adminSection.id}', '${card.id}')" title="Экспорт в PDF">⋮</span>
+                                </li>`
+                            }).join('')}
+                        </ul>
                     </div>
                 `;
             }
@@ -2367,6 +2395,7 @@
             renderQuickstart();
             renderDescriptive();
             renderInstructions();
+            renderAdminInstructions();
             renderAbout();
             renderDirectories();
         }
@@ -2693,6 +2722,122 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function renderAdminInstructions() {
+            const container = document.getElementById('adminCards');
+            const cards = appData.cards.admin_instructions || [];
+            if (cards.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-light);text-align:center;">Нет инструкций для администраторов</p>';
+                return;
+            }
+            
+            let html = '';
+            cards.forEach((card, cardIndex) => {
+                if (card.steps && card.steps.length > 0) {
+                    card.steps.forEach((step, stepIndex) => {
+                        html += `
+                            <div class="card" style="margin-bottom:30px;">
+                                <div class="card-head">
+                                    <div class="card-path">${step.text}</div>
+                                </div>
+                                <div class="card-description">
+                        `;
+                        
+                        // Отображаем детали
+                        if (step.details && step.details.length > 0) {
+                            html += '<div style="padding-left:0;margin-top:8px;">';
+                            
+                            let warningBlock = [];
+                            let inWarningBlock = false;
+                            
+                            step.details.forEach((detail, index) => {
+                                // Пропускаем пустые строки
+                                if (!detail.trim()) {
+                                    // Закрываем блок предупреждения если он открыт
+                                    if (inWarningBlock && warningBlock.length > 0) {
+                                        html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                        warningBlock.forEach(line => {
+                                            html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                        });
+                                        html += '</div>';
+                                        warningBlock = [];
+                                        inWarningBlock = false;
+                                    }
+                                    html += '<div style="height:8px;"></div>';
+                                    return;
+                                }
+                                
+                                // Если строка начинается с ⚠️
+                                if (detail.trim().startsWith('⚠️')) {
+                                    const text = detail.trim().substring(2).trim();
+                                    if (!inWarningBlock) {
+                                        inWarningBlock = true;
+                                    }
+                                    warningBlock.push(text);
+                                } else {
+                                    // Закрываем блок предупреждения если он открыт
+                                    if (inWarningBlock && warningBlock.length > 0) {
+                                        html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                        warningBlock.forEach(line => {
+                                            html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                        });
+                                        html += '</div>';
+                                        warningBlock = [];
+                                        inWarningBlock = false;
+                                    }
+                                    
+                                    // Если строка начинается с тире - рендерим с оранжевым маркером
+                                    if (detail.trim().startsWith('—')) {
+                                        const text = detail.trim().substring(1).trim();
+                                        html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                    } else if (detail.match(/^\d+\./)) {
+                                        // Нумерованный список
+                                        html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                    } else {
+                                        // Обычный текст
+                                        html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                    }
+                                }
+                                
+                                // Закрываем последний блок предупреждения если он открыт
+                                if (index === step.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
+                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                    warningBlock.forEach(line => {
+                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                    });
+                                    html += '</div>';
+                                }
+                            });
+                            
+                            html += '</div>';
+                        }
+                        
+                        // Отображаем скриншоты сеткой
+                        if (step.images && step.images.length > 0) {
+                            html += '<div class="card-screenshot" style="padding:20px 25px;background-color:#fafafa;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">';
+                            step.images.forEach(img => {
+                                html += `
+                                    <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;" 
+                                         onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
+                                         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'"
+                                         onclick="openImageModal('${img}', '${step.text}', this)">
+                                        <img src="${img}" alt="Скриншот" style="width:100%;height:auto;display:block;">
+                                    </div>
+                                `;
+                            });
+                            html += '</div></div>';
+                        }
+                        
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+            
+            container.innerHTML = html;
         }
 
         function renderAbout() {
