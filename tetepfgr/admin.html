@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>АСУ ПГР - Документация</title>
+    <title>НАВИГАТОР.ПГР - Документация</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -305,6 +305,12 @@
             background-color: rgba(237, 141, 72, 0.15);
             border-left-color: var(--accent-color);
             font-weight: 600;
+        }
+        
+        /* Стрелки появляются при наведении */
+        .toc-parent-item:hover .toc-toggle-icon,
+        .toc-card-item:hover .toc-toggle-icon {
+            opacity: 1 !important;
         }
         
         /* PDF Export Button */
@@ -1377,7 +1383,7 @@
     <header class="main-header">
         <div class="main-header-left">
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-            <div class="main-header-title">АСУ ПГР</div>
+            <div class="main-header-title">НАВИГАТОР.ПГР</div>
             <div class="main-header-subtitle">Инструкция пользователя</div>
         </div>
     </header>
@@ -1729,35 +1735,69 @@
             const tocContainer = document.getElementById('toc');
             let tocHTML = '';
 
-            // Добавляем Быстрый старт первым
+            // Добавляем Быстрый старт первым с сворачиваемым деревом
             if (appData.cards.quickstart) {
+                const quickstartSteps = appData.cards.quickstart.steps || [];
                 tocHTML += `
                     <div class="toc-level-1">
                         <li style="list-style:none;">
-                            <a href="#section-quickstart" onclick="navigateToSection('quickstart', this)" class="toc-group-title" style="cursor:pointer;display:block;padding:12px 20px;color:var(--text-primary);text-decoration:none;font-weight:600;position:relative;">
-                                Быстрый старт
-                                <span class="toc-item-download" id="download-quickstart" onclick="event.stopPropagation(); downloadQuickstartPdf(this)" title="Скачать PDF">↓</span>
+                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px;cursor:pointer;color:#ffffff;font-weight:600;">
+                                <span class="toc-toggle-icon" id="toggle-quickstart-tree" style="margin-right:8px;transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-tree')">▶</span>
+                                <span style="flex:1;" onclick="navigateToSection('quickstart', this.parentElement)">Быстрый старт</span>
+                                <span class="toc-item-download" id="download-quickstart" onclick="event.stopPropagation(); downloadQuickstartPdf(this)" title="Скачать PDF" style="margin-left:auto;">↓</span>
                                 <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButtonQuickstart()" title="Экспорт в PDF">⋮</span>
-                            </a>
+                            </div>
+                            <ul id="quickstart-tree" class="toc-tree-children" style="display:none;list-style:none;padding-left:20px;">
+                                ${quickstartSteps.map((step, idx) => {
+                                    const stepId = `quickstart-step-${idx}`;
+                                    return `<li>
+                                        <a href="#section-quickstart" onclick="navigateToSection('quickstart', this); scrollToQuickstartStep(${idx})" style="display:block;padding:8px 12px;color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;transition:all 0.2s;" onmouseover="this.style.color='#ffffff';this.style.paddingLeft='16px'" onmouseout="this.style.color='rgba(255,255,255,0.7)';this.style.paddingLeft='12px'">${step.title}</a>
+                                    </li>`;
+                                }).join('')}
+                            </ul>
                         </li>
                     </div>
                 `;
             }
 
-            // Добавляем "Администрирование" сразу после Быстрого старта
+            // Добавляем "Администрирование" сразу после Быстрого старта (всегда раскрыто)
             const adminSection = { id: 'admin', title: 'Администрирование', cards: appData.cards.admin_instructions || [] };
             if (adminSection.cards.length > 0) {
                 tocHTML += `
                     <div class="toc-level-1">
                         <div class="toc-group-title">${adminSection.title}</div>
-                        <ul>
-                            ${adminSection.cards.map(card => {
+                        <ul style="list-style:none;padding-left:0;">
+                            ${adminSection.cards.map((card, cardIdx) => {
                                 const displayName = card.navTitle || card.title || 'Без названия';
-                                return `<li>
-                                    <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)">${displayName}</a>
-                                    <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF">↓</span>
-                                    <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${adminSection.id}', '${card.id}')" title="Экспорт в PDF">⋮</span>
-                                </li>`
+                                
+                                // Проверяем есть ли у карточки шаги (для Первичной настройки)
+                                if (card.id === 'initial_setup' && card.steps && card.steps.length > 0) {
+                                    const cardTreeId = `admin-card-${card.id}-tree`;
+                                    return `<li style="margin-bottom:4px;">
+                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:8px 12px;cursor:pointer;color:rgba(255,255,255,0.8);font-size:13px;transition:all 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">
+                                            <span class="toc-toggle-icon" id="toggle-${cardTreeId}" style="margin-right:6px;transition:all 0.3s;display:inline-block;font-size:10px;opacity:0;" onclick="event.stopPropagation(); toggleTocSection('${cardTreeId}')">▶</span>
+                                            <span style="flex:1;" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this.parentElement)">${displayName}</span>
+                                            <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="margin-left:auto;margin-right:4px;">↓</span>
+                                            <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${adminSection.id}', '${card.id}')" title="Экспорт в PDF">⋮</span>
+                                        </div>
+                                        <ul id="${cardTreeId}" class="toc-tree-children" style="display:none;list-style:none;padding-left:20px;">
+                                            ${card.steps.map((step, stepIdx) => {
+                                                return `<li>
+                                                    <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this); scrollToAdminStep('${card.id}', ${stepIdx})" style="display:block;padding:6px 10px;color:rgba(255,255,255,0.6);text-decoration:none;font-size:12px;transition:all 0.2s;" onmouseover="this.style.color='#ffffff';this.style.paddingLeft='14px'" onmouseout="this.style.color='rgba(255,255,255,0.6)';this.style.paddingLeft='10px'">${step.text}</a>
+                                                </li>`;
+                                            }).join('')}
+                                        </ul>
+                                    </li>`;
+                                } else {
+                                    // Обычная карточка без подпунктов
+                                    return `<li>
+                                        <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" style="display:block;padding:8px 12px;color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;position:relative;transition:all 0.2s;" onmouseover="this.style.color='#ffffff';this.style.paddingLeft='16px'" onmouseout="this.style.color='rgba(255,255,255,0.7)';this.style.paddingLeft='12px'">
+                                            ${displayName}
+                                            <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:30px;top:50%;transform:translateY(-50%);">↓</span>
+                                            <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${adminSection.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);">⋮</span>
+                                        </a>
+                                    </li>`;
+                                }
                             }).join('')}
                         </ul>
                     </div>
@@ -1844,6 +1884,52 @@
         function capitalizeFirst(str) {
             if (!str) return '';
             return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+        }
+        
+        // Функция для переключения сворачивания/разворачивания секции в ToC
+        function toggleTocSection(treeId) {
+            const tree = document.getElementById(treeId);
+            const toggleIcon = document.getElementById('toggle-' + treeId);
+            
+            if (tree.style.display === 'none') {
+                tree.style.display = 'block';
+                toggleIcon.style.transform = 'rotate(90deg)';
+            } else {
+                tree.style.display = 'none';
+                toggleIcon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Функция для прокрутки к конкретному шагу в Быстром старте
+        function scrollToQuickstartStep(stepIndex) {
+            setTimeout(() => {
+                const stepCards = document.querySelectorAll('#quickstartContent .card');
+                if (stepCards[stepIndex]) {
+                    stepCards[stepIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Добавляем временную подсветку
+                    stepCards[stepIndex].style.transition = 'box-shadow 0.3s';
+                    stepCards[stepIndex].style.boxShadow = '0 0 15px var(--accent-color)';
+                    setTimeout(() => {
+                        stepCards[stepIndex].style.boxShadow = '';
+                    }, 1000);
+                }
+            }, 100);
+        }
+        
+        // Функция для прокрутки к конкретному шагу в карточке администрирования
+        function scrollToAdminStep(cardId, stepIndex) {
+            setTimeout(() => {
+                const stepCard = document.getElementById(`card-${cardId}-step-${stepIndex}`);
+                if (stepCard) {
+                    stepCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Добавляем временную подсветку
+                    stepCard.style.transition = 'box-shadow 0.3s';
+                    stepCard.style.boxShadow = '0 0 20px rgba(237, 141, 72, 0.6)';
+                    setTimeout(() => {
+                        stepCard.style.boxShadow = '';
+                    }, 1500);
+                }
+            }, 100);
         }
         
         function navigateToSection(sectionId, linkElement) {
@@ -2737,7 +2823,7 @@
                 if (card.steps && card.steps.length > 0) {
                     card.steps.forEach((step, stepIndex) => {
                         html += `
-                            <div class="card" style="margin-bottom:30px;">
+                            <div class="card admin-step-card" id="card-${card.id}-step-${stepIndex}" style="margin-bottom:30px;">
                                 <div class="card-head">
                                     <div class="card-path">${step.text}</div>
                                 </div>
@@ -4391,16 +4477,27 @@
         
         function initCardScrollTracking() {
             const contentPane = document.querySelector('.content-pane');
-            if (!contentPane) return;
+            if (!contentPane) {
+                console.log('Content pane not found!');
+                return;
+            }
+            
+            console.log('Initializing scroll tracking...');
+            console.log('Content pane scrollHeight:', contentPane.scrollHeight);
+            console.log('Content pane clientHeight:', contentPane.clientHeight);
             
             const scrollElement = contentPane.scrollHeight === contentPane.clientHeight ? window : contentPane;
+            
+            console.log('Scroll element:', scrollElement === window ? 'window' : 'contentPane');
             
             if (scrollElement === window) {
                 window.removeEventListener('scroll', handleWindowScroll);
                 window.addEventListener('scroll', handleWindowScroll);
+                console.log('Added window scroll listener');
             } else {
                 contentPane.removeEventListener('scroll', handleContentScroll);
                 contentPane.addEventListener('scroll', handleContentScroll);
+                console.log('Added contentPane scroll listener');
             }
         }
         
@@ -4412,15 +4509,68 @@
                 if (!contentPane) return;
                 
                 const scrollTop = contentPane.scrollTop + 100;
-                const cards = document.querySelectorAll('.content-section.active .card[id]');
                 
+                // Проверяем активную секцию
+                const activeSection = document.querySelector('.content-section.active');
+                if (!activeSection) return;
+                
+                const sectionId = activeSection.id.replace('section-', '');
+                console.log('Active section:', sectionId, 'ScrollTop:', scrollTop);
+                
+                // Для Быстрого старта отслеживаем карточки шагов
+                if (sectionId === 'quickstart') {
+                    const stepCards = activeSection.querySelectorAll('.card');
+                    console.log('Quickstart step cards found:', stepCards.length);
+                    
+                    let activeStepIndex = -1;
+                    
+                    for (let i = 0; i < stepCards.length; i++) {
+                        const cardTop = stepCards[i].offsetTop;
+                        console.log(`Step ${i}: offsetTop=${cardTop}, scrollTop=${scrollTop}`);
+                        if (cardTop <= scrollTop) {
+                            activeStepIndex = i;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    console.log('Active step index:', activeStepIndex);
+                    
+                    if (activeStepIndex >= 0) {
+                        updateActiveStepNavigation('quickstart', activeStepIndex);
+                    }
+                    return;
+                }
+                
+                // Для администрирования отслеживаем шаги внутри initial_setup
+                if (sectionId === 'admin') {
+                    const adminStepCards = activeSection.querySelectorAll('.admin-step-card');
+                    if (adminStepCards.length > 0) {
+                        let activeStepIndex = -1;
+                        
+                        for (let i = 0; i < adminStepCards.length; i++) {
+                            const cardTop = adminStepCards[i].offsetTop;
+                            if (cardTop <= scrollTop) {
+                                activeStepIndex = i;
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        if (activeStepIndex >= 0) {
+                            updateActiveStepNavigation('initial_setup', activeStepIndex);
+                        }
+                        return;
+                    }
+                }
+                
+                // Для остальных секций отслеживаем обычные карточки
+                const cards = activeSection.querySelectorAll('.card[id]');
                 if (cards.length === 0) return;
                 
                 let activeCard = null;
-                
                 for (let card of cards) {
                     const cardTop = card.offsetTop;
-                    
                     if (cardTop <= scrollTop) {
                         activeCard = card;
                     } else {
@@ -4434,6 +4584,42 @@
             }, 100);
         }
         
+        function updateActiveStepNavigation(parentId, stepIndex) {
+            // Убираем активность со всех ссылок
+            document.querySelectorAll('.toc-level-1 a, .toc-tree-children a').forEach(link => {
+                link.classList.remove('active');
+                link.style.color = '';
+                link.style.fontWeight = '';
+            });
+            
+            // Находим и активируем нужный шаг
+            let targetLink = null;
+            
+            if (parentId === 'quickstart') {
+                const quickstartTree = document.getElementById('quickstart-tree');
+                if (quickstartTree) {
+                    const links = quickstartTree.querySelectorAll('a');
+                    if (links[stepIndex]) {
+                        targetLink = links[stepIndex];
+                    }
+                }
+            } else if (parentId === 'initial_setup') {
+                const initialSetupTree = document.getElementById('admin-card-initial_setup-tree');
+                if (initialSetupTree) {
+                    const links = initialSetupTree.querySelectorAll('a');
+                    if (links[stepIndex]) {
+                        targetLink = links[stepIndex];
+                    }
+                }
+            }
+            
+            if (targetLink) {
+                targetLink.style.color = '#ffffff';
+                targetLink.style.fontWeight = '600';
+                targetLink.classList.add('active');
+            }
+        }
+        
         let windowScrollTimeout;
         function handleWindowScroll() {
             clearTimeout(windowScrollTimeout);
@@ -4441,7 +4627,64 @@
                 // Берем центр видимой области экрана
                 const viewportCenter = window.pageYOffset + (window.innerHeight / 2);
                 
-                const visibleCards = document.querySelectorAll('.content-section.active .card[id][style*="display: block"], .content-section.active .card[id]:not([style*="display"])');
+                // Проверяем активную секцию
+                const activeSection = document.querySelector('.content-section.active');
+                if (!activeSection) return;
+                
+                const sectionId = activeSection.id.replace('section-', '');
+                
+                // Для Быстрого старта отслеживаем карточки шагов
+                if (sectionId === 'quickstart') {
+                    const stepCards = activeSection.querySelectorAll('.card');
+                    let activeStepIndex = -1;
+                    let minDistance = Infinity;
+                    
+                    for (let i = 0; i < stepCards.length; i++) {
+                        const rect = stepCards[i].getBoundingClientRect();
+                        const cardTop = rect.top + window.pageYOffset;
+                        const cardCenter = cardTop + (stepCards[i].offsetHeight / 2);
+                        const distance = Math.abs(cardCenter - viewportCenter);
+                        
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            activeStepIndex = i;
+                        }
+                    }
+                    
+                    if (activeStepIndex >= 0) {
+                        updateActiveStepNavigation('quickstart', activeStepIndex);
+                    }
+                    return;
+                }
+                
+                // Для администрирования отслеживаем шаги внутри initial_setup
+                if (sectionId === 'admin') {
+                    const adminStepCards = activeSection.querySelectorAll('.admin-step-card');
+                    if (adminStepCards.length > 0) {
+                        let activeStepIndex = -1;
+                        let minDistance = Infinity;
+                        
+                        for (let i = 0; i < adminStepCards.length; i++) {
+                            const rect = adminStepCards[i].getBoundingClientRect();
+                            const cardTop = rect.top + window.pageYOffset;
+                            const cardCenter = cardTop + (adminStepCards[i].offsetHeight / 2);
+                            const distance = Math.abs(cardCenter - viewportCenter);
+                            
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                activeStepIndex = i;
+                            }
+                        }
+                        
+                        if (activeStepIndex >= 0) {
+                            updateActiveStepNavigation('initial_setup', activeStepIndex);
+                        }
+                        return;
+                    }
+                }
+                
+                // Для остальных секций отслеживаем обычные карточки
+                const visibleCards = activeSection.querySelectorAll('.card[id][style*="display: block"], .card[id]:not([style*="display"])');
                 
                 if (visibleCards.length === 0) return;
                 
@@ -4604,6 +4847,14 @@
                     card = appData.cards.instructions.find(c => c.id === cardId);
                 } else if (sectionId === 'about') {
                     card = appData.cards.about.find(c => c.id === cardId);
+                } else if (sectionId === 'admin') {
+                    card = appData.cards.admin_instructions.find(c => c.id === cardId);
+                    
+                    // Для Первичной настройки используем логику выбора шагов как у Быстрого старта
+                    if (cardId === 'initial_setup' && card && card.steps && card.steps.length > 0) {
+                        openInitialSetupStepSelectionModal(card);
+                        return;
+                    }
                 }
                 
                 if (!card) {
@@ -4729,6 +4980,189 @@
             } catch (error) {
                 console.error('Ошибка при открытии диалога выбора:', error);
             }
+        }
+        
+        function openInitialSetupStepSelectionModal(card) {
+            const modal = document.getElementById('stepSelectionModal');
+            const listContainer = document.getElementById('stepSelectionList');
+            
+            // Генерируем список шагов для Первичной настройки
+            let html = '';
+            card.steps.forEach((step, index) => {
+                const imagesCount = step.images ? step.images.length : 0;
+                
+                html += `
+                    <div style="margin-bottom: 12px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg);">
+                        <label style="display: flex; align-items: flex-start; cursor: pointer; gap: 12px;">
+                            <input type="checkbox" value="${index}" checked data-card-id="${card.id}" style="margin-top: 4px; transform: scale(1.2);">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; font-size: 15px;">
+                                    ${step.text}
+                                </div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">
+                                    ${imagesCount} изображений
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+            
+            // Меняем обработчик кнопки скачивания
+            const downloadBtn = document.querySelector('#stepSelectionModal .modal-footer button:last-child');
+            if (downloadBtn) {
+                downloadBtn.onclick = () => downloadSelectedInitialSetupSteps(card);
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        async function downloadSelectedInitialSetupSteps(card) {
+            try {
+                const selectedIndexes = Array.from(document.querySelectorAll('#stepSelectionList input[type="checkbox"]:checked'))
+                    .map(cb => parseInt(cb.value));
+                
+                if (selectedIndexes.length === 0) {
+                    alert('Выберите хотя бы один шаг для скачивания');
+                    return;
+                }
+                
+                closeStepSelectionModal();
+                
+                // Создаем урезанную версию данных с выбранными шагами
+                const selectedSteps = selectedIndexes.map(index => card.steps[index]);
+                const customCard = {
+                    ...card,
+                    steps: selectedSteps
+                };
+                
+                console.log(`Генерируем PDF для ${selectedSteps.length} выбранных шагов...`);
+                
+                // Генерируем PDF контент
+                const pdfContent = await generateAdminPdfContent(customCard);
+                
+                const opt = {
+                    margin: [8, 8, 8, 8],
+                    filename: `${sanitizeFilename(card.title || card.navTitle || 'document')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        letterRendering: true,
+                        allowTaint: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: 800,
+                        x: 0,
+                        y: 0,
+                        scrollY: 0,
+                        scrollX: 0
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'portrait',
+                        compress: true
+                    },
+                    pagebreak: { 
+                        mode: ['avoid-all', 'css', 'legacy'],
+                        avoid: '.no-break'
+                    }
+                };
+                
+                // Очищаем предыдущие элементы перед генерацией
+                const oldPdfElements = document.querySelectorAll('[class^="pdf-content-"]');
+                oldPdfElements.forEach(el => el.remove());
+                
+                await html2pdf().set(opt).from(pdfContent).save();
+                
+            } catch (error) {
+                console.error('Ошибка при генерации PDF:', error);
+            }
+        }
+        
+        async function generateAdminPdfContent(card) {
+            const container = document.createElement('div');
+            container.className = 'pdf-content-admin';
+            container.style.cssText = 'font-family: Inter, sans-serif; padding: 20px; background: white;';
+            
+            let html = `
+                <div style="margin-bottom: 30px; border-bottom: 3px solid #ed8d48; padding-bottom: 15px;">
+                    <h1 style="color: #2c3e50; font-size: 28px; margin: 0 0 10px 0;">${card.title || card.navTitle}</h1>
+                    ${card.description ? `<p style="color: #5a6c7d; font-size: 14px; margin: 0;">${card.description}</p>` : ''}
+                </div>
+            `;
+            
+            // Добавляем шаги
+            for (const [stepIndex, step] of card.steps.entries()) {
+                html += `
+                    <div style="margin-bottom: 40px; page-break-inside: avoid;">
+                        <h2 style="color: #ed8d48; font-size: 20px; margin: 0 0 15px 0; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;">
+                            ${step.text}
+                        </h2>
+                `;
+                
+                // Добавляем детали
+                if (step.details && step.details.length > 0) {
+                    html += '<div style="margin-bottom: 20px; line-height: 1.6; color: #2c3e50; font-size: 14px;">';
+                    step.details.forEach(detail => {
+                        if (detail.trim()) {
+                            // Обрабатываем HTML теги в тексте
+                            let processedDetail = detail;
+                            
+                            // Заменяем <strong> на жирный текст
+                            processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 700;">');
+                            processedDetail = processedDetail.replace(/<\/strong>/g, '</span>');
+                            
+                            if (processedDetail.trim().startsWith('—')) {
+                                const text = processedDetail.trim().substring(1).trim();
+                                html += `<div style="margin-bottom: 8px; padding-left: 20px; position: relative;">
+                                    <span style="position: absolute; left: 0; color: #ed8d48;">▸</span>${text}
+                                </div>`;
+                            } else if (processedDetail.trim().startsWith('⚠️')) {
+                                const text = processedDetail.trim().substring(2).trim();
+                                html += `<div style="margin-bottom: 8px; padding: 10px; background: #fef5ef; border-left: 3px solid #ed8d48; color: #2c3e50;">${text}</div>`;
+                            } else {
+                                html += `<div style="margin-bottom: 8px;">${processedDetail}</div>`;
+                            }
+                        } else {
+                            html += '<div style="height: 8px;"></div>';
+                        }
+                    });
+                    html += '</div>';
+                }
+                
+                // Добавляем изображения
+                if (step.images && step.images.length > 0) {
+                    html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;">';
+                    for (const img of step.images) {
+                        try {
+                            // Загружаем изображение
+                            const imgElement = document.createElement('img');
+                            imgElement.crossOrigin = 'anonymous';
+                            
+                            await new Promise((resolve, reject) => {
+                                imgElement.onload = resolve;
+                                imgElement.onerror = reject;
+                                imgElement.src = img;
+                            });
+                            
+                            html += `<img src="${img}" style="width: 100%; border: 1px solid #e1e8ed; border-radius: 8px;">`;
+                        } catch (e) {
+                            console.warn('Не удалось загрузить изображение:', img, e);
+                        }
+                    }
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+            document.body.appendChild(container);
+            return container;
         }
 
         function openStepSelectionModal() {
@@ -4931,18 +5365,24 @@
                                 const detailDiv = document.createElement('div');
                                 detailDiv.style.cssText = 'font-size: 11px; line-height: 1.5; color: #6c757d; margin-bottom: 5px;';
                                 
-                                if (detail.trim().startsWith('⚠️')) {
+                                // Обрабатываем HTML теги
+                                let processedDetail = detail;
+                                processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 700;">');
+                                processedDetail = processedDetail.replace(/<\/strong>/g, '</span>');
+                                
+                                if (processedDetail.trim().startsWith('⚠️')) {
                                     detailDiv.style.borderLeft = '3px solid #ed8d48';
                                     detailDiv.style.paddingLeft = '10px';
                                     detailDiv.style.marginTop = '8px';
                                     detailDiv.style.marginBottom = '8px';
-                                    detailDiv.textContent = detail.trim().substring(2).trim();
-                                } else if (detail.trim().startsWith('-')) {
+                                    detailDiv.innerHTML = processedDetail.trim().substring(2).trim();
+                                } else if (processedDetail.trim().startsWith('—')) {
                                     detailDiv.style.paddingLeft = '16px';
                                     detailDiv.style.position = 'relative';
-                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${detail.substring(1).trim()}`;
+                                    const text = processedDetail.trim().substring(1).trim();
+                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${text}`;
                                 } else {
-                                    detailDiv.textContent = detail;
+                                    detailDiv.innerHTML = processedDetail;
                                 }
                                 
                                 stepDiv.appendChild(detailDiv);
