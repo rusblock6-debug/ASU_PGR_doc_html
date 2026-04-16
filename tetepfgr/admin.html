@@ -2344,7 +2344,7 @@
         // Загрузка данных
         async function loadData() {
             try {
-                const response = await fetch('/api/data?t=' + Date.now());
+                const response = await fetch('data.json?t=' + Date.now());
                 if (!response.ok) throw new Error('Ошибка загрузки данных');
                 appData = await response.json();
                 renderAll();
@@ -2415,11 +2415,10 @@
                         <div class="card-head">
                             <div class="card-path">${step.title}</div>
                         </div>
-                        <div class="card-description">
                 `;
                 
                 (step.substeps || []).forEach((substep, subIndex) => {
-                    html += `<div style="margin-bottom:20px;"><p style="margin-bottom:8px;"><strong>${substep.text}</strong></p>`;
+                    html += `<div class="card-description"><div style="margin-bottom:20px;"><p style="margin-bottom:8px;"><strong>${substep.text}</strong></p>`;
                     
                     // Отображаем детали
                     if (substep.details && substep.details.length > 0) {
@@ -2508,10 +2507,11 @@
                         });
                         html += '</div></div>';
                     }
+                    
+                    html += '</div>';
                 });
                 
                 html += `
-                        </div>
                     </div>
                 `;
             });
