@@ -1741,7 +1741,7 @@
                 tocHTML += `
                     <div class="toc-level-1">
                         <li style="list-style:none;">
-                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px;cursor:pointer;color:#ffffff;font-weight:600;">
+                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 12px;cursor:pointer;color:#ffffff;font-weight:600;">
                                 <span class="toc-toggle-icon" id="toggle-quickstart-tree" style="margin-right:8px;transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-tree')">▶</span>
                                 <span style="flex:1;" onclick="navigateToSection('quickstart', this.parentElement)">Быстрый старт</span>
                                 <span class="toc-item-download" id="download-quickstart" onclick="event.stopPropagation(); downloadQuickstartPdf(this)" title="Скачать PDF" style="margin-left:auto;">↓</span>
@@ -1751,7 +1751,7 @@
                                 ${quickstartSteps.map((step, idx) => {
                                     const stepId = `quickstart-step-${idx}`;
                                     return `<li>
-                                        <a href="#section-quickstart" onclick="navigateToSection('quickstart', this); scrollToQuickstartStep(${idx})" style="display:block;padding:8px 12px;color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;transition:all 0.2s;" onmouseover="this.style.color='#ffffff';this.style.paddingLeft='16px'" onmouseout="this.style.color='rgba(255,255,255,0.7)';this.style.paddingLeft='12px'">${step.title}</a>
+                                        <a href="#section-quickstart" onclick="navigateToSection('quickstart', this); scrollToQuickstartStep(${idx})" style="display:block;padding:12px 48px 12px 24px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='28px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='24px'">${step.title}</a>
                                     </li>`;
                                 }).join('')}
                             </ul>
@@ -1773,8 +1773,8 @@
                                 // Проверяем есть ли у карточки шаги (для Первичной настройки)
                                 if (card.id === 'initial_setup' && card.steps && card.steps.length > 0) {
                                     const cardTreeId = `admin-card-${card.id}-tree`;
-                                    return `<li style="margin-bottom:4px;">
-                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:8px 12px;cursor:pointer;color:rgba(255,255,255,0.8);font-size:13px;transition:all 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">
+                                    return `<li style="margin-bottom:2px;">
+                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:12px 48px 12px 12px;cursor:pointer;color:rgba(255,255,255,0.8);font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='16px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='12px'">
                                             <span class="toc-toggle-icon" id="toggle-${cardTreeId}" style="margin-right:6px;transition:all 0.3s;display:inline-block;font-size:10px;opacity:0;" onclick="event.stopPropagation(); toggleTocSection('${cardTreeId}')">▶</span>
                                             <span style="flex:1;" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this.parentElement)">${displayName}</span>
                                             <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="margin-left:auto;margin-right:4px;">↓</span>
@@ -1783,7 +1783,7 @@
                                         <ul id="${cardTreeId}" class="toc-tree-children" style="display:none;list-style:none;padding-left:20px;">
                                             ${card.steps.map((step, stepIdx) => {
                                                 return `<li>
-                                                    <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this); scrollToAdminStep('${card.id}', ${stepIdx})" style="display:block;padding:6px 10px;color:rgba(255,255,255,0.6);text-decoration:none;font-size:12px;transition:all 0.2s;" onmouseover="this.style.color='#ffffff';this.style.paddingLeft='14px'" onmouseout="this.style.color='rgba(255,255,255,0.6)';this.style.paddingLeft='10px'">${step.text}</a>
+                                                    <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this); scrollToAdminStep('${card.id}', ${stepIdx})" style="display:block;padding:12px 48px 12px 24px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='28px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='24px'">${step.text}</a>
                                                 </li>`;
                                             }).join('')}
                                         </ul>
@@ -2583,11 +2583,11 @@
                         html += '<div class="card-screenshot" style="padding:20px 25px;background-color:#fafafa;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">';
                         substep.images.forEach(img => {
                             html += `
-                                <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;" 
+                                <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;height:180px;" 
                                      onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
                                      onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'"
                                      onclick="openImageModal('${img}', '${step.title}', this)">
-                                    <img src="${img}" alt="Скриншот" style="width:100%;height:auto;display:block;">
+                                    <img src="${img}" alt="Скриншот" style="width:100%;height:100%;object-fit:cover;display:block;">
                                 </div>
                             `;
                         });
@@ -2904,11 +2904,11 @@
                             html += '<div class="card-screenshot" style="padding:20px 25px;background-color:#fafafa;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">';
                             step.images.forEach(img => {
                                 html += `
-                                    <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;" 
+                                    <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;height:180px;" 
                                          onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
                                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'"
                                          onclick="openImageModal('${img}', '${step.text}', this)">
-                                        <img src="${img}" alt="Скриншот" style="width:100%;height:auto;display:block;">
+                                        <img src="${img}" alt="Скриншот" style="width:100%;height:100%;object-fit:cover;display:block;">
                                     </div>
                                 `;
                             });
@@ -4477,27 +4477,16 @@
         
         function initCardScrollTracking() {
             const contentPane = document.querySelector('.content-pane');
-            if (!contentPane) {
-                console.log('Content pane not found!');
-                return;
-            }
-            
-            console.log('Initializing scroll tracking...');
-            console.log('Content pane scrollHeight:', contentPane.scrollHeight);
-            console.log('Content pane clientHeight:', contentPane.clientHeight);
+            if (!contentPane) return;
             
             const scrollElement = contentPane.scrollHeight === contentPane.clientHeight ? window : contentPane;
-            
-            console.log('Scroll element:', scrollElement === window ? 'window' : 'contentPane');
             
             if (scrollElement === window) {
                 window.removeEventListener('scroll', handleWindowScroll);
                 window.addEventListener('scroll', handleWindowScroll);
-                console.log('Added window scroll listener');
             } else {
                 contentPane.removeEventListener('scroll', handleContentScroll);
                 contentPane.addEventListener('scroll', handleContentScroll);
-                console.log('Added contentPane scroll listener');
             }
         }
         
@@ -4515,26 +4504,21 @@
                 if (!activeSection) return;
                 
                 const sectionId = activeSection.id.replace('section-', '');
-                console.log('Active section:', sectionId, 'ScrollTop:', scrollTop);
                 
                 // Для Быстрого старта отслеживаем карточки шагов
                 if (sectionId === 'quickstart') {
                     const stepCards = activeSection.querySelectorAll('.card');
-                    console.log('Quickstart step cards found:', stepCards.length);
                     
                     let activeStepIndex = -1;
                     
                     for (let i = 0; i < stepCards.length; i++) {
                         const cardTop = stepCards[i].offsetTop;
-                        console.log(`Step ${i}: offsetTop=${cardTop}, scrollTop=${scrollTop}`);
                         if (cardTop <= scrollTop) {
                             activeStepIndex = i;
                         } else {
                             break;
                         }
                     }
-                    
-                    console.log('Active step index:', activeStepIndex);
                     
                     if (activeStepIndex >= 0) {
                         updateActiveStepNavigation('quickstart', activeStepIndex);
