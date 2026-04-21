@@ -643,7 +643,11 @@
           "Статусы — статусы для классификации рабочего времени",
           "Виды груза — типы материалов с параметрами плотности"
         ],
-        "image": "screenshots/main-windows/handbooks.png"
+        "image": "screenshots/main-windows/handbooks.png",
+        "images": [
+          "screenshots/main-windows/handbooks.png",
+          "screenshots/main-windows/handbooks_detail.png"
+        ]
       },
       {
         "id": "operational",
@@ -658,54 +662,58 @@
           "Управление рейсами — просмотр и редактирование текущих и завершенных рейсов",
           "Наряд-задание — создание сменных заданий для техники"
         ],
-        "image": "screenshots/main-windows/operational.png"
+        "image": "screenshots/main-windows/operational.png",
+        "images": [
+          "screenshots/main-windows/operational.png",
+          "screenshots/main-windows/operational_detail.png"
+        ]
       },
       {
         "id": "reports",
         "title": "Отчеты",
         "subtitle": "Анализ производительности и отчетность",
-        "description": "Раздел для анализа производительности и формирования отчетности. В разработке.",
+        "description": "Раздел для анализа производительности и формирования отчетности.",
         "items": [
-          "⏳ Сменная статистика для оборудования (в разработке)",
-          "⏳ Эффективность техники (в разработке)",
-          "⏳ Лог действий пользователей (в разработке)",
-          "⏳ Архив сообщений (в разработке)"
+          "Сменная статистика для оборудования",
+          "Эффективность техники",
+          "Лог действий пользователей",
+          "Архив сообщений"
         ],
-        "image": "screenshots/main-windows/reports.png"
-      },
-      {
-        "id": "navigation",
-        "title": "Навигация по системе",
-        "subtitle": "Интерфейс и управление",
-        "description": "Общее описание интерфейса системы и элементов навигации.",
-        "items": [
-          "Верхняя панель — логотип, меню навигации, информация о пользователе",
-          "Левая боковая панель — фильтры, списки объектов, быстрые действия",
-          "Основная рабочая область — таблицы, графики, карты, формы"
-        ],
-        "image": "screenshots/main-windows/navigation.png"
+        "image": "screenshots/main-windows/reports.png",
+        "images": [
+          "screenshots/main-windows/reports.png",
+          "screenshots/main-windows/reports_detail.png"
+        ]
       },
       {
         "id": "diagnostics",
         "title": "Диагностика",
         "subtitle": "Мониторинг состояния системы",
-        "description": "Раздел для мониторинга технического состояния оборудования и системы. В разработке.",
+        "description": "Раздел для мониторинга технического состояния оборудования и системы.",
         "items": [
-          "⏳ Диагностика оборудования (в разработке)",
-          "⏳ Диагностика системы (в разработке)"
+          "Диагностика оборудования",
+          "Диагностика системы"
         ],
-        "image": "screenshots/main-windows/diagnostics.png"
+        "image": "screenshots/main-windows/diagnostics.png",
+        "images": [
+          "screenshots/main-windows/diagnostics.png",
+          "screenshots/main-windows/diagnostics_detail.png"
+        ]
       },
       {
         "id": "settings",
         "title": "Настройки",
         "subtitle": "Конфигурация системы",
-        "description": "Раздел для настройки параметров системы и предприятия. В разработке.",
+        "description": "Раздел для настройки параметров системы и предприятия.",
         "items": [
-          "⏳ Настройки предприятия (в разработке)",
-          "⏳ Системные настройки (в разработке)"
+          "Настройки предприятия",
+          "Системные настройки"
         ],
-        "image": "screenshots/main-windows/settings.png"
+        "image": "screenshots/main-windows/settings.png",
+        "images": [
+          "screenshots/main-windows/settings.png",
+          "screenshots/main-windows/settings_detail.png"
+        ]
       }
     ],
     "instructions": [
