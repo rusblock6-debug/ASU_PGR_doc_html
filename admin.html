@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>НАВИГАТОР.ПГР - Документация</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- Локальная версия - без внешних зависимостей -->
+    <script src="pdf-lib.min.js"></script>
     <style>
         :root {
             /* Modern Pandoc-inspired Theme */
@@ -66,7 +64,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-primary);
             line-height: 1.7;
@@ -529,7 +527,7 @@
             border: none;
             padding: 14px 28px;
             border-radius: 10px;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1785,7 +1783,7 @@
                                 if (card.steps && card.steps.length > 0) {
                                     const cardTreeId = `admin-card-${card.id}-tree`;
                                     return `<li style="margin-bottom:2px;">
-                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:12px 48px 12px 12px;cursor:pointer;color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.9)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
+                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:12px 48px 12px 12px;cursor:pointer;color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;transition:all 0.2s;border-left:3px solid transparent;" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.9)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
                                             <span class="toc-toggle-icon" id="toggle-${cardTreeId}" style="transition:all 0.3s;display:inline-block;font-size:10px;opacity:0;" onclick="event.stopPropagation(); toggleTocSection('${cardTreeId}')">▶</span>
                                             <span style="flex:1;">${displayName}</span>
                                             <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="margin-left:auto;margin-right:4px;">↓</span>
@@ -1794,7 +1792,7 @@
                                         <ul id="${cardTreeId}" class="toc-tree-children" style="display:none;list-style:none;padding-left:16px;">
                                             ${card.steps.map((step, stepIdx) => {
                                                 return `<li>
-                                                    <a href="#card-${card.id}-step-${stepIdx}" style="display:block;padding:10px 48px 10px 32px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:400;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='rgba(255,255,255,0.95)';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.65)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${step.text}</a>
+                                                    <a href="#card-${card.id}-step-${stepIdx}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}-step-${stepIdx}', this); scrollToAdminStep('${card.id}', ${stepIdx})" style="display:block;padding:10px 48px 10px 32px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:400;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='rgba(255,255,255,0.95)';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.65)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${step.text}</a>
                                                 </li>`;
                                             }).join('')}
                                         </ul>
@@ -1802,7 +1800,7 @@
                                 } else {
                                     // Обычная карточка без подпунктов - добавляем отступ слева как у треугольника
                                     return `<li>
-                                        <a href="#card-${card.id}" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
+                                        <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
                                             ${displayName}
                                             <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
                                             <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${adminSection.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
@@ -1840,7 +1838,7 @@
                                         displayName = capitalizeFirst(navTitle) || 'Без названия';
                                     }
                                     return `<li>
-                                        <a href="#card-${card.id}" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${displayName}</a>
+                                        <a href="#card-${card.id}" onclick="navigateToCard('${section.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${displayName}</a>
                                         <span class="toc-item-download" id="download-${section.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${section.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
                                         <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${section.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
                                     </li>`
@@ -1871,7 +1869,7 @@
                             ${aboutSection.cards.map(card => {
                                 const displayName = card.navTitle || card.title || 'Без названия';
                                 return `<li>
-                                    <a href="#card-${card.id}">${displayName}</a>
+                                    <a href="#card-${card.id}" onclick="navigateToCard('${aboutSection.id}', 'card-${card.id}', this)">${displayName}</a>
                                     <span class="toc-item-download" id="download-${aboutSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${aboutSection.id}', '${card.id}', this)" title="Скачать PDF">↓</span>
                                     <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${aboutSection.id}', '${card.id}')" title="Экспорт в PDF">⋮</span>
                                 </li>`
@@ -1944,7 +1942,8 @@
         }
         
         function navigateToSection(sectionId, linkElement) {
-            showSection(sectionId, true);
+            showSection(sectionId);
+            document.querySelector('.content-pane').scrollTo({ top: 0, behavior: 'auto' });
             
             // Set active state in ToC
             document.querySelectorAll('.toc-level-1 a').forEach(link => link.classList.remove('active'));
@@ -1952,41 +1951,29 @@
         }
         
         function navigateToCard(sectionId, cardId, linkElement) {
-            // Show section without scrolling to top
+            // Show correct section first
             showSection(sectionId, false);
             
+            // Force reflow to ensure section is visible
+            document.getElementById(`section-${sectionId}`).offsetHeight;
+            
+            // Now scroll to card immediately
+            requestAnimationFrame(() => {
+                const cardElement = document.getElementById(cardId);
+                if (cardElement) {
+                    scrollToCard(cardId);
+                } else {
+                    console.error('Card not found:', cardId);
+                    const contentPane = document.querySelector('.content-pane');
+                    if (contentPane) {
+                        contentPane.scrollTo({ top: 0, behavior: 'auto' });
+                    }
+                }
+            });
+
             // Set active state in ToC
             document.querySelectorAll('.toc-level-1 a, .toc-card-item').forEach(link => link.classList.remove('active'));
             if (linkElement) linkElement.classList.add('active');
-            
-            // Wait for DOM to render, then scroll to card with offset
-            setTimeout(() => {
-                const cardElement = document.getElementById(cardId);
-                if (cardElement) {
-                    const contentPane = document.querySelector('.content-pane');
-                    if (contentPane) {
-                        // Get absolute position relative to content pane
-                        let cardTop = 0;
-                        let element = cardElement;
-                        while (element && element !== contentPane) {
-                            cardTop += element.offsetTop;
-                            element = element.offsetParent;
-                        }
-                        
-                        const offset = 80; // 64px header + 16px padding
-                        contentPane.scrollTo({ top: cardTop - offset, behavior: 'auto' });
-                        
-                        // Highlight effect
-                        cardElement.style.transition = 'box-shadow 0.3s';
-                        cardElement.style.boxShadow = '0 0 15px var(--accent-color)';
-                        setTimeout(() => {
-                            cardElement.style.boxShadow = '';
-                        }, 1000);
-                    }
-                }
-            }, 50);
-            
-            return false; // Prevent default href behavior
         }
 
         function showSection(sectionId, scrollToTop = true) {
@@ -2024,7 +2011,7 @@
             });
             document.getElementById(`section-${sectionId}`).classList.add('active');
             
-            // Прокрутка наверх только если требуется
+            // Прокрутка наверх при переключении любой секции (если scrollToTop = true)
             if (scrollToTop) {
                 const contentPane = document.querySelector('.content-pane');
                 if (contentPane) {
@@ -2036,28 +2023,12 @@
         function scrollToCard(cardId) {
             const cardElement = document.getElementById(cardId);
             if (cardElement) {
-                const contentPane = document.querySelector('.content-pane');
-                if (contentPane) {
-                    // Get absolute position relative to content pane
-                    let cardTop = 0;
-                    let element = cardElement;
-                    while (element && element !== contentPane) {
-                        cardTop += element.offsetTop;
-                        element = element.offsetParent;
-                    }
-                    
-                    const offset = 80; // 64px header + 16px padding
-                    contentPane.scrollTo({ top: cardTop - offset, behavior: 'auto' });
-                    
-                    // Highlight effect
-                    cardElement.style.transition = 'box-shadow 0.3s';
-                    cardElement.style.boxShadow = '0 0 15px var(--accent-color)';
-                    setTimeout(() => {
-                        cardElement.style.boxShadow = '';
-                    }, 1000);
-                }
-            }
-        }
+                cardElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+                // Add a temporary highlight effect
+                cardElement.style.transition = 'box-shadow 0.3s';
+                cardElement.style.boxShadow = '0 0 15px var(--accent-color)';
+                setTimeout(() => {
+                    cardElement.style.boxShadow = '';
                 }, 1000);
             }
         }
@@ -5112,7 +5083,7 @@
         async function generateAdminPdfContent(card) {
             const container = document.createElement('div');
             container.className = 'pdf-content-admin';
-            container.style.cssText = 'font-family: Inter, sans-serif; padding: 20px; background: white;';
+            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: white;';
             
             let html = `
                 <div style="margin-bottom: 30px; border-bottom: 3px solid #ed8d48; padding-bottom: 15px;">
@@ -5329,7 +5300,7 @@
 
         async function generatePdfContentWithAllImages(card, sectionId) {
             const container = document.createElement('div');
-            container.style.cssText = 'font-family: Inter, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
+            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
             container.className = 'pdf-content-' + Date.now();
             
             const title = document.createElement('h1');
@@ -5488,7 +5459,7 @@
 
         async function generatePdfContent(card, sectionId) {
             const container = document.createElement('div');
-            container.style.cssText = 'font-family: Inter, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
+            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
             
             const title = document.createElement('h1');
             title.style.cssText = 'font-size: 22px; font-weight: 700; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
@@ -5947,7 +5918,7 @@
         async function generateDirectoryPdfContent(directory) {
             // Создание нового контейнера
             const container = document.createElement('div');
-            container.style.cssText = 'font-family: Inter, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
+            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
             container.className = 'pdf-content-' + Date.now(); // Уникальный класс
             
             // Заголовок
