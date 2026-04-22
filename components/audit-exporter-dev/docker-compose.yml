@@ -1,0 +1,74 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24-alpine
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: audit
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: secret
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      args:
+        CI_REGISTRY_PASSWORD: ${CI_REGISTRY_PASSWORD}
+        CI_REGISTRY_USER: ${CI_REGISTRY_USER}
+        CI_COMMIT_REF_SLUG: ${CI_COMMIT_REF_SLUG}
+
+    entrypoint: ["./scripts/migrate.sh"]
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_NATIVE_PORT: 9000
+      CLICKHOUSE_DATABASE: audit
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: secret
+      CLICKHOUSE_SECURE: "false"
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      args:
+        CI_REGISTRY_PASSWORD: ${CI_REGISTRY_PASSWORD}
+        CI_REGISTRY_USER: ${CI_REGISTRY_USER}
+        CI_COMMIT_REF_SLUG: ${CI_COMMIT_REF_SLUG}
+    ports:
+      - "8000:8000"
+    environment:
+      GRAPH__POSTGRES_HOST: 10.100.109.14
+      GRAPH__POSTGRES_PORT: 5433
+      GRAPH__POSTGRES_DATABASE: trip_service
+      GRAPH__POSTGRES_USER: postgres
+      GRAPH__POSTGRES_PASSWORD: postgres
+      ENTERPRISE__POSTGRES_HOST: 10.100.109.14
+      ENTERPRISE__POSTGRES_PORT: 5433
+      ENTERPRISE__POSTGRES_DATABASE: enterprise_db
+      ENTERPRISE__POSTGRES_USER: postgres
+      ENTERPRISE__POSTGRES_PASSWORD: postgres
+      TRIP__POSTGRES_HOST: 10.100.109.14
+      TRIP__POSTGRES_PORT: 5433
+      TRIP__POSTGRES_DATABASE: dispatching_graph
+      TRIP__POSTGRES_USER: postgres
+      TRIP__POSTGRES_PASSWORD: postgres
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_DATABASE: audit
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: secret
+      CLICKHOUSE_SECURE: "false"
+      DEPENDENCY_CONNECT_TIMEOUT_SECONDS: 5
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  clickhouse-data:

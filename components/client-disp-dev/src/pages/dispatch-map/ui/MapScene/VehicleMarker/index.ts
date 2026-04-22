@@ -1,0 +1,1 @@
+export { VehicleMarker } from './VehicleMarker';

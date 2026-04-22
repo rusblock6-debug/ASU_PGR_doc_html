@@ -1,0 +1,47 @@
+.root {
+  display: flex;
+  gap: 1px;
+  padding-left: 20px;
+
+  &.vertical {
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+    padding: 0;
+  }
+}
+
+.load_place_container,
+.vehicles_on_route_container,
+.unload_place_container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: var(--bg-widget);
+
+  .input_root {
+    grid-template-columns: 75px 1fr;
+    column-gap: 2px;
+  }
+}
+
+.load_place_container {
+  width: 212px;
+  border-radius: 8px 0 0 8px;
+
+  &.vertical {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+  }
+}
+
+.unload_place_container {
+  width: 212px;
+  border-radius: 0 8px 8px 0;
+
+  &.vertical {
+    width: 100%;
+    border-radius: 0 0 8px 8px;
+  }
+}

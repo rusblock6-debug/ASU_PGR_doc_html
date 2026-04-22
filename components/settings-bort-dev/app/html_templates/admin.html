@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings-bort Admin</title>
+
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <h1>Settings-bort</h1>
+    </section>
+
+    <section class="grid">
+      <article class="panel card" id="config_panel">
+        <div class="card-head">
+          <div>
+            <h2>Конфигурация</h2>
+          </div>
+          <span class="chip">URL</span>
+        </div>
+
+        <label class="label" for="settings_url">SETTINGS_URL</label>
+        <input class="input" id="settings_url" placeholder="http://10.100.109.14:8006">
+
+        <label class="label" for="enterprise_server_url">ENTERPRISE_SERVER_URL</label>
+        <input class="input" id="enterprise_server_url" placeholder="http://10.100.109.14:8002">
+
+        <div class="actions">
+          <button id="btn_load_config" class="btn neutral" type="button">1. Загрузить</button>
+          <button id="btn_test" class="btn success" type="button">2. Проверить</button>
+          <button id="btn_save_config" class="btn primary" type="button">3. Сохранить</button>
+        </div>
+
+        <div id="status_config" class="status"></div>
+      </article>
+
+      <article class="panel card locked" id="secrets_panel">
+        <div class="card-head">
+          <div>
+            <h2>Инициализация</h2>
+          </div>
+          <span class="chip">SECRETS</span>
+        </div>
+
+        <label class="label" for="vehicle_id">VEHICLE_ID</label>
+        <input class="input" id="vehicle_id" placeholder="4" disabled>
+
+        <div class="actions">
+          <button id="btn_load_vehicles" class="btn neutral" type="button" disabled>4. Загрузить ID</button>
+          <button id="btn_init" class="btn primary" type="button" disabled>5. Инициализировать</button>
+          <button id="btn_get_secrets" class="btn success" type="button" disabled>6. Секреты</button>
+          <button id="btn_export_env" class="btn neutral" type="button" disabled>Экспорт .env</button>
+        </div>
+
+        <div id="status_init" class="status">Сначала заполните и сохраните URL-конфигурацию.</div>
+      </article>
+
+      <article class="panel card full">
+        <div class="card-head compact">
+          <h2>Ответ API</h2>
+          <div class="actions inline">
+            <button id="btn_copy_output" class="btn neutral slim" type="button">Копировать JSON</button>
+            <button id="btn_clear_output" class="btn neutral slim" type="button">Очистить</button>
+          </div>
+        </div>
+        <textarea class="output" id="output" spellcheck="false"></textarea>
+        <div id="status_output" class="status"></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const ids = [
+      "settings_url",
+      "enterprise_server_url",
+      "vehicle_id",
+      "output",
+      "status_config",
+      "status_init",
+      "status_output"
+    ];
+
+    const el = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
+    const secretsControls = [
+      "vehicle_id",
+      "btn_load_vehicles",
+      "btn_init",
+      "btn_get_secrets",
+      "btn_export_env"
+    ].map((id) => document.getElementById(id));
+    const secretsPanel = document.getElementById("secrets_panel");
+
+    function status(target, message, ok = true) {
+      target.textContent = message;
+      target.className = "status " + (ok ? "ok" : "err");
+    }
+
+    async function parseError(response) {
+      const text = (await response.text()) || `HTTP ${response.status}`;
+      try {
+        const data = JSON.parse(text);
+        if (typeof data?.detail === "string" && data.detail.trim()) {
+          return data.detail;
+        }
+      } catch (_) {
+        // ignore
+      }
+      return text;
+    }
+
+    function setOutput(data) {
+      const sensitiveKeyPattern = /(?:^|[_-])(password|passwd|pwd|secret|token|private|access|refresh|key)(?:$|[_-])/i;
+
+      function isSensitiveKey(key) {
+        return sensitiveKeyPattern.test(String(key || ""));
+      }
+
+      function maskSensitiveData(value) {
+        if (Array.isArray(value)) {
+          return value.map((item) => maskSensitiveData(item));
+        }
+        if (value && typeof value === "object") {
+          const masked = {};
+          for (const [key, item] of Object.entries(value)) {
+            if (isSensitiveKey(key)) {
+              masked[key] = "[hidden]";
+              continue;
+            }
+            masked[key] = maskSensitiveData(item);
+          }
+          return masked;
+        }
+        return value;
+      }
+
+      if (typeof data === "string") {
+        try {
+          const parsed = JSON.parse(data);
+          el.output.value = JSON.stringify(maskSensitiveData(parsed), null, 2);
+        } catch (_) {
+          el.output.value = data;
+        }
+        return;
+      }
+      el.output.value = JSON.stringify(maskSensitiveData(data), null, 2);
+    }
+
+    function setSecretsEnabled(enabled, message = "") {
+      for (const control of secretsControls) {
+        control.disabled = !enabled;
+      }
+      secretsPanel.classList.toggle("locked", !enabled);
+      if (message) {
+        status(el.status_init, message, enabled);
+      }
+    }
+
+    function validateConfig() {
+      const settingsUrl = el.settings_url.value.trim();
+      const enterpriseUrl = el.enterprise_server_url.value.trim();
+      if (!settingsUrl || !enterpriseUrl) {
+        throw new Error("Заполните SETTINGS_URL и ENTERPRISE_SERVER_URL");
+      }
+    }
+
+    async function runAction(buttonId, handler, onError) {
+      const button = document.getElementById(buttonId);
+      const original = button.textContent;
+      button.disabled = true;
+      button.classList.add("loading");
+      try {
+        await handler();
+      } catch (error) {
+        onError(error);
+      } finally {
+        button.disabled = false;
+        button.classList.remove("loading");
+        button.textContent = original;
+      }
+    }
+
+    function payload() {
+      return {
+        settings_url: el.settings_url.value.trim(),
+        enterprise_server_url: el.enterprise_server_url.value.trim()
+      };
+    }
+
+    function fillConfig(data) {
+      el.settings_url.value = data.settings_url || "";
+      el.enterprise_server_url.value = data.enterprise_server_url || "";
+    }
+
+    async function loadConfig() {
+      const response = await fetch("/api/admin/config");
+      if (!response.ok) throw new Error(await parseError(response));
+      const data = await response.json();
+      fillConfig(data);
+      setOutput(data);
+      status(el.status_config, "Конфигурация загружена", true);
+
+      const hasSavedConfig = Boolean(
+        (data.settings_url || "").trim() &&
+        (data.enterprise_server_url || "").trim()
+      );
+      if (hasSavedConfig) {
+        setSecretsEnabled(true, "Блок секретов доступен.");
+      } else {
+        setSecretsEnabled(false, "Сначала заполните и сохраните URL-конфигурацию.");
+      }
+    }
+
+    async function saveConfig() {
+      validateConfig();
+      const response = await fetch("/api/admin/config", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload())
+      });
+      if (!response.ok) throw new Error(await parseError(response));
+      const data = await response.json();
+      fillConfig(data);
+      setOutput(data);
+      status(el.status_config, "Конфигурация сохранена", true);
+      setSecretsEnabled(true, "Блок секретов разблокирован. Можно инициализировать.");
+    }
+
+    async function testConnections() {
+      validateConfig();
+      const response = await fetch("/api/admin/test-connections", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload())
+      });
+      if (!response.ok) throw new Error(await parseError(response));
+      const data = await response.json();
+      setOutput(data);
+
+      const ok = data.settings_server?.ok && data.enterprise_server?.ok;
+      if (ok) {
+        status(el.status_config, "Оба соединения доступны", true);
+      } else {
+        const failed = [];
+        if (!data.settings_server?.ok) failed.push("settings-server");
+        if (!data.enterprise_server?.ok) failed.push("enterprise-server");
+        status(el.status_config, `Ошибка подключения: ${failed.join(", ")}`, false);
+      }
+    }
+
+    async function initSecrets() {
+      const vehicleId = el.vehicle_id.value.trim();
+      if (!vehicleId) {
+        status(el.status_init, "Укажите ID борта", false);
+        return;
+      }
+
+      const response = await fetch(`/api/admin/init/${encodeURIComponent(vehicleId)}`, { method: "POST" });
+      if (!response.ok) throw new Error(await parseError(response));
+      const initData = await response.json();
+      let finalData = initData;
+
+      if (!initData.export?.output_path) {
+        const exportResponse = await fetch("/api/admin/export-env", { method: "POST" });
+        if (!exportResponse.ok) throw new Error(await parseError(exportResponse));
+        const exportData = await exportResponse.json();
+        finalData = { ...initData, export: exportData };
+      }
+
+      setOutput(finalData);
+      const exportedPath = finalData.export?.output_path ? `: ${finalData.export.output_path}` : "";
+      status(el.status_init, `.env сохранен автоматически${exportedPath}`, true);
+    }
+
+    async function getSecrets() {
+      const response = await fetch("/api/admin/secrets");
+      if (!response.ok) throw new Error(await parseError(response));
+      const data = await response.json();
+      setOutput(data);
+      status(el.status_init, `Секретов загружено: ${Object.keys(data || {}).length}`, true);
+    }
+
+    async function loadVehicles() {
+      const response = await fetch("/api/admin/vehicles");
+      if (!response.ok) throw new Error(await parseError(response));
+      const data = await response.json();
+      const list = data.vehicle_ids || [];
+      if (list.length > 0 && !el.vehicle_id.value.trim()) {
+        el.vehicle_id.value = list[0];
+      }
+      setOutput(data);
+      status(el.status_init, `Найдено ID бортов: ${list.length}`, true);
+    }
+
+    async function exportEnv() {
+      const response = await fetch("/api/admin/export-env", { method: "POST" });
+      if (!response.ok) throw new Error(await parseError(response));
+      const data = await response.json();
+      setOutput(data);
+      status(el.status_init, `Экспортировано ${data.secrets_count} переменных в ${data.output_path}`, true);
+    }
+
+    async function copyOutput() {
+      const text = el.output.value || "";
+      if (!text.trim()) {
+        status(el.status_output, "Вывод пустой", false);
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      status(el.status_output, "JSON скопирован в буфер обмена", true);
+    }
+
+    function clearOutput() {
+      el.output.value = "";
+      status(el.status_output, "Вывод очищен", true);
+    }
+
+    document.getElementById("btn_load_config").addEventListener("click", () => runAction("btn_load_config", loadConfig, (e) => status(el.status_config, e.message, false)));
+    document.getElementById("btn_save_config").addEventListener("click", () => runAction("btn_save_config", saveConfig, (e) => status(el.status_config, e.message, false)));
+    document.getElementById("btn_test").addEventListener("click", () => runAction("btn_test", testConnections, (e) => status(el.status_config, e.message, false)));
+    document.getElementById("btn_init").addEventListener("click", () => runAction("btn_init", initSecrets, (e) => status(el.status_init, e.message, false)));
+    document.getElementById("btn_export_env").addEventListener("click", () => runAction("btn_export_env", exportEnv, (e) => status(el.status_init, e.message, false)));
+    document.getElementById("btn_get_secrets").addEventListener("click", () => runAction("btn_get_secrets", getSecrets, (e) => status(el.status_init, e.message, false)));
+    document.getElementById("btn_load_vehicles").addEventListener("click", () => runAction("btn_load_vehicles", loadVehicles, (e) => status(el.status_init, e.message, false)));
+    document.getElementById("btn_copy_output").addEventListener("click", () => runAction("btn_copy_output", copyOutput, (e) => status(el.status_output, e.message, false)));
+    document.getElementById("btn_clear_output").addEventListener("click", clearOutput);
+
+    loadConfig().catch((e) => status(el.status_config, e.message, false));
+  </script>
+</body>
+</html>

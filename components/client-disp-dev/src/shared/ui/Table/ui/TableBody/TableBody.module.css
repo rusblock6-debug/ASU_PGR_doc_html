@@ -1,0 +1,27 @@
+.tbody {
+  position: relative;
+  display: grid;
+}
+
+.padding_row {
+  display: flex;
+}
+
+.virtual_row {
+  position: absolute;
+  display: flex;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.loading_row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+}
+
+.loading_cell {
+  width: 100%;
+}

@@ -1,0 +1,59 @@
+.vehicles_on_route_container {
+  position: relative;
+  background: var(--bg-widget);
+
+  &.horizontal {
+    flex: 1;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 99%;
+      height: 1px;
+      content: '';
+      background: var(--text-secondary-2);
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  &.vertical {
+    flex: 1;
+    border-top: 1px solid var(--bg-widget-hover);
+    border-bottom: 1px solid var(--bg-widget-hover);
+  }
+
+  &.drop_hovered {
+    background: var(--bg-widget-hover);
+  }
+}
+
+.vehicle_marker_container {
+  position: absolute;
+  top: 50%;
+  width: fit-content;
+  transform: translate(-50%, -46%);
+}
+
+.vehicles_vertical_root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 8px;
+}
+
+.vehicles_vertical_container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.empty_vehicles {
+    height: 100%;
+  }
+
+  &.loaded_vehicles {
+    justify-content: end;
+    height: 100%;
+  }
+}

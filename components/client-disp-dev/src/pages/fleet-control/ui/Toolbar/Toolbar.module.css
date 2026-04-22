@@ -1,0 +1,30 @@
+.root {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-right: 12px;
+  overflow: hidden;
+}
+
+.actions_container {
+  display: flex;
+  gap: 16px;
+}
+
+.mode_switcher_container {
+  display: flex;
+  flex-wrap: nowrap;
+  width: fit-content;
+  background: var(--bg-widget);
+  border-radius: 6px;
+
+  &.right {
+    margin-left: auto;
+  }
+}
+
+.horizontal_mode_icon {
+  transform: rotate(90deg);
+}

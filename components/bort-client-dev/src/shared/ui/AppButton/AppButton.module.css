@@ -1,0 +1,156 @@
+.button {
+  /* Убираем overlay затемнения Mantine */
+  &::before {
+    display: none;
+  }
+
+  /* По дефолту стили для Primary кнопки */
+  --btn-bg: var(--base-orange);
+  --btn-bg-hover: var(--primary);
+  --btn-bg-active: var(--orem-red-600);
+  --btn-color: var(--base-white);
+  --btn-color-hover: var(--btn-color);
+  --btn-color-active: var(--btn-color);
+  --btn-disabled-bg: var(--orem-netural-20);
+  --btn-disabled-color: var(--text-primary);
+  --btn-disabled-border-color: transparent;
+  --btn-loading-bg: var(--orem-red-600);
+  --btn-loader-color: var(--base-white);
+  --btn-border-width: 1px;
+  --btn-border-color: transparent;
+  --btn-outline-color: var(--color-outline-primary);
+
+  /* Мапим на публичные переменные Mantine Button */
+  --button-bg: var(--btn-bg);
+  --button-hover: var(--btn-bg-hover);
+  --button-color: var(--btn-color);
+  --button-hover-color: var(--btn-color-hover);
+  --button-bd: var(--btn-border-width) solid var(--btn-border-color);
+  --button-radius: var(--btn-radius);
+  --button-height: var(--btn-height);
+  --button-padding-x: var(--btn-padding-x);
+  --button-fz: var(--btn-font-size);
+  --button-section-spacing: var(--btn-gap);
+  --loader-color: var(--btn-loader-color);
+
+  /* Общие состояния для кнопки */
+
+  /* Disabled состояние — исключаем loading, т.к. Mantine добавляет disabled при loading */
+  &:disabled:not([data-loading]),
+  &[data-disabled]:not([data-loading]) {
+    color: var(--btn-disabled-color);
+    background: var(--btn-disabled-bg);
+    border: var(--btn-border-width) solid var(--btn-disabled-border-color);
+  }
+
+  /* Loading состояние */
+  &[data-loading] {
+    --button-color: var(--btn-loader-color);
+
+    background: var(--btn-loading-bg);
+  }
+
+  /* Нажатие (:active) или программное активное состояние (data-active).
+     Не применяется к disabled и loading кнопкам */
+  &:active:not(:disabled, [data-disabled], [data-loading='true']),
+  &[data-active='true']:not(:disabled, [data-disabled], [data-loading='true']) {
+    --button-bg: var(--btn-bg-active);
+    --button-hover: var(--btn-bg-active);
+    --button-color: var(--btn-color-active);
+    --button-hover-color: var(--btn-color-active);
+  }
+
+  /* Фокус с клавиатуры */
+  &:focus-visible:not([data-loading='true']) {
+    --button-bd: var(--btn-border-width) solid transparent;
+
+    box-shadow: 0 0 0 2px var(--btn-outline-color);
+  }
+
+  /* Кнопка только с иконкой */
+  &.button_only_icon {
+    --button-padding-x: var(--btn-icon-padding);
+  }
+
+  &.secondary {
+    --btn-bg: transparent;
+    --btn-bg-hover: var(--orem-orange-900);
+    --btn-bg-active: var(--orem-orange-800);
+    --btn-color: var(--base-orange);
+    --btn-border-color: var(--base-orange);
+    --btn-disabled-bg: var(--orem-netural-01);
+    --btn-disabled-color: var(--orem-netural-20);
+    --btn-loading-bg: var(--orem-orange-800);
+    --btn-loader-color: var(--primary);
+  }
+
+  &.clear {
+    --btn-bg: transparent;
+    --btn-bg-hover: var(--orem-bw-000-25);
+    --btn-color-hover: var(--base-white);
+    --btn-bg-active: transparent;
+    --btn-color-active: var(--base-orange);
+    --btn-color: var(--text-primary);
+    --btn-border-color: transparent;
+    --btn-disabled-bg: transparent;
+    --btn-disabled-color: var(--text-secondary);
+    --btn-loading-bg: transparent;
+    --btn-loader-color: var(--primary);
+  }
+
+  &.size_extra_large {
+    --btn-padding-x: 40px;
+    --btn-height: 80px;
+    --btn-gap: 24px;
+    --btn-radius: 16px;
+    --btn-icon-padding: 20px;
+    --btn-font-size: var(--font-size-xl);
+    --btn-line-height: var(--line-height-normal);
+  }
+
+  &.size_large {
+    --btn-padding-x: 24px;
+    --btn-height: 48px;
+    --btn-gap: 16px;
+    --btn-radius: 12px;
+    --btn-icon-padding: 12px;
+    --btn-font-size: var(--font-size-lg);
+    --btn-line-height: var(--line-height-normal);
+  }
+
+  &.size_medium {
+    --btn-padding-x: 20px;
+    --btn-height: 40px;
+    --btn-gap: 12px;
+    --btn-radius: 8px;
+    --btn-icon-padding: 10px;
+    --btn-font-size: var(--font-size-md);
+    --btn-line-height: var(--line-height-relaxed);
+  }
+
+  &.size_small {
+    --btn-padding-x: 16px;
+    --btn-height: 32px;
+    --btn-gap: 8px;
+    --btn-radius: 8px;
+    --btn-icon-padding: 8px;
+    --btn-font-size: var(--font-size-sm);
+    --btn-line-height: var(--line-height-loose);
+  }
+
+  &.size_extra_small {
+    --btn-padding-x: 12px;
+    --btn-height: 24px;
+    --btn-gap: 6px;
+    --btn-radius: 6px;
+    --btn-icon-padding: 5px;
+    --btn-font-size: var(--font-size-xs);
+    --btn-line-height: var(--line-height-normal);
+  }
+
+  & .label {
+    font-size: var(--btn-font-size);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--btn-line-height);
+  }
+}

@@ -1,0 +1,27 @@
+---
+- name: Check whether GitLab Runner repository is already configured
+  ansible.builtin.stat:
+    path: "{{ gitlab_runner_repo_file }}"
+  register: gitlab_runner_repo_file_stat
+
+- name: Download GitLab Runner repository installer script
+  ansible.builtin.get_url:
+    url: "{{ gitlab_runner_repo_script_url }}"
+    dest: "{{ gitlab_runner_repo_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  when: not gitlab_runner_repo_file_stat.stat.exists
+
+- name: Configure GitLab Runner APT repository
+  ansible.builtin.command: "bash {{ gitlab_runner_repo_script_path }}"
+  when: not gitlab_runner_repo_file_stat.stat.exists
+  register: gitlab_runner_repo_setup
+  changed_when: true
+
+- name: Install GitLab Runner package
+  ansible.builtin.apt:
+    update_cache: true
+    name: "{{ gitlab_runner_package }}"
+    state: present
+

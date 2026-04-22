@@ -1,0 +1,34 @@
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 365px;
+  overflow: hidden;
+  background: var(--orem-bw-950);
+  border-radius: 8px;
+
+  &.close {
+    gap: 12px;
+    width: 40px;
+    padding: 12px;
+  }
+}
+
+.button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.icon {
+  transform: rotate(-90deg);
+}
+
+.divider {
+  height: 2px;
+  background: var(--bg-widget);
+
+  &.close {
+    height: 1px;
+  }
+}

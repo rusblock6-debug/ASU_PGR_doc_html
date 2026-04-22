@@ -1427,6 +1427,14 @@
                         </div>
                     </div>
 
+                    <!-- Section 0.5: Quick Start Bort -->
+                    <div id="section-quickstart_bort" class="content-section">
+                        <h2 class="section-group-title">Быстрый старт (Борт)</h2>
+                        <div id="quickstartBortContent">
+                            <div class="loading">Загрузка...</div>
+                        </div>
+                    </div>
+
                     <!-- Section 1: Descriptive -->
                     <div id="section-descriptive" class="content-section">
                         <h2 class="section-group-title">Обзор</h2>
@@ -1769,6 +1777,29 @@
                 `;
             }
 
+            // Добавляем Быстрый старт (Борт) вторым с сворачиваемым деревом
+            if (appData.cards.quickstart_bort) {
+                const quickstartBortSteps = appData.cards.quickstart_bort.steps || [];
+                tocHTML += `
+                    <div class="toc-level-1">
+                        <li style="list-style:none;">
+                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 12px;cursor:pointer;color:#ffffff;font-weight:600;">
+                                <span class="toc-toggle-icon" id="toggle-quickstart-bort-tree" style="transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-bort-tree')">▶</span>
+                                <span style="flex:1;" onclick="navigateToSection('quickstart_bort', this.parentElement)">Быстрый старт (Борт)</span>
+                            </div>
+                            <ul id="quickstart-bort-tree" class="toc-tree-children" style="display:none;list-style:none;padding-left:16px;">
+                                ${quickstartBortSteps.map((step, idx) => {
+                                    const stepId = `quickstart-bort-step-${idx}`;
+                                    return `<li>
+                                        <a href="#section-quickstart_bort" onclick="navigateToSection('quickstart_bort', this); scrollToQuickstartBortStep(${idx})" style="display:block;padding:12px 48px 12px 32px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='36px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='32px'">${step.title}</a>
+                                    </li>`;
+                                }).join('')}
+                            </ul>
+                        </li>
+                    </div>
+                `;
+            }
+
             // Добавляем "Администрирование" сразу после Быстрого старта (всегда раскрыто)
             const adminSection = { id: 'admin', title: 'Администрирование', cards: appData.cards.admin_instructions || [] };
             if (adminSection.cards.length > 0) {
@@ -1913,6 +1944,22 @@
         function scrollToQuickstartStep(stepIndex) {
             setTimeout(() => {
                 const stepCards = document.querySelectorAll('#quickstartContent .card');
+                if (stepCards[stepIndex]) {
+                    stepCards[stepIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
+                    // Добавляем временную подсветку
+                    stepCards[stepIndex].style.transition = 'box-shadow 0.3s';
+                    stepCards[stepIndex].style.boxShadow = '0 0 15px var(--accent-color)';
+                    setTimeout(() => {
+                        stepCards[stepIndex].style.boxShadow = '';
+                    }, 1000);
+                }
+            }, 100);
+        }
+        
+        // Функция для прокрутки к конкретному шагу в Быстром старте (Борт)
+        function scrollToQuickstartBortStep(stepIndex) {
+            setTimeout(() => {
+                const stepCards = document.querySelectorAll('#quickstartBortContent .card');
                 if (stepCards[stepIndex]) {
                     stepCards[stepIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
                     // Добавляем временную подсветку
@@ -2504,6 +2551,7 @@
         // Рендер всех секций
         function renderAll() {
             renderQuickstart();
+            renderQuickstartBort();
             renderDescriptive();
             renderInstructions();
             renderAdminInstructions();
@@ -2521,6 +2569,125 @@
             
             let html = '';
             (quickstart.steps || []).forEach((step, stepIndex) => {
+                html += `
+                    <div class="card" style="margin-bottom:30px;">
+                        <div class="card-head">
+                            <div class="card-path">${step.title}</div>
+                        </div>
+                `;
+                
+                (step.substeps || []).forEach((substep, subIndex) => {
+                    html += `<div class="card-description"><div style="margin-bottom:20px;"><p style="margin-bottom:8px;"><strong>${substep.text}</strong></p>`;
+                    
+                    // Отображаем детали
+                    if (substep.details && substep.details.length > 0) {
+                        html += '<div style="padding-left:0;margin-top:8px;">';
+                        
+                        let warningBlock = [];
+                        let inWarningBlock = false;
+                        
+                        substep.details.forEach((detail, index) => {
+                            // Пропускаем пустые строки
+                            if (!detail.trim()) {
+                                // Закрываем блок предупреждения если он открыт
+                                if (inWarningBlock && warningBlock.length > 0) {
+                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                    warningBlock.forEach(line => {
+                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                    });
+                                    html += '</div>';
+                                    warningBlock = [];
+                                    inWarningBlock = false;
+                                }
+                                html += '<div style="height:8px;"></div>';
+                                return;
+                            }
+                            
+                            // Если строка начинается с ⚠️
+                            if (detail.trim().startsWith('⚠️')) {
+                                const text = detail.trim().substring(2).trim();
+                                if (!inWarningBlock) {
+                                    inWarningBlock = true;
+                                }
+                                warningBlock.push(text);
+                            } else {
+                                // Закрываем блок предупреждения если он открыт
+                                if (inWarningBlock && warningBlock.length > 0) {
+                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                    warningBlock.forEach(line => {
+                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                    });
+                                    html += '</div>';
+                                    warningBlock = [];
+                                    inWarningBlock = false;
+                                }
+                                
+                                // Если строка начинается с ▸ - рендерим с оранжевым маркером
+                                if (detail.trim().startsWith('▸')) {
+                                    const text = detail.trim().substring(1).trim();
+                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                }
+                                // Если строка начинается с тире - рендерим с оранжевым маркером
+                                else if (detail.trim().startsWith('-')) {
+                                    const text = detail.trim().substring(1).trim();
+                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                } else {
+                                    // Обычный текст без маркера
+                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                }
+                            }
+                            
+                            // Закрываем блок в конце если он остался открытым
+                            if (index === substep.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
+                                html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                warningBlock.forEach(line => {
+                                    html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                });
+                                html += '</div>';
+                            }
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                    
+                    // Отображаем скриншоты сеткой
+                    if (substep.images && substep.images.length > 0) {
+                        html += '<div class="card-screenshot" style="padding:20px 25px;background-color:#fafafa;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">';
+                        substep.images.forEach(img => {
+                            html += `
+                                <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;height:180px;" 
+                                     onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
+                                     onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'"
+                                     onclick="openImageModal('${img}', '${step.title}', this)">
+                                    <img src="${img}" alt="Скриншот" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </div>
+                            `;
+                        });
+                        html += '</div></div>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += `
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function renderQuickstartBort() {
+            const container = document.getElementById('quickstartBortContent');
+            const quickstartBort = appData.cards.quickstart_bort;
+            if (!quickstartBort) {
+                container.innerHTML = '<p style="color:var(--text-light);">Нет данных</p>';
+                return;
+            }
+            
+            let html = '';
+            (quickstartBort.steps || []).forEach((step, stepIndex) => {
                 html += `
                     <div class="card" style="margin-bottom:30px;">
                         <div class="card-head">

@@ -1,0 +1,25 @@
+.error {
+  display: flex;
+  gap: 8px;
+  color: var(--orem-red-400);
+
+  &.xs {
+    gap: 2px;
+  }
+}
+
+.text {
+  padding: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+
+  &.xs {
+    padding-top: 2px;
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+}

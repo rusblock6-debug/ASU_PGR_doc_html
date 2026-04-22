@@ -1,0 +1,17 @@
+# Dispa bort
+
+dispa-backend git@git.dmi-msk.ru:retek.pgr/dispatching/dispa-backend.git
+graph-service-frontend git@git.dmi-msk.ru:retek.pgr/dispatching/graph-service-frontend.git
+graph-service-backend git@git.dmi-msk.ru:retek.pgr/dispatching/graph-service-backend.git
+enterprise-service git@git.dmi-msk.ru:retek.pgr/dispatching/enterprise-service.git
+auth-service-backend git@git.dmi-msk.ru:retek.pgr/dispatching/auth-service-backend.git
+sync-service git@git.dmi-msk.ru:retek.pgr/dispatching/sync-service.git
+dump-service git@git.dmi-msk.ru:retek.pgr/dispatching/dump-service.git
+cdc-bort-applier git@git.dmi-msk.ru:retek.pgr/dispatching/cdc-bort-applier.git
+settings-bort git@git.dmi-msk.ru:retek.pgr/dispatching/settings-bort.git
+wifi-event-dispatcher git@git.dmi-msk.ru:retek.pgr/dispatching/wifi-event-dispatcher.git
+ekuiper git@git.dmi-msk.ru:retek.pgr/dispatching/infra-services/ekuiper.git
+postgres-disp git@git.dmi-msk.ru:retek.pgr/dispatching/infra-services/postgres-disp.git
+rabbitmq-bort-disp git@git.dmi-msk.ru:retek.pgr/dispatching/infra-services/rabbitmq-bort-disp.git
+nanomq-bort-disp git@git.dmi-msk.ru:retek.pgr/dispatching/infra-services/nanomq-bort-disp.git
+bort-client git@git.dmi-msk.ru:retek.pgr/dispatching/bort-client.git

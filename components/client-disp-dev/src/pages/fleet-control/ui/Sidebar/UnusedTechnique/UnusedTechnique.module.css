@@ -1,0 +1,44 @@
+.root {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--orem-bw-950);
+
+  &.close {
+    padding: 0;
+  }
+}
+
+.header {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  &.close {
+    gap: 12px;
+  }
+}
+
+.grey_icon {
+  color: var(--text-primary);
+}
+
+.title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-loose);
+}
+
+.count {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary-2);
+}

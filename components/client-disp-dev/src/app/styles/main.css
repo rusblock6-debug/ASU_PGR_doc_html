@@ -1,0 +1,37 @@
+/* Порядок слоёв: reset < mantine < app (app имеет наивысший приоритет) */
+@layer reset, mantine, app;
+
+@import url('./reset.css') layer(reset);
+@import url('./variables.css');
+@import url('./utils.css');
+@import url('./fonts.css');
+@import url('./table.css');
+@import url('./loader.css');
+@import url('./calendar.css');
+@import url('@mantine/core/styles.css') layer(mantine);
+@import url('@mantine/dates/styles.css') layer(mantine);
+@import url('@mantine/notifications/styles.css') layer(mantine);
+@import url('react-grid-layout/css/styles.css');
+@import url('react-resizable/css/styles.css');
+@import url('vis-timeline/styles/vis-timeline-graph2d.css');
+@import url('./vis-timeline.css');
+
+html,
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--base-white);
+}
+
+/* stylelint-disable-next-line selector-max-id */
+#root {
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+
+.workspace-page {
+  /* Блокируем горизонтальный скрол, чтобы нельзя было перенести объект за рамки экрана на странице рабочего стола */
+  overflow: hidden auto;
+}

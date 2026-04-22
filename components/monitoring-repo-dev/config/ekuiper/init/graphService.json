@@ -1,0 +1,33 @@
+{
+  "about": {
+    "author": {
+      "name": "Mining Dispatch System",
+      "email": "dispatch@mining.local",
+      "company": "Mining Operations",
+      "website": "https://mining.local"
+    },
+    "helpUrl": {
+      "en_US": "https://mining.local/docs/graph-service",
+      "ru_RU": "https://mining.local/docs/graph-service"
+    },
+    "description": {
+      "en_US": "Graph service tag detection API - finds nearest tag by GPS coordinates",
+      "ru_RU": "API graph-service для определения меток по GPS координатам"
+    }
+  },
+  "interfaces": {
+    "graphService": {
+      "address": "http://dispatching-graph-backend:5000",
+      "protocol": "rest",
+      "options": {
+        "insecureSkipVerify": true,
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        }
+      },
+      "schemaless": true
+    }
+  }
+}
+

@@ -1,0 +1,1 @@
+export { PageWidget } from './PageWidget';

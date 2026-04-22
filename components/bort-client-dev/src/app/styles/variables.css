@@ -1,0 +1,164 @@
+:root {
+  /* ========== ТИПОГРАФИКА ========== */
+  --font-sans: 'Roboto Mono', monospace;
+  --font-family-murs-gothic: 'Murs Gothic', sans-serif;
+
+  /* Базовые значения line-height */
+  --line-height-tight: 118%;
+  --line-height-normal: 120%;
+  --line-height-relaxed: 128%;
+  --line-height-loose: 130%;
+
+  /* Размеры шрифтов */
+  --font-size-5xl: 64px;
+  --font-size-4xl: 48px;
+  --font-size-3xl: 40px;
+  --font-size-3-5xl: 38px;
+  --font-size-2xl: 32px;
+  --font-size-xl: 28px;
+  --font-size-lg: 20px;
+  --font-size-2md: 19px;
+  --font-size-md: 14px;
+  --font-size-sm: 13px;
+  --font-size-xs: 11px;
+  --font-size-2xs: 10px;
+
+  /* Толщина шрифтов */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extra-bold: 800;
+
+  /* ========== BREAKPOINTS ========== */
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* ========== ЦВЕТА ========== */
+  --base-orange: #d15c29;
+  --base-orange-2: #fe6f31;
+  --base-black: #030303;
+  --base-white: #fefcf9;
+  --base-red: #ee3036;
+  --bg-page: #141414;
+  --bg-widget: #272727;
+  --bg-widget-hover: #3b3b3b;
+  --bg-widget-hover-2: #525252;
+  --text-primary: #aeaeae;
+  --text-secondary: #585858;
+  --text-secondary-2: #7a7a7a;
+  --text-placeholder: #858585;
+  --lines-stokes-card: #717681;
+  --lines-stokes-scale: #707070;
+  --lines-stokes-fa-connector: #565656;
+  --gradient-card-default: linear-gradient(#ff8940, #ff6f31);
+  --line-fa-connector: #565656;
+  --orem-netural-01: #383838;
+  --orem-netural-20: #4d4d4d;
+  --orem-netural-30: #666666;
+  --orem-netural-50: #d9d9d9;
+  --orem-orange-900: #5c3000;
+  --orem-orange-800: #733c00;
+  --orem-orange-500: #fb8200;
+  --orem-orange-300: #fcaf5c;
+  --orem-orange-200: #fdc68b;
+  --orem-orange-100: #fddcb9;
+  --orem-violet-400: #7985cb;
+  --orem-red-900: #43130f;
+  --orem-red-800: #6f1f19;
+  --orem-red-700: #9c2b23;
+  --orem-red-600: #c8372d;
+  --orem-red-500: #f44336;
+  --orem-red-400: #f6655a;
+  --orem-red-300: #f8877f;
+  --orem-ping-500: #ec407a;
+  --orem-bw-800: #303030;
+  --orem-bw-700: #4f4f4f;
+  --orem-bw-600: #5c5c60;
+  --orem-bw-500: #69696d;
+  --orem-bw-400: #737377;
+  --orem-bw-950: #1a1a1a;
+  --orem-bw-000-50: rgb(255 255 255 / 40%);
+  --orem-bw-000-25: rgb(255 255 255 / 12%);
+  --status-red: #ee3036;
+  --status-green: #2ba650;
+  --status-yellow: #ffa500;
+  --status-blue: #1a85fa;
+  --status-white: #fefcf9;
+  --status-grey: #949494;
+  --bg-table-header: #121212;
+  --bg-table-row: #000000;
+  --bg-table-row-active: #121212;
+  --bg-error-darker: #310d0b;
+  --status-warning-light: #fbd5ad;
+  --status-warning: #f6af64;
+  --status-warning-dark: #f69329;
+  --status-info-light: #bdd7ef;
+  --status-muted: #b5a7d3;
+  --status-success-light: #cfe8b9;
+
+  /* ========== OUTLINE обводка при focus ========== */
+  --outline-width: 2px;
+  --outline-style: solid;
+  --outline-offset: 2px;
+  --color-outline-primary: var(--text-secondary);
+  --outline-primary: var(--outline-width) var(--outline-style) var(--color-outline-primary);
+
+  /* ========== СЕМАНТИЧЕСКИЕ ПЕРЕМЕННЫЕ ========== */
+  --primary: var(--base-orange-2);
+  --primary-foreground: var(--base-white);
+  --accent: var(--bg-widget-hover);
+
+  /* ========== KIOSK LAYOUT ========== */
+
+  /* Не завязаны на Mantine: при невалидном calc() весь padding отбрасывается и остаётся * { padding: 0 }.
+   * Горизонталь: ~1–1.5% ширины при 1024px — без «толстых» полей. */
+  --kiosk-safe-area-inline: clamp(8px, 1.15vw, 12px);
+  --kiosk-safe-area-block: clamp(8px, 1.25vh, 12px);
+  --kiosk-content-gap: 12px;
+
+  /* Квадратные кнопки с иконкой в карточках главного экрана (макет: маленькая иконка внутри) */
+  --kiosk-card-icon-button-size: 80px;
+  --kiosk-card-icon-size: 42px;
+
+  /* Нижняя полоса: крупная зона нажатия, иконка меньше (vmin — от эталона 1024×600) */
+  --kiosk-bottom-nav-icon-size: clamp(36px, 6.4vmin, 48px);
+
+  /* Толщина штриха в user units SVG 24×24; для гамбургера отдельно — три линии визуально «толще» */
+  --kiosk-bottom-nav-icon-stroke: 1.45;
+  --kiosk-bottom-nav-icon-stroke-menu: 1.2;
+  --kiosk-aside-left-width: 0px;
+  --kiosk-aside-right-width: 0px;
+
+  /* Полоса с «Назад» и «Подтвердить» (ширина задаётся в KioskLayout) */
+  --kiosk-aside-left-bg: #121212;
+  --kiosk-aside-right-bg: #121212;
+  --kiosk-header-bg: #000000;
+
+  /*
+   * Главный экран (эталон 1024×600): две колонки и разная высота верх/низ.
+   * Ширина: ~33% / ~67%. Высота зоны контента (под шапкой): слева 75%/25%, справа 85%/15%.
+   */
+  --kiosk-main-gauge-max: min(100%, 40vmin);
+
+  /* ========== Z-INDEX СИСТЕМА ========== */
+  --z-index-default: 1;
+  --z-sidebar: 10;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* ========== SPACING & RADIUS ========== */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}

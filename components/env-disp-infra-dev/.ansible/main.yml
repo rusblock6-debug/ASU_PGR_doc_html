@@ -1,0 +1,33 @@
+---
+- name: Prepare dispatching hosts
+  hosts: servers
+  serial: 1
+  gather_facts: true
+  become: true
+  vars_files:
+    - settings.yml
+
+  roles:
+    - role: host_base
+      tags:
+        - host_base
+
+    - role: docker_compose
+      tags:
+        - docker_compose
+
+    - role: dispatching_dirs
+      tags:
+        - dispatching_dirs
+
+    - role: gitlab_runner
+      tags:
+        - gitlab_runner
+
+    - role: docker_registry_login
+      tags:
+        - docker_registry_login
+
+    - role: deploy_lock_agent
+      tags:
+        - deploy_lock_agent

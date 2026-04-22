@@ -1,0 +1,40 @@
+.root {
+  display: flex;
+  width: 486px;
+  padding: 8px 14px;
+}
+
+.close_button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: fit-content;
+}
+
+.close_icon {
+  width: 20px;
+  height: 20px;
+}
+
+.title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-relaxed);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.status_color_container {
+  display: flex;
+  align-items: center;
+}
+
+.string_info {
+  flex: initial;
+  width: fit-content;
+}

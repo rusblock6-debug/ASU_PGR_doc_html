@@ -1,0 +1,13 @@
+version: v2
+plugins:
+  # Go stubs
+  - remote: buf.build/protocolbuffers/go
+    out: .
+    opt:
+      - paths=source_relative
+
+  # gRPC stubs
+  - remote: buf.build/grpc/go
+    out: .
+    opt:
+      - paths=source_relative

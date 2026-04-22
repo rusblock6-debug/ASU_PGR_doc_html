@@ -1,0 +1,655 @@
+
+name: dispatching-bort
+
+x-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "200m"
+    max-file: "4"
+
+# https://git.dmi-msk.ru/retek.pgr/dispatching/dispa-backend
+x-trip-service-template: &trip-service-template
+  image: ${DISPA_BACKEND_IMAGE:-registry.dmi-msk.ru/dispa-backend}:${DISPA_BACKEND_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+  restart: unless-stopped
+  environment:
+    # Core Configuration
+    DEBUG: ${DEBUG}
+    LOG_LEVEL: ${LOG_LEVEL}
+    HOST: 0.0.0.0
+    PORT: 8000
+    # PostgreSQL + TimescaleDB
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: ${TRIP_POSTGRES_DB}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Redis
+    REDIS_HOST: redis
+    REDIS_PORT: ${REDIS_PORT}
+    # Nanomq
+    NANOMQ_HOST: nanomq
+    NANOMQ_PORT: 1883
+    # Enterprise Service (для HTTP GET запросов после MQTT событий)
+    ENTERPRISE_SERVICE_HOST: enterprise-service
+    ENTERPRISE_SERVICE_PORT: 8001
+    # Trip Service
+    VEHICLE_ID: ${VEHICLE_ID}
+    SERVICE_MODE: ${TRIP_SERVICE_MODE}
+    # Transport library env
+    RABBIT__HOST: rabbitmq
+    RABBIT__PORT: 5672
+    RABBIT__USER: ${RABBIT_TRANSPORT_USER}
+    RABBIT__PASSWORD: ${RABBIT_TRANSPORT_PASSWORD}
+    RABBIT__RETRY_MAX_ATTEMPTS: ${RETRY_MAX_ATTEMPTS}
+    RABBIT__RETRY_BASE_DELAY_SEC: ${RETRY_BASE_DELAY_SEC}
+
+services:
+  # Redis
+  redis:
+    image: registry.dmi-msk.ru/base-images:redis-7-master
+    container_name: dispatching-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory ${REDIS_MAXMEMORY}
+      --maxmemory-policy ${REDIS_MAXMEMORY_POLICY}
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: ${REDIS_MAXMEMORY}
+    logging: *logging
+
+  # PostgreSQL (custom) with PostGIS + TimescaleDB
+  postgres:
+    image: ${POSTGRES_DISP_IMAGE:-registry.dmi-msk.ru/postgres-disp}:${POSTGRES_DISP_TAG:-dev-latest}
+    container_name: dispatching-postgres
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=timescaledb
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+      PGDATA: /var/lib/postgresql/data/pgdata
+      DB_INIT_MODE: bort
+      # Переменная для динамической настройки активного vehicle_id, не используется сейчас.
+      PGOPTIONS: "-c dispatching.vehicle_id=${VEHICLE_ID}"
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *logging
+
+  # NanoMQ
+  nanomq:
+    image: ${NANOMQ_BORT_DISP_IMAGE:-registry.dmi-msk.ru/nanomq-bort-disp}:${NANOMQ_BORT_DISP_TAG:-dev-latest}
+    container_name: dispatching-nanomq
+    restart: unless-stopped
+    ports:
+      - "${NANOMQ_MQTT_PORT}:1883"
+      - "${NANOMQ_WS_PORT}:8083"
+      - "${NANOMQ_ADMIN_PORT}:8081"
+    volumes:
+      - nanomq-data:/opt/nanomq/data
+    environment:
+      VEHICLE_ID: ${VEHICLE_ID}
+      SERVER_NANOMQ_HOST: ${SERVER_NANOMQ_HOST}
+      SERVER_NANOMQ_PORT: ${SERVER_NANOMQ_PORT}
+      SYNC_SERVICE_INSTANCE_ID: ${SYNC_SERVICE_INSTANCE_ID}
+      SYNC_SERVICE_SERVER_INSTANCE_ID: ${SYNC_SERVICE_SERVER_INSTANCE_ID}
+    networks:
+      - dispatching-network
+    command: >
+      sh -c "
+        cp /etc/nanomq.conf.template /tmp/nanomq.conf &&
+        sed -i 's/VEHICLE_ID_PLACEHOLDER/'"$${VEHICLE_ID}"'/g' /tmp/nanomq.conf &&
+        sed -i 's/SERVER_NANOMQ_HOST_PLACEHOLDER/'"$${SERVER_NANOMQ_HOST}"'/g' /tmp/nanomq.conf &&
+        sed -i 's/SERVER_NANOMQ_PORT_PLACEHOLDER/'"$${SERVER_NANOMQ_PORT}"'/g' /tmp/nanomq.conf &&
+        sed -i 's/SERVER_INSTANCE_ID_PLACEHOLDER/'"$${SYNC_SERVICE_SERVER_INSTANCE_ID}"'/g' /tmp/nanomq.conf &&
+        sed -i 's/INSTANCE_ID_PLACEHOLDER/'"$${SYNC_SERVICE_INSTANCE_ID}"'/g' /tmp/nanomq.conf &&
+        exec nanomq start --conf /tmp/nanomq.conf
+      "
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://admin:public@127.0.0.1:8081/api/v4"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *logging
+
+  # eKuiper
+  ekuiper:
+    image: ${EKUIPER_IMAGE:-registry.dmi-msk.ru/ekuiper}:${EKUIPER_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-ekuiper
+    restart: unless-stopped
+    ports:
+      - "${EKUIPER_PORT}:9081"
+      - "${EKUIPER_PROMETHEUS_PORT}:20499"
+    volumes:
+      - ekuiper-data:/kuiper/data
+
+    environment:
+      # Local Nanomq connection (default)
+      MQTT_SOURCE__DEFAULT__SERVER: "tcp://nanomq:1883"
+
+      MQTT_SOURCE__DEFAULT__QOS: 0
+      # External Nanomq connection (для прокси правил)
+      MQTT_SOURCE__EXTERNAL_NANOMQ__SERVER: "tcp://${EXTERNAL_NANOMQ_HOST}:${EXTERNAL_NANOMQ_PORT}"
+
+      MQTT_SOURCE__EXTERNAL_NANOMQ__QOS: 0
+      # Local Nanomq with downsampling (500ms interval = 2 events/sec)
+      MQTT_SOURCE__LOCAL_DS__SERVER: "tcp://nanomq:1883"
+      MQTT_SOURCE__LOCAL_DS__INTERVAL: "500ms"
+      MQTT_SOURCE__LOCAL_DS__QOS: 0
+      # Переменная vehicle_id для фильтрации
+      VEHICLE_ID: "${VEHICLE_ID}"
+      # Logging
+      KUIPER__BASIC__CONSOLELOG: "true"
+      KUIPER__BASIC__LOGLEVEL: "${EKUIPER_LOG_LEVEL}"
+      # Prometheus metrics
+      KUIPER__BASIC__PROMETHEUS: "true"
+      KUIPER__BASIC__PROMETHEUSPORT: "20499"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nanomq:
+        condition: service_healthy
+      graph-service-backend:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9081/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *logging
+
+  # eKuiper Manager
+  ekuiper-manager:
+    image: registry.dmi-msk.ru/base-images:ekuiper-manager-master
+    container_name: dispatching-ekuiper-manager
+    restart: unless-stopped
+    ports:
+      - "${EKUIPER_MANAGER_PORT}:9082"
+    environment:
+      DEFAULT_EKUIPER_ENDPOINT: ${DEFAULT_EKUIPER_ENDPOINT}
+    depends_on:
+      ekuiper:
+        condition: service_started
+    networks:
+      - dispatching-network
+    logging: *logging
+
+  rabbitmq:
+    image: ${RABBTMQ_BORT_DISP_IMAGE:-registry.dmi-msk.ru/rabbitmq-bort-disp}:${RABBTMQ_BORT_DISP_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-rabbitmq
+    hostname: rabbitmq-bort-node
+    ports:
+      - "${RABBITMQ_PORT}:5672"  # AMQP
+      - "${RABBITMQ_HTTP_PORT}:15672"  # HTTP management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    mem_limit: ${RABBITMQ_MAXMEMORY}  # TODO: also pass to rabbitmq.conf somehow
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - dispatching-network
+    logging: *logging
+
+  # Auth Service Backend API
+  auth-service-backend:
+    image: ${AUTH_SERVICE_BACKEND_IMAGE:-registry.dmi-msk.ru/auth-service-backend}:${AUTH_SERVICE_BACKEND_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-bort-auth-backend
+    restart: unless-stopped
+    ports:
+      - "${AUTH_BACKEND_PORT}:8000"
+    environment:
+      SECRET_KEY: ${AUTH_SERVICE_SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+      ALGORITHM: ${JWT_ALGORITHM}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${AUTH_POSTGRES_DB}
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AUTH_POSTGRES_DB}"
+      MODE: ${AUTH_MODE}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging: *logging
+
+  # Graph Service Backend API
+  graph-service-backend:
+    image: ${GRAPH_SERVICE_BACKEND_IMAGE:-registry.dmi-msk.ru/graph-service-backend}:${GRAPH_SERVICE_BACKEND_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-graph-backend
+    restart: unless-stopped
+    ports:
+      - "${GRAPH_BACKEND_PORT}:5000"
+    environment:
+      SECRET_KEY: ${GRAPH_SERVICE_SECRET_KEY}
+      # Режим работы: конкретный ID = бортовой режим (синхронизация с сервером)
+      VEHICLE_ID: ${VEHICLE_ID}
+      # База данных
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${GRAPH_POSTGRES_DB}
+      REDIS__REDIS_HOST: redis
+      REDIS__REDIS_PORT: ${REDIS_PORT}
+      # MQTT
+      NANOMQ_HOST: nanomq
+      NANOMQ_MQTT_PORT: 1883
+      # Адрес серверного graph-service (для синхронизации)
+      GRAPH_SERVICE_SERVER_HOST: ${GRAPH_SERVICE_SERVER_HOST}
+      GRAPH_SERVICE_SERVER_PORT: ${GRAPH_SERVICE_SERVER_PORT}
+      # GPS → Canvas трансформация
+      ORIGIN_GPS_LAT: ${ORIGIN_GPS_LAT}
+      ORIGIN_GPS_LON: ${ORIGIN_GPS_LON}
+      ORIGIN_CANVAS_X: ${ORIGIN_CANVAS_X}
+      ORIGIN_CANVAS_Y: ${ORIGIN_CANVAS_Y}
+      ORIGIN_CANVAS_Z: ${ORIGIN_CANVAS_Z}  # Изменено с -25 на 0: теперь origin на высоте 0м (основной уровень)
+      # Высота транспорта по умолчанию (если не передается в MQTT/GPS)
+      DEFAULT_VEHICLE_HEIGHT: ${DEFAULT_VEHICLE_HEIGHT}
+      # S3
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL}
+      S3_BUCKET_NAME: graph-service
+      S3_REGION_NAME: ${S3_REGION_NAME}
+      # Debug
+      DEBUG: ${DEBUG}
+      LOG_LEVEL: ${LOG_LEVEL}
+      # Route calculation
+      DEVIATION_THRESHOLD_M: ${DEVIATION_THRESHOLD_M}
+      ROUTE_CACHE_TTL: ${ROUTE_CACHE_TTL}
+      ENTERPRISE_SERVICE_INTERNAL_PORT: ${ENTERPRISE_SERVICE_INTERNAL_PORT}
+      TRIP_SERVICE_HOST: ${TRIP_SERVICE_HOST}
+      ENTERPRISE_SERVICE_HOST: ${ENTERPRISE_SERVICE_HOST}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nanomq:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging: *logging
+
+  # Graph Service Frontend (React SPA + Nginx)
+  graph-service-frontend:
+    build:
+      context: ../repos/graph-service-frontend
+      dockerfile: Dockerfile
+      args:
+        # Передаем переменные окружения как build args для сборки React приложения
+        REACT_APP_ENTERPRISE_SERVICE_HOST: ${REACT_APP_ENTERPRISE_SERVICE_HOST}
+        REACT_APP_ENTERPRISE_SERVICE_PORT: ${REACT_APP_ENTERPRISE_SERVICE_PORT}
+        REACT_APP_GARAGE_LAT: ${REACT_APP_GARAGE_LAT}
+        REACT_APP_GARAGE_LON: ${REACT_APP_GARAGE_LON}
+        REACT_APP_GARAGE_HEIGHT: ${REACT_APP_GARAGE_HEIGHT}
+        REACT_APP_MODE: ${REACT_APP_MODE}
+    container_name: dispatching-graph-frontend
+    restart: unless-stopped
+    ports:
+      - "${GRAPH_FRONTEND_PORT}:80"
+    environment:
+      BACKEND_HOST: graph-service-backend
+      BACKEND_PORT: 5000
+    depends_on:
+      - graph-service-backend
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging: *logging
+
+  # Dozzle
+  dozzle:
+    image: registry.dmi-msk.ru/base-images:dozzle-v10.1-master
+    container_name: dispatching-dozzle-bort
+    restart: unless-stopped
+    ports:
+      - "${DOZZLE_PORT}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      DOZZLE_LEVEL: info
+      DOZZLE_TAILSIZE: 300
+      DOZZLE_FILTER: "name=dispatching-*"
+    networks:
+      - dispatching-network
+    logging: *logging
+
+  # Enterprise Service - основной микросервис
+  enterprise-service:
+    image: ${ENTERPRISE_SERVICE_IMAGE:-registry.dmi-msk.ru/enterprise-service}:${ENTERPRISE_SERVICE_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-bort-enterprise-service
+    restart: unless-stopped
+    environment:
+      DEBUG: ${DEBUG}
+      HOST: 0.0.0.0
+      PORT: 8001
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${ENTERPRISE_SERVICE_POSTGRES_DB}"
+      REDIS_URL: ${REDIS_URL_ENTERPRISE}
+      TIMEZONE: ${TIMEZONE}
+      LOG_LEVEL: ${LOG_LEVEL}
+      NANOMQ_HOST: nanomq
+      NANOMQ_MQTT_PORT: 1883
+      VEHICLE_ID: ${VEHICLE_ID}
+      SERVICE_MODE: ${SERVICE_MODE}
+      DEPLOYMENT_MODE: ${DEPLOYMENT_MODE}
+      SERVER_SYNC_BASE_URL: ${SERVER_SYNC_BASE_URL}
+    ports:
+      - "${REACT_APP_ENTERPRISE_SERVICE_PORT}:${ENTERPRISE_SERVICE_INTERNAL_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nanomq:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    logging: *logging
+
+  # Trip Service
+  trip-service:
+    <<: *trip-service-template
+    ports:
+      - "${TRIP_SERVICE_PORT}:8000"
+    container_name: dispatching-trip-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nanomq:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["sh", "start.sh"]
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging: *logging
+
+  trip-transport-service:
+    <<: *trip-service-template
+    container_name: dispatching-transport-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    command: ["sh", "start.broker.sh", "bort", "${VEHICLE_ID}"]
+    networks:
+      - dispatching-network
+    logging: *logging
+
+  sync-service:
+    image: ${SYNC_SERVICE_IMAGE:-registry.dmi-msk.ru/sync-service}:${SYNC_SERVICE_IMAGE_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-sync-service
+    restart: unless-stopped
+    environment:
+      INSTANCE_ID: ${SYNC_SERVICE_INSTANCE_ID}
+      MODE: ${SYNC_SERVICE_MODE}
+      LOG_LEVEL: ${SYNC_SERVICE_LOG_LEVEL}
+      DEBUG_MODE: ${SYNC_SERVICE_DEBUG_MODE}
+      REDIS_URL: ${SYNC_SERVICE_REDIS_URL}
+      MQTT_BROKER_HOST: ${SYNC_SERVICE_MQTT_BROKER_HOST}
+      MQTT_BROKER_PORT: ${SYNC_SERVICE_MQTT_BROKER_PORT}
+      AUTOREPUB_MQTT_BROKER_HOST: ${SYNC_SERVICE_AUTOREPUB_MQTT_BROKER_HOST}
+      AUTOREPUB_MQTT_BROKER_PORT: ${SYNC_SERVICE_AUTOREPUB_MQTT_BROKER_PORT}
+      RABBITMQ_DSN: ${SYNC_SERVICE_RABBITMQ_DSN}
+    ports:
+      - "${SYNC_SERVICE_PORT}:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      nanomq:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    logging: *logging
+
+  # DumpService
+  dump-service:
+    image: ${DUMP_SERVICE_IMAGE:-registry.dmi-msk.ru/dump-service}:${DUMP_SERVICE_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-dump-service
+    restart: unless-stopped
+    ports:
+      - "${DUMP_SERVICE_PORT}:8000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      MODE: ${DUMP_SERVICE_APP_MODE}
+      TRUCK_ID: ${VEHICLE_ID}
+      # PostgreSQL
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: ${DUMP_SERVICE_POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_USER: ${DUMP_REDIS_USER}
+      REDIS_PASSWORD: ${DUMP_REDIS_PASSWORD}
+      REDIS_CACHE_DATABASE: ${REDIS_CACHE_DATABASE}
+      # S3
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL}
+      S3_REGION_NAME: ${S3_REGION_NAME}
+      # Nanomq
+      NANOMQ_HOST: nanomq
+      NANOMQ_PORT: 1883
+      # TripService config
+      TRIP_SERVICE_POSTGRES_DATABASE: ${TRIP_POSTGRES_DB}
+      TRIP_SERVICE_POSTGRES_USER: ${POSTGRES_USER}
+      TRIP_SERVICE_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TRIP_SERVICE_POSTGRES_HOST: postgres
+      TRIP_SERVICE_POSTGRES_PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    logging: *logging
+
+  cdc-bort-applier:
+    image: ${CDC_BORT_APPLIER_IMAGE:-registry.dmi-msk.ru/cdc-bort-applier}:${CDC_BORT_APPLIER_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-cdc-bort-applier
+    restart: unless-stopped
+    environment:
+      # PostgreSQL
+      GRAPH_SERVICE__POSTGRES_HOST: postgres
+      GRAPH_SERVICE__POSTGRES_PORT: 5432
+      GRAPH_SERVICE__POSTGRES_DATABASE: ${GRAPH_POSTGRES_DB}
+      GRAPH_SERVICE__POSTGRES_USER: ${POSTGRES_USER}
+      GRAPH_SERVICE__POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      ENTERPRISE_SERVICE__POSTGRES_HOST: postgres
+      ENTERPRISE_SERVICE__POSTGRES_PORT: 5432
+      ENTERPRISE_SERVICE__POSTGRES_DATABASE: ${ENTERPRISE_SERVICE_POSTGRES_DB}
+      ENTERPRISE_SERVICE__POSTGRES_USER: ${POSTGRES_USER}
+      ENTERPRISE_SERVICE__POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      AUTH_SERVICE__POSTGRES_HOST: postgres
+      AUTH_SERVICE__POSTGRES_PORT: 5432
+      AUTH_SERVICE__POSTGRES_DATABASE: ${AUTH_POSTGRES_DB}
+      AUTH_SERVICE__POSTGRES_USER: ${POSTGRES_USER}
+      AUTH_SERVICE__POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      TRIP_SERVICE__POSTGRES_HOST: postgres
+      TRIP_SERVICE__POSTGRES_PORT: 5432
+      TRIP_SERVICE__POSTGRES_DATABASE: ${TRIP_POSTGRES_DB}
+      TRIP_SERVICE__POSTGRES_USER: ${POSTGRES_USER}
+      TRIP_SERVICE__POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # RABBITMQ_CDC
+      RABBIT_HOST: ${SERVER_RABBIT_HOST}
+      RABBIT_PORT: ${CDC_RABBIT_PORT}
+      RABBIT_USER: ${CDC_RABBIT_USER}
+      RABBIT_PASSWORD: ${CDC_RABBIT_PASSWORD}
+
+      # RABBITMQ_AMQP
+      RABBIT_AMQP_HOST: rabbitmq
+      RABBIT_AMQP_PORT: 5672
+      RABBIT_AMQP_USER: ${RABBIT_TRANSPORT_USER}
+      RABBIT_AMQP_PASSWORD: ${RABBIT_TRANSPORT_PASSWORD}
+
+      VEHICLE_ID: ${VEHICLE_ID}
+    # Old workaround to reach rabbitmq-server. Probably not needed anymore
+    # extra_hosts:
+    #   - "rabbitmq-server-node:${SERVER_RABBIT_HOST}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      graph-service-backend:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    logging: *logging
+
+
+  wifi-event-dispatcher-bort:
+    image: ${WIFI_EVENT_DISPATCHER_BORT_IMAGE:-registry.dmi-msk.ru/wifi-event-dispatcher}:${WIFI_EVENT_DISPATCHER_BORT_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-wifi-event-dispatcher-bort
+    entrypoint: ["/bort"]
+    restart: unless-stopped
+    environment:
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: ${WIFI_RABBIT_USER}
+      RABBIT_PASSWORD: ${WIFI_RABBIT_PASS}
+      BORT_TRUCK_ID: ${VEHICLE_ID}
+      BORT_NANOMQ_HOST: nanomq
+      BORT_NANOMQ_PORT: 1883
+      BORT_SERVER_ADDRESS: ${WIFI_SERVER_ADDRESS}
+      ENVIRONMENT: production
+    depends_on:
+      nanomq:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - dispatching-network
+    logging: *logging
+
+  bort-client:
+    image: ${BORT_CLIENT_IMAGE:-registry.dmi-msk.ru/bort-client}:${BORT_CLIENT_IMAGE_TAG:-${DEFAULT_IMAGE_TAG:-dev-latest}}
+    container_name: dispatching-bort-client
+    environment:
+      VITE_VEHICLE_ID: ${VEHICLE_ID}
+      APP_MODE: ${APP_MODE:-prod}
+    ports:
+      - "5173:5173"
+      - "80:80"
+    expose:
+      - "80" 
+    depends_on:
+      enterprise-service:
+        condition: service_started
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    networks:
+      - dispatching-network
+
+
+  # ============================================================================
+  # PYTEST - Тесты eKuiper и PostgreSQL
+  # ============================================================================
+  pytest:
+    build:
+      context: ./tests/ekuiper
+      dockerfile: Dockerfile
+    container_name: dispatching-pytest
+    networks:
+      - dispatching-network
+    depends_on:
+      ekuiper:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nanomq:
+        condition: service_healthy
+    environment:
+      - VEHICLE_ID=${VEHICLE_ID}
+    profiles:
+      - test
+    logging: *logging
+
+networks:
+  dispatching-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  ekuiper-data:
+  nanomq-data:
+  rabbitmq-data:
+  prometheus-data:
+  grafana-data:

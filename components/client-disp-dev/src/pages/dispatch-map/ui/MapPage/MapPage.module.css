@@ -1,0 +1,13 @@
+.body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--orem-bw-950);
+  border-radius: 8px;
+}
+
+.map_panel {
+  position: relative;
+}

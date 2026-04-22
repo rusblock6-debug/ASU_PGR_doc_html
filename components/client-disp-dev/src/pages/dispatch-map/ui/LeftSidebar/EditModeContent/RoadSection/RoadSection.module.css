@@ -1,0 +1,27 @@
+.collapsible_road {
+  --header-margin: 16px 0 8px 0;
+}
+
+.road_buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  & .button {
+    --btn-padding-x: 8px;
+  }
+
+  & .button_icon {
+    margin-right: 6px;
+  }
+}
+
+.button_submit {
+  margin-left: auto;
+}
+
+.color_dropdown {
+  min-width: 240px;
+  background-color: var(--bg-widget);
+  border-color: var(--text-secondary);
+}

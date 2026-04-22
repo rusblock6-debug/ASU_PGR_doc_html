@@ -1,0 +1,1 @@
+export { SectionsPage } from './SectionsPage';

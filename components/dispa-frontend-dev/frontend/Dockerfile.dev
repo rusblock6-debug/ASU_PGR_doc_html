@@ -1,0 +1,28 @@
+# Development Dockerfile with hot reload
+FROM mirror.gcr.io/node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Accept build arguments for environment variables
+ARG VITE_API_URL=http://10.100.109.13:8000
+ARG VITE_API_URL=http://10.100.109.11:8000
+ARG VITE_API_URL=http://10.100.109.12:8000
+
+# Set environment variables
+ENV VITE_API_URL=${VITE_API_URL}
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Start development server with hot reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+
+
+

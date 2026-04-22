@@ -1,0 +1,26 @@
+host: 0.0.0.0
+port: 8000
+
+auth:
+  url: "http://auth-service-backend:8000"
+  verify_endpoint: "/api/v1/verify"
+
+services:
+  auth:
+    url: "http://auth-service-backend:8000"
+    path_pattern: "/api/{version}/{path}"
+
+
+  trip:
+    url: "http://trip-service-server:8000"
+    path_pattern: "/api/{path}"
+
+
+  enterprise:
+    url: "http://enterprise-service:8001"
+    path_pattern: "/api/{path}"
+
+
+  graph:
+    url: "http://graph-service-backend:5000"
+    path_pattern: "/api/{path}"

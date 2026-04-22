@@ -1,0 +1,53 @@
+[project]
+name = "sync-service"
+version = "0.1.0"
+description = "Reliable MQTT-based sync service with custom delivery guarantees"
+requires-python = ">=3.13,<3.14"
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "pydantic>=2.11.0",
+    "pydantic-settings>=2.11.0",
+    "uvicorn[standard]>=0.35.0",
+    "redis>=6.4.0,<7.0",
+    "aiomqtt>=2.4.0",
+    "python-dotenv>=1.0.0",
+    "typer>=0.12.0",
+    "pyyaml>=6.0.0",
+    "aio-pika>=9.5.0",
+    "fastnanoid>=0.4.3",
+    "lz4>=4.4.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=4.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["app/tests"]
+python_files = ["test_*.py"]
+
+[tool.basedpyright]
+typeCheckingMode = "basic"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[[tool.uv.index]]
+name = "mirror"
+url = "https://mirrors.ustc.edu.cn/pypi/simple/"

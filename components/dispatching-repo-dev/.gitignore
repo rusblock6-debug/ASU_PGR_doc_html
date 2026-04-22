@@ -1,0 +1,72 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+docker-compose.override.yml
+docker-compose.*.local.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+backups/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Data directories (раскомментируйте если не хотите версионировать данные)
+# data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# Application specific
+config/airbyte/workspace/*
+!config/airbyte/workspace/.gitkeep
+config/ekuiper/data/
+
+# Debezium — папки local и всё их содержимое
+config/debezium/*/local/
+
+# любые папки local под config (на случай других сервисов)
+config/**/local/
+
+# sh-скрипты с local в имени
+*local*.sh
+
+# docker-compose файлы с local в имени
+*.*.local.yaml
+
+*.history/

@@ -1,0 +1,22 @@
+stages:
+  - test
+  - scanner
+  - build
+  - trigger-deploy
+
+include:
+  - project: "k8s/gitlab-template"
+    ref: "main"
+    file: "/dispa-build.gitlab-ci.yaml"
+
+trigger-server:
+  stage: trigger-deploy
+  extends: .trigger_dispatching_server
+  variables:
+    SERVICE_NAME: ${CI_PROJECT_NAME}
+
+trigger-bort:
+  stage: trigger-deploy
+  extends: .trigger_dispatching_bort
+  variables:
+    SERVICE_NAME: ${CI_PROJECT_NAME}

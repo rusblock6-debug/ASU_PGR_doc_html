@@ -1,0 +1,12 @@
+.heading {
+  margin-bottom: 12px;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-normal);
+  color: var(--base-white);
+}
+
+.text {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--text-primary);
+}

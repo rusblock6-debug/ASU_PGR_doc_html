@@ -1,0 +1,22 @@
+---
+- name: Ensure host uses Debian-family distribution with apt
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == 'Debian'
+      - ansible_pkg_mgr == 'apt'
+    fail_msg: >-
+      This playbook supports only Debian/Ubuntu hosts with apt.
+      Current host {{ inventory_hostname }} is {{ ansible_distribution }} {{ ansible_distribution_version }}.
+
+- name: Install base OS packages
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: "{{ host_base_cache_valid_time }}"
+    name: "{{ host_base_packages }}"
+    state: present
+
+- name: Add gitlab-runner user to root group
+  ansible.builtin.user:
+    name: gitlab-runner
+    groups: root
+    append: yes

@@ -1,0 +1,70 @@
+.vehicle_marker {
+  --marker-color: var(--base-white);
+  --wheel-fill: var(--bg-widget);
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+
+  &.normal_label_position {
+    flex-direction: column;
+
+    &.horizontal {
+      flex-direction: initial;
+    }
+
+    &.vertical {
+      gap: 2px;
+    }
+  }
+
+  &:hover .vehicle_label {
+    color: var(--base-white);
+    background-color: var(--orem-bw-700);
+  }
+
+  &.selected {
+    .vehicle_icon,
+    .vehicle_label {
+      background-color: var(--base-orange);
+    }
+  }
+
+  &.non_interactive {
+    pointer-events: none;
+  }
+}
+
+.vehicle_icon {
+  display: block;
+  flex-shrink: 0;
+  color: var(--marker-color);
+
+  &.mirrored {
+    transform: scaleX(-1);
+  }
+}
+
+.vehicle_label {
+  max-width: 236px;
+  padding: 2px;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  color: var(--base-white);
+  background-color: var(--bg-widget);
+
+  &.absolute {
+    &.vertical {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+.vehicle_wrapper {
+  user-select: none;
+  border-radius: 4px;
+}

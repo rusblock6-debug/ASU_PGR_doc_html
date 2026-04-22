@@ -1,0 +1,33 @@
+services:
+  vector-logs:
+    image: timberio/vector:0.39.0-alpine
+    container_name: vector-logs
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NAMESPACE=${NAMESPACE:-}
+      - HOST_HOSTNAME=${HOST_HOSTNAME:-unknown}
+    volumes:
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - vector-data:/vector-data-dir
+      - /etc/hostname:/host/hostname:ro
+    command:
+      - --config-dir
+      - /etc/vector
+    networks:
+      - vector-network
+    ports:
+      - "9099:9099"
+
+volumes:
+  vector-data:
+    driver: local
+
+networks:
+  vector-network:
+    driver: bridge
+    external: false
+

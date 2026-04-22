@@ -1,0 +1,11 @@
+.button {
+  flex-shrink: 0;
+}
+
+.button_asc {
+  --arrow-up: var(--base-orange);
+}
+
+.button_desc {
+  --arrow-down: var(--base-orange);
+}

@@ -1,0 +1,10 @@
+type: mqtt
+source_instance_id: null
+target_instances: server
+source_topic: truck/+/test/#
+target_topic: null
+
+deduplication: false
+autostart: false
+
+retry_max_attempts: 0

@@ -1,0 +1,1 @@
+export { VehicleTypeIcon } from './VehicleTypeIcon';

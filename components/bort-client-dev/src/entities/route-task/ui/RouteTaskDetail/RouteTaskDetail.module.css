@@ -1,0 +1,70 @@
+.root {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  height: 100%;
+  min-height: 0;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background-color: var(--kiosk-aside-right-bg);
+  border-radius: var(--radius-md);
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.place_block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.place_value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+}
+
+.metrics_row {
+  display: flex;
+  gap: var(--spacing-xl);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric_value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.metric_value_accent {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-normal);
+  color: var(--base-orange-2);
+  white-space: nowrap;
+}
+
+.cargo_block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cargo_value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+}

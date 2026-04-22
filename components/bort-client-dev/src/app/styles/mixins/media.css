@@ -1,0 +1,51 @@
+/* stylelint-disable media-query-no-invalid */
+
+/* Мобильные устройства (до 640px) */
+
+/* noinspection ALL */
+@define-mixin mobile {
+  @media (width <= $breakpoint-sm) {
+    /* noinspection ALL */
+    @mixin-content;
+  }
+}
+
+/* Планшеты (от 768px) */
+
+/* noinspection ALL */
+@define-mixin tablet {
+  @media (width >= $breakpoint-md) {
+    /* noinspection ALL */
+    @mixin-content;
+  }
+}
+
+/* Десктопы (от 1024px) */
+
+/* noinspection ALL */
+@define-mixin desktop {
+  @media (width >= $breakpoint-lg) {
+    /* noinspection ALL */
+    @mixin-content;
+  }
+}
+
+/* Большие экраны (от 1280px) */
+
+/* noinspection ALL */
+@define-mixin wide {
+  @media (width >= $breakpoint-xl) {
+    /* noinspection ALL */
+    @mixin-content;
+  }
+}
+
+/* Большие экраны (от 1440px) */
+
+/* noinspection ALL */
+@define-mixin extra_wide {
+  @media (width >= $breakpoint-xxl) {
+    /* noinspection ALL */
+    @mixin-content;
+  }
+}

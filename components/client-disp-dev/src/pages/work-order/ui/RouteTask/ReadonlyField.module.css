@@ -1,0 +1,27 @@
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: inline-block;
+  color: var(--text-secondary-2);
+}
+
+.input {
+  display: flex;
+  align-items: center;
+  min-height: var(--input-height);
+  padding-right: var(--input-padding);
+}
+
+.placeholder {
+  color: var(--text-secondary);
+}
+
+.value {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

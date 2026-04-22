@@ -1,0 +1,32 @@
+export {
+  vehicleRtkApi,
+  useGetAllVehiclesQuery,
+  useGetVehiclesInfiniteQuery,
+  useGetVehiclePlacesQuery,
+  useGetVehicleStateQuery,
+  useGetVehiclePopupQuery,
+  useGetVehicleByIdQuery,
+  useGetVehiclesStreamQuery,
+  useGetVehicleCoordinatesStreamQuery,
+  useCreateVehicleMutation,
+  useUpdateVehicleMutation,
+  useDeleteVehicleMutation,
+} from './vehicles-rtk';
+
+export type {
+  CreateVehicleRequest,
+  UpdateVehicleRequest,
+  Vehicle,
+  VehicleCoordinates,
+  VehiclePlaceItem,
+  VehiclePlacesResponse,
+  VehiclePopupResponse,
+  VehicleStateEvent,
+  VehicleStateItem,
+  VehicleStateResponse,
+  VehiclesResponse,
+  VehicleStatus,
+  VehicleType,
+  VehiclesQueryArg,
+  NormalizedVehiclesResponse,
+} from './types';

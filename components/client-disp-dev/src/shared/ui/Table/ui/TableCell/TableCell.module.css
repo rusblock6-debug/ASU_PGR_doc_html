@@ -1,0 +1,59 @@
+.cell {
+  position: relative;
+  height: 24px;
+  padding: 0;
+  overflow: hidden;
+  vertical-align: middle;
+  background-color: var(--bg-table-row, transparent);
+  border-right: 1px solid var(--lines-stokes-fa-connector);
+  transition: background-color 0.15s ease;
+}
+
+.cell_sticky {
+  position: sticky;
+  left: 0;
+  z-index: var(--z-index-default);
+}
+
+.cell_inner {
+  height: 100%;
+  padding: 3px 12px;
+}
+
+.align_left {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.align_right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.no_border {
+  border-right: none;
+}
+
+/* Выделение sticky ячейки (чекбокса) для выбранной строки */
+:global(.asu-gtk-table) tr:not([data-skeleton])[data-selected] > td[data-select].cell_sticky {
+  background-color: var(--bg-table-row-hover, transparent);
+}
+
+/* Выделение всей строки при наведении (кроме чекбокса и скелетона) */
+:global(.asu-gtk-table) tr:not([data-skeleton]):hover > td:not([data-select]) {
+  background-color: var(--orem-bw-600);
+
+  &:hover {
+    background-color: var(--orem-bw-400);
+  }
+}
+
+/* Выделение выбранной строки (когда чекбокс отмечен, кроме скелетона) */
+:global(.asu-gtk-table) tr:not([data-skeleton])[data-selected] > td:not([data-select]) {
+  background-color: var(--bg-table-row-hover, transparent);
+}
+
+/* Выделение колонки при наведении на ячейку (кроме скелетона) */
+:global(.asu-gtk-table) tr:not([data-skeleton]) .cell:global(.js-column-hovered) {
+  background-color: var(--bg-table-row-hover, transparent);
+}

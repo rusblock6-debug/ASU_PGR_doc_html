@@ -1,0 +1,7 @@
+.line {
+  display: block;
+  height: 1px;
+  margin: 16px 0;
+  background-color: var(--bg-widget-hover);
+  border: none;
+}

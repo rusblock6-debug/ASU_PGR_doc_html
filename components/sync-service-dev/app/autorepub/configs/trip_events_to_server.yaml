@@ -1,0 +1,7 @@
+type: rabbitmq
+source_instance_id: null
+target_instances: server
+queue_name: trip
+
+deduplication: true
+autostart: false

@@ -1,0 +1,158 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+}
+
+.menu_item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item_header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.item_icon {
+  width: 16px;
+  height: 16px;
+}
+
+.item_content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 16px;
+  padding-bottom: 4px;
+  padding-left: 36px;
+}
+
+.item_list {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  padding: 5px 8px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--text-primary);
+  background: transparent;
+  border-radius: 8px;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-property: all;
+
+  &:focus-visible {
+    border-color: var(--color-outline-primary);
+    box-shadow: 0 0 0 3px var(--color-outline-primary);
+  }
+
+  &:hover .fav_icon {
+    color: var(--base-white);
+    opacity: 1;
+  }
+
+  &:hover,
+  &:focus-within {
+    color: var(--base-white);
+    background-color: var(--accent);
+  }
+}
+
+.item_link {
+  flex: 1;
+  color: inherit;
+  outline: none;
+  outline-offset: unset;
+}
+
+.item_link_disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.fav_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin-left: auto;
+  color: var(--text-primary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &[data-visible='true'] {
+    opacity: 1;
+  }
+}
+
+.fav_icon_pin {
+  margin-top: 2px;
+}
+
+.last_section {
+  min-height: calc(100vh - 90px);
+}
+
+.menu_block_variant {
+  flex-direction: row;
+  gap: 8px;
+
+  .menu_item {
+    width: 360px;
+    max-height: 617px;
+    padding: 16px 0 8px 16px;
+    background-color: var(--bg-widget);
+    border-radius: 8px;
+  }
+
+  .item_header {
+    padding: 0;
+    font-weight: var(--font-weight-bold);
+  }
+
+  .item_icon {
+    width: 36px;
+    height: 36px;
+    padding: 4px;
+    background: var(--gradient-card-default);
+    border-radius: 8px;
+  }
+
+  .item_content {
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-left: 42px;
+    margin-right: 4px;
+  }
+
+  .item_list {
+    padding: 5px 4px 5px 8px;
+  }
+}
+
+.button_wrapper {
+  display: flex;
+  align-items: center;
+}

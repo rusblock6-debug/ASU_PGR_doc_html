@@ -1,0 +1,87 @@
+---
+docker_compose_version: "5.0.1"
+
+dispatching_directories:
+  - path: /srv
+    owner: root
+    group: root
+    mode: "0775"
+    state: directory
+  - path: /srv/dispatching-repo
+    owner: root
+    group: root
+    mode: "0775"
+    state: directory
+  - path: /srv/dispatching-repo-state
+    owner: root
+    group: root
+    mode: "0775"
+    state: directory
+
+gitlab_url: "https://git.dmi-msk.ru/"
+gitlab_executor: "shell"
+gitlab_tags: "laptop,shell,local"
+gitlab_runner_reconfigure: true
+gitlab_runner_ssh_private_key_content: |
+  -----BEGIN OPENSSH PRIVATE KEY-----
+  b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+  QyNTUxOQAAACA6cZml6atw3Ki1Fm7H8qMWyGMsp+I4zqM++RfWYIdjNwAAAKDG3E2JxtxN
+  iQAAAAtzc2gtZWQyNTUxOQAAACA6cZml6atw3Ki1Fm7H8qMWyGMsp+I4zqM++RfWYIdjNw
+  AAAEBXFC5Zgyi1wS208xlvJFzVSouZmNDj+vCcw2Jl8AyIcTpxmaXpq3DcqLUWbsfyoxbI
+  Yyyn4jjOoz75F9Zgh2M3AAAAGmdpdGxhYi1ydW5uZXJAbmlyLXRyYWNrLTA0AQID
+  -----END OPENSSH PRIVATE KEY-----
+gitlab_runner_ssh_public_key_content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDpxmaXpq3DcqLUWbsfyoxbIYyyn4jjOoz75F9Zgh2M3 gitlab-runner@nir-track-04"
+gitlab_runner_known_hosts_entries:
+  - "git.dmi-msk.ru ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJAG1+ubT8PHXT2JIRWEckVkOqgNTLEkRxaexqHOWRHU"
+  - "git.dmi-msk.ru ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCmNA54tlzfjxCq2uIDl7duLH2acunZsY1WnXenz/B17U7JogIioyh9zGsNTnTl0C/6V+LwR+FaoMzeOUd1dU2tVIGiZn5ePZenRgDkyo1Yg66fQqyxQRVqPZZZs51NaH3ecRlHftwpS8QN70fhEKR4O/Sv2eW/+gamU0Z0iJCjqch//dpKZbNo/1QFPaevD+cYm5l6qqyJBiuaf4UKzvKt51Pp6U1GkPr9FJ3ILq+qtKW9oMU79lIh9Tb+srFvSKPS0+q2nOjt7/iAf3qDqhGrmUOP9gczd9SGetKI+kM1nT1vh9vQhEuLFJ7Uk5W0yyRxJB/vBvq8wc4Hcp2PXsQKIZfsHLSG0PUsi7WbNYfz+Er2dPkoj6zPpgKTiR4invwcqx1mGlEP8RQxaAnugiWogYUOaJYQnZigJJ530mkg6CYZb2LhYjLROTaoaBrHPKf4RZjyMvTwAa7woNY5xw57tUdHHctiLcoa4paqDDSpAVPJO8trlocGQTKzcNcGrZk="
+  - "git.dmi-msk.ru ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKxrjgfXMCRec5OKu2aKbppm05RJelyJSK6ayOmceDDrrCkCoo7ASfseiGv/gmBHjc4t9Qbi1S1st3SyaAmEIi8="
+
+# Токены runner по хостам.
+# Ключ: имя хоста или IP.
+gitlab_runner_tokens:
+  "10.109.51.16": "glrt-O4axBo3ThDwXyNkJqSvQwW86MQp0OjEKdTp5Cw.01.121fzcy0x"
+  "10.109.51.17": "glrt-Ge6As0u4y5dSINwUVI-TPm86MQp0OjEKdTp5Cw.01.121ilnpwg"
+  "10.109.51.18": "glrt-OztWdn7xXnli5VYKG-ef3286MQp0OjEKdTp5Cw.01.121j17ots"
+  "10.109.51.19": "glrt-EQOhY_9pELnYkeQJFK8WDm86MQp0OjEKdTozbAw.01.131lzsfs2"
+  "10.109.51.20": "glrt-c2Pq8qgjkLG-DF_qSAN83G86MQp0OjEKdTozbAw.01.131w1lt7b"
+  "10.109.51.21": "glrt-OOdJor8X00lwwxu9c2cXtG86MQp0OjEKdTozbAw.01.130bkkvks"
+
+docker_registry_login_enabled: true
+docker_registry_url: registry.dmi-msk.ru
+docker_registry_username: reader-01
+docker_registry_password: ZX31hweNR
+docker_registry_login_users:
+  - root
+  - gitlab-runner
+
+deploy_lock_agent_enabled: true
+deploy_lock_agent_dir: /srv/deploy-lock-agent
+deploy_lock_agent_compose_filename: docker-compose.yaml
+deploy_lock_agent_image: registry.dmi-msk.ru/base-images:deploy-lock-agent-567d0dea
+deploy_lock_agent_container_name: deploy-lock-agent
+deploy_lock_agent_restart_policy: unless-stopped
+deploy_lock_agent_user: root
+deploy_lock_agent_network_name: docker-agent-network
+deploy_lock_agent_docker_socket: /var/run/docker.sock
+deploy_lock_agent_compose_up: true
+
+# Общие значения.
+deploy_lock_agent_defaults:
+  deploy_lock_url: https://deploy-lock.dmi-msk.ru
+  deploy_lock_token: 6ou2X5
+  server_ip: null
+
+# Переопределение по хостам.
+deploy_lock_agent_hosts:
+  "10.109.51.16":
+    deploy_lock_env_key: dispa-stage-bort-3
+  "10.109.51.17":
+    deploy_lock_env_key: dispa-stage-bort-4
+  "10.109.51.18":
+    deploy_lock_env_key: dispa-stage-bort-5
+  "10.109.51.19":
+    deploy_lock_env_key: dispa-stage-bort-6
+  "10.109.51.20":
+    deploy_lock_env_key: dispa-stage-bort-7
+  "10.109.51.21":
+    deploy_lock_env_key: dispa-stage-bort-8

@@ -1,0 +1,4 @@
+.dropdown {
+  background: var(--bg-widget);
+  border: 1px solid var(--text-secondary);
+}

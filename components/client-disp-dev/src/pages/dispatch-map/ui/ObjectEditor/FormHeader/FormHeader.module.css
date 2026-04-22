@@ -1,0 +1,17 @@
+.header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--base-white);
+}
+
+.close_icon {
+  width: 16px;
+  height: 16px;
+}

@@ -1,0 +1,56 @@
+.sidebar {
+  --offset-left: 14px;
+  --offset-left-with-scrollbar: 6px;
+
+  position: absolute;
+  z-index: var(--z-map-sidebar);
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 12px;
+  width: 436px;
+  height: 100%;
+  padding: 14px var(--offset-left-with-scrollbar) 14px 14px;
+  overflow: hidden;
+  background-color: var(--orem-bw-950);
+  border-right: 1px solid var(--bg-widget);
+
+  & .page_header {
+    padding: 0;
+    margin-right: calc(var(--offset-left) - var(--offset-left-with-scrollbar));
+    margin-bottom: 0;
+  }
+
+  & .mode_switcher {
+    margin-right: calc(var(--offset-left) - var(--offset-left-with-scrollbar));
+  }
+
+  & .body {
+    flex: 1;
+    min-height: 0;
+    padding-right: 4px;
+  }
+}
+
+.sidebar_collapsed {
+  width: 320px;
+  height: 48px;
+  overflow: unset;
+  background-color: var(--orem-bw-950);
+  border: none;
+  border-radius: 8px;
+}
+
+.collapse_button {
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+
+  svg {
+    transform: rotate(90deg);
+  }
+
+  &.active svg {
+    transform: rotate(-90deg);
+  }
+}

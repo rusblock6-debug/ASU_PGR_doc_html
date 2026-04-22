@@ -1,0 +1,82 @@
+.root {
+  --sidebar-offset: 8px;
+
+  position: absolute;
+  bottom: 8px;
+  left: var(--sidebar-offset);
+  z-index: var(--z-map-behind);
+  display: flex;
+  width: 611px;
+  height: 84px;
+  padding: 8px 12px 12px;
+  background-color: var(--orem-bw-950);
+  border-radius: 8px;
+}
+
+.toolbar_container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toolbar_buttons_container {
+  display: flex;
+  gap: 2px;
+}
+
+.rewind_icon {
+  transform: rotate(180deg);
+}
+
+.pause_icon {
+  width: 12px;
+  height: 12px;
+}
+
+.player_container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: end;
+  width: 100%;
+  padding: 8px 8px 0;
+  margin-right: 12px;
+}
+
+.thumb {
+  background-color: var(--base-orange);
+  border-color: var(--base-orange);
+}
+
+.track {
+  --slider-track-bg: var(--bg-widget-hover);
+}
+
+.speed_select {
+  width: 130px;
+}
+
+.dates_container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.date_label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary-2);
+}
+
+.date_value {
+  font-size: var(--font-size-sm);
+}
+
+.action_buttons_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cross_icon {
+  width: 16px;
+  height: 16px;
+}

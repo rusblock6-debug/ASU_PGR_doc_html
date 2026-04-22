@@ -1,0 +1,89 @@
+.page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  min-height: 0;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 0;
+  padding: var(--spacing-md);
+  background: var(--bg-table-header);
+  border-radius: var(--radius-md);
+}
+
+.prev_title {
+  margin: 0;
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
+  color: var(--base-white);
+}
+
+.timer {
+  --active-downtime-timer-size: clamp(132px, 25vh, 168px);
+
+  margin: auto auto 0;
+  /* stylelint-disable-next-line scale-unlimited/declaration-strict-value */
+  font-family: var(--font-sans), monospace;
+  font-size: var(--active-downtime-timer-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--base-white);
+  text-align: center;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+
+.timer_caption {
+  margin: auto 0 0;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+}
+
+.finish_btn {
+  --active-downtime-btn-width: 520px;
+  --active-downtime-btn-font-size: 43px;
+
+  flex-shrink: 0;
+  align-self: flex-start;
+  width: min(100%, var(--active-downtime-btn-width));
+  min-height: 80px;
+  padding: 0 var(--spacing-md);
+  margin-top: 0;
+  font-size: var(--active-downtime-btn-font-size);
+  font-weight: var(--font-weight-extra-bold);
+  line-height: var(--line-height-normal);
+  color: var(--base-white);
+  text-transform: uppercase;
+  cursor: pointer;
+  background: var(--orem-orange-900);
+  border: 1px solid var(--base-orange);
+  border-radius: var(--radius-md);
+  box-shadow: 0 -8px 24px rgb(209 92 41 / 24%);
+}
+
+.finish_btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.finish_btn:focus-visible {
+  outline: var(--outline-primary);
+  outline-offset: 2px;
+}
+
+.finish_btn_selected {
+  box-shadow:
+    0 -8px 24px rgb(209 92 41 / 24%),
+    0 0 0 1px var(--orem-orange-500);
+}

@@ -1,0 +1,635 @@
+version: '3'
+
+vars:
+  BRANCH: '{{default "dev" .BRANCH}}'
+  ENV_TAG: '{{default "" .ENV_TAG}}'
+  MANUAL: '{{default "0" .MANUAL}}'
+  LATEST_TAG: '{{default (printf "%s-latest" .BRANCH) .LATEST_TAG}}'
+  COMPOSE_BORT: docker-compose.bort.yaml
+  COMPOSE_OVERRIDE_BORT: 'docker-compose.bort.override.yaml'
+  IS_LOCAL: '{{.IS_LOCAL | default "true"}}'
+  COMPOSE_SETTINGS: docker-compose.settings-bort.yaml
+  VECTOR_DIR: monitoring
+  COMPOSE_VECTOR: docker-compose.yaml
+  DOCKER_COMPOSE:
+    sh: |
+      if command -v docker-compose >/dev/null 2>&1; then
+        echo docker-compose
+      else
+        echo "docker compose"
+      fi
+  DOCKER_COMPOSE_BORT: >-
+      {{.DOCKER_COMPOSE}}
+      -f {{.COMPOSE_BORT}}
+      {{if eq .IS_LOCAL "true"}} -f {{.COMPOSE_OVERRIDE_BORT}}{{end}}
+
+tasks:
+  default:
+    desc: Показать список задач
+    cmds:
+      - task --list
+
+  help:
+    desc: Показать список задач
+    cmds:
+      - task --list
+
+  config:
+    desc: Посмотреть docker-compose c которым происходит запуск
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} config'   
+
+  dc:
+    desc: "Выполнить любую Docker Compose команду"
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} {{.CLI_ARGS}}'
+
+  easy-bort:
+    desc: "Запустить только основные сервисы для бортовой разработки (без graph-frontend, transport, sync, dump, cdc, wifi)"
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}}  up -d redis postgres nanomq ekuiper ekuiper-manager rabbitmq auth-service-backend graph-service-backend enterprise-service trip-service frontend'
+    aliases:
+      - easy
+
+  ensure-dotenv:
+    internal: true
+    cmds:
+      - |
+        set -e
+        if [ ! -f .env ]; then
+          cp .env.example .env
+          echo "Создан файл .env из .env.example"
+          echo "Пожалуйста, отредактируйте .env с вашими настройками"
+        fi
+
+  init-bort:
+    desc: Клонирование репозиториев бортовой части
+    aliases:
+      - init
+    deps:
+      - ensure-dotenv
+    cmds:
+      - echo "Инициализация бортовой части..."
+      - DEPLOY_BRANCH="{{.BRANCH}}" bash scripts/clone_bort.sh
+      - echo "Бортовая часть инициализирована"
+
+  build-bort:
+    desc: Собрать bort-образы
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} build'
+
+  build-bort-clean:
+    desc: Собрать bort-образы без кеша
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} build --no-cache'
+
+  dev-bort:
+    desc: Запустить bort-стек в режиме разработки
+    deps:
+      - init-bort
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_FILE=".env_{{.ENV_TAG}}"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "Ошибка: Файл $ENV_FILE не найден!"
+            exit 1
+          fi
+          echo "Используется env файл: $ENV_FILE"
+        else
+          ENV_FILE=".env"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "Ошибка: Файл .env не найден!"
+            echo "Создайте .env файл или используйте: task dev-bort ENV_TAG=bort_1_dev"
+            exit 1
+          fi
+          echo "Используется дефолтный .env файл"
+        fi
+        echo "Загружаем переменные из $ENV_FILE..."
+        set -a && . "./$ENV_FILE" && set +a
+        echo "Пересборка образов бортовой части..."
+        {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" build --no-cache
+        echo "Запуск бортовой части в режиме разработки..."
+        ENVIRONMENT=development {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" up -d --force-recreate --remove-orphans 
+        echo "Бортовая часть запущена"
+      - echo "Запуск Vector для бортовой части..."
+      - task start-vector
+      - task urls-bort
+
+  start-vector:
+    desc: Запустить Vector для сбора логов bort-стека
+    aliases:
+      - up-vector
+    cmds:
+      - |
+        set -e
+        bash {{.VECTOR_DIR}}/start.sh
+
+  stop-vector:
+    desc: Остановить Vector для bort-стека
+    aliases:
+      - down-vector
+    cmds:
+      - |
+        set -e
+        if [ ! -f "{{.VECTOR_DIR}}/.env" ]; then
+          echo "Файл {{.VECTOR_DIR}}/.env не найден, Vector вероятно не запускался"
+          exit 0
+        fi
+        echo "Остановка Vector..."
+        cd {{.VECTOR_DIR}}
+        {{.DOCKER_COMPOSE}} -f {{.COMPOSE_VECTOR}} down
+        echo "Vector остановлен"
+
+  logs-vector:
+    desc: Показать логи Vector
+    cmds:
+      - |
+        set -e
+        if [ ! -f "{{.VECTOR_DIR}}/.env" ]; then
+          echo "Файл {{.VECTOR_DIR}}/.env не найден, Vector ещё не запускался"
+          exit 1
+        fi
+        cd {{.VECTOR_DIR}}
+        {{.DOCKER_COMPOSE}} -f {{.COMPOSE_VECTOR}} logs -f
+
+  ps-vector:
+    desc: Показать статус Vector
+    cmds:
+      - |
+        set -e
+        if [ ! -f "{{.VECTOR_DIR}}/.env" ]; then
+          echo "Файл {{.VECTOR_DIR}}/.env не найден, Vector ещё не запускался"
+          exit 0
+        fi
+        echo "=== Vector ==="
+        cd {{.VECTOR_DIR}}
+        {{.DOCKER_COMPOSE}} -f {{.COMPOSE_VECTOR}} ps
+
+  bootstrap-bort-env:
+    desc: Сгенерировать env через settings-bort
+    user: root
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_TAG="{{.ENV_TAG}}"
+          BASE_ENV=""
+        else
+          ENV_TAG="settings_generated"
+          BASE_ENV=".env"
+        fi
+        OUTPUT_ENV=".env_${ENV_TAG}"
+        if [ -n "$BASE_ENV" ] && [ -f "$BASE_ENV" ]; then
+          echo "Используется base env файл: $BASE_ENV"
+          BASE_ARG="--base-env-file $BASE_ENV"
+        else
+          echo "Base env не используется (или файл не найден), продолжаем без него"
+          BASE_ARG=""
+        fi
+        if [ -z "$BASE_ARG" ] && [ -f "$OUTPUT_ENV" ]; then
+          echo "Удаляем старый $OUTPUT_ENV перед генерацией"
+          rm -f "$OUTPUT_ENV"
+        fi
+        echo "Итоговый env файл: $OUTPUT_ENV"
+        bash scripts/bootstrap_with_settings.sh \
+          --settings-compose-file {{.COMPOSE_SETTINGS}} \
+          ${BASE_ARG:+$BASE_ARG} \
+          --settings-service settings-service \
+          --output-env-file "$OUTPUT_ENV"
+        echo "Env готов: $OUTPUT_ENV"
+        echo "Запуск bort отдельно: task dev-bort ENV_TAG=$ENV_TAG"
+
+  bootstrap-bort-manual-env:
+    desc: Сгенерировать env через settings-bort после ручной инициализации
+    user: root
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_TAG="{{.ENV_TAG}}"
+          BASE_ENV=""
+        else
+          ENV_TAG="settings_generated"
+          BASE_ENV=".env"
+        fi
+        OUTPUT_ENV=".env_${ENV_TAG}"
+        if [ -n "$BASE_ENV" ] && [ -f "$BASE_ENV" ]; then
+          echo "Используется base env файл: $BASE_ENV"
+          BASE_ARG="--base-env-file $BASE_ENV"
+        else
+          echo "Base env не используется (или файл не найден), продолжаем без него"
+          BASE_ARG=""
+        fi
+        if [ -z "$BASE_ARG" ] && [ -f "$OUTPUT_ENV" ]; then
+          echo "Удаляем старый $OUTPUT_ENV перед генерацией"
+          rm -f "$OUTPUT_ENV"
+        fi
+        echo "Итоговый env файл: $OUTPUT_ENV"
+        echo "Ожидание ручной инициализации через settings-bort UI/curl..."
+        bash scripts/bootstrap_with_settings.sh \
+          --settings-compose-file {{.COMPOSE_SETTINGS}} \
+          ${BASE_ARG:+$BASE_ARG} \
+          --settings-service settings-service \
+          --output-env-file "$OUTPUT_ENV" \
+          --skip-init
+        echo "Env готов: $OUTPUT_ENV"
+        echo "Запуск bort отдельно: task dev-bort ENV_TAG=$ENV_TAG"
+
+  dev-bort-bootstrap:
+    desc: Полный bootstrap flow для bort
+
+    deps:
+      - init-bort
+    cmds:
+      - |
+        set -e
+        if [ "{{.MANUAL}}" = "1" ]; then
+          BOOTSTRAP_TARGET="bootstrap-bort-manual-env"
+        else
+          BOOTSTRAP_TARGET="bootstrap-bort-env"
+        fi
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_TAG="{{.ENV_TAG}}"
+          task "${BOOTSTRAP_TARGET}" ENV_TAG="${ENV_TAG} IS_LOCAL=false"
+        else
+          ENV_TAG="settings_generated"
+          task "${BOOTSTRAP_TARGET}"
+        fi
+        task dev-bort ENV_TAG="${ENV_TAG}" BRANCH="{{.BRANCH}} IS_LOCAL=false"
+
+  down:
+    desc: Остановить bort-стек
+    aliases:
+      - stop
+      - down-bort
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} down'
+      - task stop-vector
+      - echo "Все сервисы остановлены"
+
+  restart:
+    desc: Перезапустить bort-стек
+    aliases:
+      - restart-bort
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} restart'
+      - task start-vector
+      - echo "Сервисы перезапущены"
+
+  logs-bort:
+    desc: Показать логи bort-стека
+    aliases:
+      - logs
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} logs -f'
+
+  ps:
+    desc: Показать статус bort-стека
+    aliases:
+      - ps-bort
+    cmds:
+      - echo "=== Бортовая часть ==="
+      - '{{.DOCKER_COMPOSE_BORT}} ps'
+      - task ps-vector
+
+  urls-bort:
+    desc: Показать URLs bort-стека
+    aliases:
+      - urls
+    cmds:
+      - |
+        echo ""
+        echo "=== URLs бортовых сервисов ==="
+        echo ""
+        echo "Redis (кэш):           localhost:6379"
+        echo "PostgreSQL (БД):       localhost:5432"
+        echo "NanoMQ MQTT:           localhost:1883"
+        echo "NanoMQ WebSocket:      ws://localhost:8083/mqtt"
+        echo "NanoMQ Admin:          http://localhost:8081"
+        echo "eKuiper:               http://localhost:9081"
+        echo "eKuiper Manager:       http://localhost:9082"
+        echo "Manager credentials:   admin:public"
+        echo "Trip Service Backend:  http://localhost:8000"
+        echo "Graph Service Backend: http://localhost:5001"
+        echo "Main Frontend:         http://localhost:3000"
+        echo "Graph Service Frontend: http://localhost:3001"
+        echo "Dozzle (логи):         http://localhost:9999"
+        echo ""
+
+  health:
+    desc: Показать health bort-стека
+    cmds:
+      - echo "=== Бортовая часть ==="
+      - '{{.DOCKER_COMPOSE_BORT}} ps --format json | jq -r ''.[] | "\(.Name): \(.Health)"'''
+
+  backup-volumes:
+    desc: Сохранить postgres volume bort-стека
+    cmds:
+      - |
+        set -e
+        echo "Создание резервной копии volumes..."
+        mkdir -p backups
+        TS=$(date +%Y%m%d-%H%M%S)
+        docker run --rm \
+          -v dispatching-postgres-data:/data \
+          -v "$PWD/backups:/backup" \
+          alpine tar czf "/backup/postgres-data-${TS}.tar.gz" -C /data .
+        echo "Резервная копия создана"
+
+  redis-cli:
+    desc: Открыть redis-cli внутри bort-стека
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} exec redis redis-cli'
+
+  psql:
+    desc: Открыть psql внутри bort-стека
+    cmds:
+      - '{{.DOCKER_COMPOSE_BORT}} exec postgres psql -U postgres -d dispatching'
+
+  pull:
+    desc: Скачать образы bort-стека
+    aliases:
+      - pull-bort
+      - pull-all-bort
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_FILE=".env_{{.ENV_TAG}}"
+          echo "Pulling всех образов (bort) с env: $ENV_FILE..."
+          {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" pull
+        else
+          echo "Pulling всех образов (bort)..."
+          {{.DOCKER_COMPOSE_BORT}} pull
+        fi
+        echo "Все образы загружены"
+
+  stats:
+    desc: Показать docker stats
+    cmds:
+      - docker stats --no-stream
+
+  prune:
+    desc: Удалить неиспользуемые Docker ресурсы
+    cmds:
+      - docker system prune -f
+      - echo "Неиспользуемые ресурсы удалены"
+
+  prune-builder:
+    desc: Очистить build cache
+    cmds:
+      - docker builder prune -f
+      - echo "Build cache очищен"
+
+  cleanup-image-repo:
+    desc: Удалить старые теги одного образа, сохранив текущий и branch-latest
+    requires:
+      vars:
+        - REPO
+        - CURRENT_TAG
+    cmds:
+      - |
+        set -e
+        DRY_RUN_ARG=""
+        if [ "{{default "0" .DRY_RUN}}" = "1" ]; then
+          DRY_RUN_ARG="--dry-run"
+        fi
+        bash scripts/cleanup-image-tags.sh \
+          --repo "{{.REPO}}" \
+          --keep-tag "{{.CURRENT_TAG}}" \
+          --keep-tag "{{.LATEST_TAG}}" \
+          ${DRY_RUN_ARG}
+
+  cleanup-bort-images:
+    desc: Удалить старые теги управляемых bort-образов, сохранив текущие и branch-latest
+    cmds:
+      - |
+        set -e
+        DRY_RUN_ARG=""
+        if [ "{{default "0" .DRY_RUN}}" = "1" ]; then
+          DRY_RUN_ARG="--dry-run"
+        fi
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_FILE=".env_{{.ENV_TAG}}"
+        else
+          ENV_FILE=".env"
+        fi
+        if [ ! -f "$ENV_FILE" ]; then
+          echo "Ошибка: Файл $ENV_FILE не найден!"
+          exit 1
+        fi
+        echo "Используется env файл: $ENV_FILE"
+        bash scripts/ensure-image-tag-defaults.sh "$ENV_FILE" "{{.LATEST_TAG}}" "{{.COMPOSE_BORT}}"
+        while IFS=$'\t' read -r IMAGE_REPO IMAGE_TAG IMAGE_VAR TAG_VAR; do
+          [ -n "$IMAGE_REPO" ] || continue
+          echo "===> ${IMAGE_VAR}/${TAG_VAR}: ${IMAGE_REPO}:${IMAGE_TAG}"
+          bash scripts/cleanup-image-tags.sh \
+            --repo "$IMAGE_REPO" \
+            --keep-tag "$IMAGE_TAG" \
+            --keep-tag "{{.LATEST_TAG}}" \
+            ${DRY_RUN_ARG}
+        done < <(bash scripts/list-managed-image-refs.sh "$ENV_FILE" "{{.COMPOSE_BORT}}")
+        echo "Cleanup управляемых bort-образов завершён"
+
+  test-ekuiper:
+    desc: Запуск быстрых тестов eKuiper
+    cmds:
+      - echo "Запуск быстрых тестов eKuiper (без E2E)..."
+      - '{{.DOCKER_COMPOSE_BORT}} run --rm pytest'
+      - echo "Тесты завершены"
+
+  test-ekuiper-full:
+    desc: Запуск всех тестов eKuiper
+    cmds:
+      - echo "Запуск ВСЕХ тестов eKuiper (с E2E)..."
+      - '{{.DOCKER_COMPOSE_BORT}} run --rm pytest pytest --run-e2e -v'
+      - echo "Все тесты завершены"
+
+  test-ekuiper-with-mocks:
+    desc: Запуск тестов eKuiper с моками
+    cmds:
+      - echo "Запуск тестов с моками (без E2E)..."
+      - '{{.DOCKER_COMPOSE_BORT}} run --rm pytest pytest --with-mocks -v'
+      - echo "Тесты завершены"
+
+  test-ekuiper-with-mocks-full:
+    desc: Запуск тестов eKuiper с моками и E2E
+    cmds:
+      - echo "Запуск тестов с моками (включая E2E)..."
+      - '{{.DOCKER_COMPOSE_BORT}} run --rm pytest pytest --with-mocks --run-e2e -v'
+      - echo "Тесты завершены"
+
+  test-ekuiper-verbose:
+    desc: Запуск verbose-тестов eKuiper
+    cmds:
+      - echo "Запуск тестов eKuiper (verbose, без E2E)..."
+      - '{{.DOCKER_COMPOSE_BORT}} run --rm pytest pytest -vv'
+      - echo "Тесты завершены"
+
+  check-migrations:
+    desc: Проверить целостность миграций
+    cmds:
+      - echo "Проверка целостности миграций..."
+      - python3 scripts/check_migrations.py
+      - echo "Проверка завершена"
+
+  update-bort-service:
+    desc: Пересобрать и перезапустить один bort-сервис
+    requires:
+      vars:
+        - SERVICE
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_FILE=".env_{{.ENV_TAG}}"
+        else
+          ENV_FILE=".env"
+        fi
+        if [ ! -f "$ENV_FILE" ]; then
+          echo "Ошибка: Файл $ENV_FILE не найден!"
+          exit 1
+        fi
+        echo "Используется env файл: $ENV_FILE"
+        set -a && . "./$ENV_FILE" && set +a
+        if ! {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" config --services 2>/dev/null | grep -q "^{{.SERVICE}}$"; then
+          echo "Сервис {{.SERVICE}} не найден в {{.COMPOSE_BORT}} - пропускаем"
+          exit 0
+        fi
+        echo "Пересборка сервиса {{.SERVICE}}..."
+        {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" build --no-cache {{.SERVICE}}
+        echo "Перезапуск сервиса {{.SERVICE}}..."
+        {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" up -d --no-deps --force-recreate {{.SERVICE}}
+        echo "Сервис {{.SERVICE}} обновлён"
+
+  update-settings-bort-service:
+    desc: Пересобрать и перезапустить один settings-bort-сервис
+    requires:
+      vars:
+        - SERVICE
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_FILE=".env_{{.ENV_TAG}}"
+        else
+          ENV_FILE=".env"
+        fi
+        if [ -f "$ENV_FILE" ]; then
+          echo "Используется env файл: $ENV_FILE"
+          ENV_ARGS="--env-file $ENV_FILE"
+        else
+          echo "Файл $ENV_FILE не найден, продолжаем с дефолтами {{.COMPOSE_SETTINGS}}"
+          ENV_ARGS=""
+        fi
+        SETTINGS_COMPOSE_CMD="env UID=$(id -u) GID=$(id -g) {{.DOCKER_COMPOSE}} -f {{.COMPOSE_SETTINGS}}"
+        if ! $SETTINGS_COMPOSE_CMD $ENV_ARGS config --services 2>/dev/null | grep -q "^{{.SERVICE}}$"; then
+          echo "Сервис {{.SERVICE}} не найден в {{.COMPOSE_SETTINGS}} - пропускаем"
+          exit 0
+        fi
+        echo "Пересборка сервиса {{.SERVICE}}..."
+        $SETTINGS_COMPOSE_CMD $ENV_ARGS build --no-cache {{.SERVICE}}
+        echo "Перезапуск сервиса {{.SERVICE}}..."
+        $SETTINGS_COMPOSE_CMD $ENV_ARGS up -d --force-recreate {{.SERVICE}}
+        echo "Сервис {{.SERVICE}} обновлён"
+
+  pull-and-restart-bort-service:
+    desc: Pull и перезапуск одного bort-сервиса
+    requires:
+      vars:
+        - SERVICE
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_FILE=".env_{{.ENV_TAG}}"
+        else
+          ENV_FILE=".env"
+        fi
+        if [ ! -f "$ENV_FILE" ]; then
+          echo "Ошибка: Файл $ENV_FILE не найден!"
+          exit 1
+        fi
+        echo "Используется env файл: $ENV_FILE"
+        set -a && . "./$ENV_FILE" && set +a
+        if ! {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" config --services 2>/dev/null | grep -q "^{{.SERVICE}}$"; then
+          echo "Сервис {{.SERVICE}} не найден в {{.COMPOSE_BORT}} - пропускаем"
+          exit 0
+        fi
+        echo "Docker login в registry..."
+        docker login registry.dmi-msk.ru -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+        echo "Pulling образа для {{.SERVICE}}..."
+        {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" pull {{.SERVICE}}
+        echo "Перезапуск сервиса {{.SERVICE}}..."
+        {{.DOCKER_COMPOSE_BORT}} --env-file "$ENV_FILE" up -d --no-deps --force-recreate {{.SERVICE}}
+        echo "$({{.DOCKER_COMPOSE_BORT}} images | grep {{.SERVICE}})"
+        echo "Сервис {{.SERVICE}} обновлён (pull)"
+
+  pull-and-restart-settings-bort-service:
+    desc: Pull и перезапуск одного settings-bort-сервиса
+    requires:
+      vars:
+        - SERVICE
+    cmds:
+      - |
+        set -e
+        if [ -n "{{.ENV_TAG}}" ]; then
+          ENV_FILE=".env_{{.ENV_TAG}}"
+        else
+          ENV_FILE=".env"
+        fi
+        if [ -f "$ENV_FILE" ]; then
+          echo "Используется env файл: $ENV_FILE"
+          ENV_ARGS="--env-file $ENV_FILE"
+        else
+          echo "Файл $ENV_FILE не найден, продолжаем с дефолтами {{.COMPOSE_SETTINGS}}"
+          ENV_ARGS=""
+        fi
+        SETTINGS_COMPOSE_CMD="env UID=$(id -u) GID=$(id -g) {{.DOCKER_COMPOSE}} -f {{.COMPOSE_SETTINGS}}"
+        if ! $SETTINGS_COMPOSE_CMD $ENV_ARGS config --services 2>/dev/null | grep -q "^{{.SERVICE}}$"; then
+          echo "Сервис {{.SERVICE}} не найден в {{.COMPOSE_SETTINGS}} - пропускаем"
+          exit 0
+        fi
+        echo "Docker login в registry..."
+        docker login registry.dmi-msk.ru -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+        echo "Pulling образа для {{.SERVICE}}..."
+        $SETTINGS_COMPOSE_CMD $ENV_ARGS pull {{.SERVICE}}
+        echo "Перезапуск сервиса {{.SERVICE}}..."
+        $SETTINGS_COMPOSE_CMD $ENV_ARGS up -d --force-recreate {{.SERVICE}}
+        echo "Сервис {{.SERVICE}} обновлён (pull)"
+
+  uv-index-url:
+    desc: Настроить extra-index-url для uv
+    cmds:
+      - |
+        set -e
+        set -a; source .env; set +a
+        echo "Установка глобального extra-index-url для uv (ветка: {{.BRANCH}})"
+        mkdir -p ~/.config/uv
+        cat > ~/.config/uv/uv.toml <<EOF
+        extra-index-url = ["https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@${CI_PIPY_DOMAIN}/repository/pypi-{{.BRANCH}}-group/simple"]
+        EOF
+
+  uv-index-remove:
+    desc: Удалить конфигурацию uv
+    cmds:
+      - |
+        set -e
+        echo "Удаление файла конфигурации uv"
+        rm -f ~/.config/uv/uv.toml
+
+  help-uv:
+    desc: Показать справку по uv-конфигурации
+    cmds:
+      - echo "Цели для управления конфигурацией uv (Nexus):"
+      - echo "  task uv-index-url BRANCH=dev      Создать конфигурацию uv для Nexus-репозитория pypi-<BRANCH>-group."
+      - echo "  task uv-index-remove              Удалить файл конфигурации uv (~/.config/uv/uv.toml)."
+
+  docker-login:
+    desc: "Авторизация в registry.dmi-msk.ru"
+    dotenv: ['.env']
+    cmds:
+      - |
+        echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY_DOMAIN"

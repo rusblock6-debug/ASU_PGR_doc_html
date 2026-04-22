@@ -1,0 +1,324 @@
+.deploy_base:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: "none"
+    BORT_DEPLOY_CMD: "dev-bort"
+  script:
+    - |
+      set -Eeuo pipefail
+      export DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1
+      SOURCE_BRANCH="${TRIGGERED_BRANCH:-${CI_COMMIT_REF_NAME:-dev}}"
+      export DEPLOY_BRANCH="${DEPLOY_BRANCH:-${SOURCE_BRANCH}}"
+      BRANCH_SLUG="$(printf '%s' "${SOURCE_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+      if [ -z "${BRANCH_SLUG}" ]; then
+        BRANCH_SLUG="dev"
+      fi
+      export DEFAULT_IMAGE_TAG="${BRANCH_SLUG}-latest"
+      echo "===> Ветка деплоя: ${SOURCE_BRANCH}, default image tag: ${DEFAULT_IMAGE_TAG}"
+
+      if [ -n "${TRIGGERED_COMMIT:-}" ] && [ -z "${SERVICE_NAME:-}" ]; then
+        echo "===> Триггер без SERVICE_NAME - пропускаем"
+        exit 0
+      fi
+
+      if [ -n "${TARGET_ENV:-}" ] && [ "${TARGET_ENV}" != "bort" ]; then
+        echo "===> TARGET_ENV=${TARGET_ENV} не совпадает с текущим типом bort - пропускаем"
+        exit 0
+      fi
+
+      ENV_TAG="${DEPLOY_ENV}"
+      ENV_FILE=".env_${DEPLOY_ENV}"
+      STATE_DIR="/srv/${CI_PROJECT_NAME}-state"
+      TAG_STATE_FILE="${STATE_DIR}/image-tags.${DEPLOY_ENV}.env"
+      PREV_ENV_FILE="/srv/${CI_PROJECT_NAME}/${ENV_FILE}"
+      TMP_ENV_SNAPSHOT="/tmp/${CI_PROJECT_NAME}-${CI_JOB_ID}-${ENV_FILE}.saved"
+      LEGACY_STATE_ENV_FILE="${STATE_DIR}/${ENV_FILE}"
+
+      mkdir -p "${STATE_DIR}"
+      if [ -f "${PREV_ENV_FILE}" ]; then
+        echo "===> Временно сохраняем текущий runtime env в ${TMP_ENV_SNAPSHOT}"
+        cp "${PREV_ENV_FILE}" "${TMP_ENV_SNAPSHOT}"
+      fi
+
+      echo "===> Очистка старых /tmp/${CI_PROJECT_NAME}-*"
+      find /tmp -maxdepth 1 -type d -name "${CI_PROJECT_NAME}-*" -exec rm -rf {} +
+
+      TMP_CLONE="/tmp/${CI_PROJECT_NAME}-${CI_JOB_ID}"
+      echo "Клонируем в: $TMP_CLONE (ветка: ${DEPLOY_BRANCH})"
+      git clone -b "${DEPLOY_BRANCH}" "https://${GIT_BOT}:${GIT_BOT_TOKEN}@git.dmi-msk.ru/retek.pgr/dispatching/${CI_PROJECT_NAME}.git" "$TMP_CLONE" || {
+        echo "Ветка ${DEPLOY_BRANCH} не найдена, пробуем dev..."
+        git clone -b "dev" "https://${GIT_BOT}:${GIT_BOT_TOKEN}@git.dmi-msk.ru/retek.pgr/dispatching/${CI_PROJECT_NAME}.git" "$TMP_CLONE"
+      }
+
+      rm -rf /srv/${CI_PROJECT_NAME}
+      mkdir -p /srv/${CI_PROJECT_NAME}
+      rsync -a "$TMP_CLONE"/ /srv/${CI_PROJECT_NAME}/
+
+      SETTINGS_BORT_DIR="/srv/repos/settings-bort"
+      if [ ! -d "$SETTINGS_BORT_DIR" ]; then
+          echo "Directory $SETTINGS_BORT_DIR not found. Cloning repository..."
+          git clone -b "${DEPLOY_BRANCH}" https://${GIT_BOT}:${GIT_BOT_TOKEN}@git.dmi-msk.ru/retek.pgr/dispatching/settings-bort.git "$SETTINGS_BORT_DIR"
+      else 
+        rm -rf ${SETTINGS_BORT_DIR}
+        git clone -b "${DEPLOY_BRANCH}" https://${GIT_BOT}:${GIT_BOT_TOKEN}@git.dmi-msk.ru/retek.pgr/dispatching/settings-bort.git "$SETTINGS_BORT_DIR"
+      fi
+
+      cd /srv/${CI_PROJECT_NAME}
+
+      export PATH="$PWD/.bin:$PATH"
+      bash scripts/install_task.sh "$PWD/.bin"
+      task --version
+
+      restore_runtime_env_if_needed() {
+        if [ -f "${ENV_FILE}" ]; then
+          return 0
+        fi
+        if [ -f "${TMP_ENV_SNAPSHOT}" ]; then
+          echo "===> Восстанавливаем ${ENV_FILE} из ${TMP_ENV_SNAPSHOT}"
+          cp "${TMP_ENV_SNAPSHOT}" "${ENV_FILE}"
+          return 0
+        fi
+        if [ -f "${LEGACY_STATE_ENV_FILE}" ]; then
+          echo "===> Восстанавливаем ${ENV_FILE} из legacy state ${LEGACY_STATE_ENV_FILE}"
+          cp "${LEGACY_STATE_ENV_FILE}" "${ENV_FILE}"
+          return 0
+        fi
+        echo "===> ${ENV_FILE} не найден, генерируем через settings-bort"
+        task bootstrap-bort-env ENV_TAG="${ENV_TAG}" BRANCH="${DEPLOY_BRANCH}"
+      }
+
+      apply_tag_state_if_present() {
+        if [ -f "${TAG_STATE_FILE}" ]; then
+          echo "===> Накатываем сохранённые теги из ${TAG_STATE_FILE} в ${ENV_FILE}"
+          bash scripts/merge-env-file.sh "${ENV_FILE}" "${TAG_STATE_FILE}"
+        else
+          echo "===> Сохранённый state тегов не найден, остаёмся на значениях из ${ENV_FILE}"
+        fi
+      }
+
+      ensure_default_image_tags() {
+        echo "===> Обеспечиваем default image tags (${DEFAULT_IMAGE_TAG}) в ${ENV_FILE}"
+        bash scripts/ensure-image-tag-defaults.sh "${ENV_FILE}" "${DEFAULT_IMAGE_TAG}" "$PWD/docker-compose.bort.yaml"
+      }
+
+      persist_tag_state() {
+        if [ ! -f "${ENV_FILE}" ]; then
+          echo "===> ${ENV_FILE} отсутствует, state тегов не обновляем"
+          return 0
+        fi
+        echo "===> Синхронизируем state тегов в ${TAG_STATE_FILE}"
+        bash scripts/sync-image-tag-state.sh "${ENV_FILE}" "${TAG_STATE_FILE}" "$PWD/docker-compose.bort.yaml"
+      }
+
+      cleanup_legacy_state_env() {
+        if [ -f "${LEGACY_STATE_ENV_FILE}" ]; then
+          echo "===> Удаляем obsolete state env ${LEGACY_STATE_ENV_FILE}"
+          rm -f "${LEGACY_STATE_ENV_FILE}"
+        fi
+      }
+
+      if [ ! -f "${TAG_STATE_FILE}" ] && [ -f "${LEGACY_STATE_ENV_FILE}" ]; then
+        echo "===> Мигрируем теги из legacy state ${LEGACY_STATE_ENV_FILE}"
+        bash scripts/sync-image-tag-state.sh "${LEGACY_STATE_ENV_FILE}" "${TAG_STATE_FILE}" "$PWD/docker-compose.bort.yaml"
+      fi
+
+      docker image prune -f
+
+      if [ -n "${SERVICE_NAME:-}" ] && [ -n "${REPO_NAME:-}" ]; then
+        echo "===> Частичное обновление: сервис=${SERVICE_NAME}, репо=${REPO_NAME}"
+        task init-bort BRANCH="${DEPLOY_BRANCH}" IS_LOCAL=false
+        restore_runtime_env_if_needed
+        apply_tag_state_if_present
+        ensure_default_image_tags
+        if [ -n "${IMAGE_REPO:-}" ] && [ -n "${IMAGE_TAG:-}" ]; then
+          echo "===> Обновление образа для ${SERVICE_NAME}: ${IMAGE_REPO}:${IMAGE_TAG}"
+          chmod +x scripts/update-image-tag.sh
+          ./scripts/update-image-tag.sh "${SERVICE_NAME}" "${IMAGE_REPO}" "${IMAGE_TAG}" "${ENV_FILE}"
+          ./scripts/update-image-tag.sh "${SERVICE_NAME}" "${IMAGE_REPO}" "${IMAGE_TAG}" "${TAG_STATE_FILE}"
+        fi
+        if [ "${COMPOSE_TARGET:-}" = "settings-bort" ] || [ "${SERVICE_NAME}" = "settings-service" ]; then
+          UPDATE_TARGET="update-settings-bort-service"
+          PULL_TARGET="pull-and-restart-settings-bort-service"
+        else
+          UPDATE_TARGET="update-bort-service"
+          PULL_TARGET="pull-and-restart-bort-service"
+        fi
+
+        if [ -n "${IMAGE_REPO:-}" ] && [ -n "${IMAGE_TAG:-}" ]; then
+          task "${PULL_TARGET}" SERVICE="${SERVICE_NAME}" ENV_TAG="${ENV_TAG}" BRANCH="${DEPLOY_BRANCH}"
+          task cleanup-image-repo REPO="${IMAGE_REPO}" CURRENT_TAG="${IMAGE_TAG}" LATEST_TAG="${DEFAULT_IMAGE_TAG}"
+        else
+          task "${UPDATE_TARGET}" SERVICE="${SERVICE_NAME}" ENV_TAG="${ENV_TAG}" BRANCH="${DEPLOY_BRANCH}"
+        fi
+        persist_tag_state
+        cleanup_legacy_state_env
+      else
+        echo "===> Полное обновление бортовой части"
+        if [ "${BORT_DEPLOY_CMD}" = "dev-bort-bootstrap" ]; then
+          if [ "${MANUAL:-0}" = "1" ]; then
+            BOOTSTRAP_TARGET="bootstrap-bort-manual-env"
+          else
+            BOOTSTRAP_TARGET="bootstrap-bort-env"
+          fi
+          task "${BOOTSTRAP_TARGET}" ENV_TAG="${ENV_TAG}" BRANCH="${DEPLOY_BRANCH}" 
+          apply_tag_state_if_present
+          ensure_default_image_tags
+          task dev-bort ENV_TAG="${ENV_TAG}" BRANCH="${DEPLOY_BRANCH}" IS_LOCAL=false
+        else
+          restore_runtime_env_if_needed
+          apply_tag_state_if_present
+          ensure_default_image_tags
+          task "${BORT_DEPLOY_CMD}" ENV_TAG="${ENV_TAG}" BRANCH="${DEPLOY_BRANCH}" IS_LOCAL=false
+        fi
+        persist_tag_state
+        cleanup_legacy_state_env
+        task cleanup-bort-images ENV_TAG="${ENV_TAG}" LATEST_TAG="${DEFAULT_IMAGE_TAG}"
+      fi
+
+# DEV
+
+.deploy_template_dispa-bort:
+  extends: .deploy_base
+  tags:
+    - dispa-bort-1
+  variables:
+    DEPLOY_ENV: "bort_1_dev"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "4"
+    SETTINGS_URL: "http://10.100.109.14:8006"
+    ENTERPRISE_SERVER_URL: "http://10.100.109.14:8002"
+
+.deploy_template_dispa-bort2:
+  extends: .deploy_base
+  tags:
+    - dispa-bort-2
+  variables:
+    DEPLOY_ENV: "bort_2_dev"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "9"
+    SETTINGS_URL: "http://10.100.109.14:8006"
+    ENTERPRISE_SERVER_URL: "http://10.100.109.14:8002"
+
+.deploy_template_dispa-bort3:
+  extends: .deploy_base
+  tags:
+    - dispa-bort-3
+  variables:
+    DEPLOY_ENV: "bort_3_dev"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "17"
+    SETTINGS_URL: "http://10.100.109.14:8006"
+    ENTERPRISE_SERVER_URL: "http://10.100.109.14:8002"
+
+.deploy_template_dispa-bort4:
+  extends: .deploy_base
+  tags:
+    - dispa-bort-4
+  variables:
+    DEPLOY_ENV: "bort_4_dev"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "22"
+    SETTINGS_URL: "http://10.100.109.14:8006"
+    ENTERPRISE_SERVER_URL: "http://10.100.109.14:8002"
+
+# dispa-dev-bort-1-bevm01 (raspberry pi)
+.deploy_template_dispa-dev-bort-1-bevm01:
+  extends: .deploy_base
+  tags:
+    - dispa-dev-bort-1-bevm01
+  variables:
+    DEPLOY_ENV: "dispa-dev-bort-1-bevm01"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "4"
+    SETTINGS_URL: "http://10.100.109.14:8006"
+    ENTERPRISE_SERVER_URL: "http://10.100.109.14:8002"
+
+# STAGE
+
+.deploy_template_dispa-stage-bort-1:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-1
+  variables:
+    DEPLOY_ENV: "bort_1_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "4"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"
+
+.deploy_template_dispa-stage-bort-2:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-2
+  variables:
+    DEPLOY_ENV: "bort_2_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "9"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"
+
+.deploy_template_dispa-stage-bort-3:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-3
+  variables:
+    DEPLOY_ENV: "bort_3_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "17"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"
+
+.deploy_template_dispa-stage-bort-4:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-4
+  variables:
+    DEPLOY_ENV: "bort_4_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "22"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"
+
+.deploy_template_dispa-stage-bort-5:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-5
+  variables:
+    DEPLOY_ENV: "bort_5_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "2"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"
+
+.deploy_template_dispa-stage-bort-6:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-6
+  variables:
+    DEPLOY_ENV: "bort_6_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "3"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"
+
+.deploy_template_dispa-stage-bort-7:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-7
+  variables:
+    DEPLOY_ENV: "bort_7_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "10"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"
+
+.deploy_template_dispa-stage-bort-8:
+  extends: .deploy_base
+  tags:
+    - dispa-stage-bort-8
+  variables:
+    DEPLOY_ENV: "bort_8_stage"
+    BORT_DEPLOY_CMD: "dev-bort-bootstrap"
+    VEHICLE_ID: "11"
+    SETTINGS_URL: "http://10.109.51.3:8006"
+    ENTERPRISE_SERVER_URL: "http://10.109.51.3:8002"

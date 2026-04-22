@@ -1,0 +1,10 @@
+.title {
+  display: flex;
+  gap: 16px;
+}
+
+.status {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

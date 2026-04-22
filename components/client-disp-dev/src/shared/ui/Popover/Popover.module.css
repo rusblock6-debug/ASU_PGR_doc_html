@@ -1,0 +1,8 @@
+.dropdown {
+  gap: 8px;
+  padding: 8px;
+  background-color: var(--bg-widget-hover);
+  border: 1px solid transparent;
+  border-radius: var(--mantine-radius-md);
+  box-shadow: 0 0 20px 0 #3537401f;
+}

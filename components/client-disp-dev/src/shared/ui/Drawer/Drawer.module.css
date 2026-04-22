@@ -1,0 +1,27 @@
+.root {
+  --overlay-bg: rgb(0 0 0 / 50%);
+}
+
+.content {
+  border-left: 1px solid var(--text-secondary);
+}
+
+.header {
+  min-height: 32px;
+  padding: 20px 12px 8px 20px;
+}
+
+.title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-loose);
+  color: var(--base-white);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 60px);
+  padding: 0 12px 17px 17px;
+  color: var(--text-primary);
+}

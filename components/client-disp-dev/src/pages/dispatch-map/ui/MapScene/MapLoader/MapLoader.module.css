@@ -1,0 +1,28 @@
+.loader {
+  --orem-bw-000-25: transparent;
+  --map-loader-bg: rgb(56 55 55 / 64%);
+
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-map-base);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 50px;
+  padding-left: var(--sidebar-offset, 0);
+  background-color: var(--map-loader-bg);
+  backdrop-filter: blur(6px);
+}
+
+.loader_icon {
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+}
+
+.loader_text {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+  color: var(--base-white);
+}

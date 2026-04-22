@@ -1,0 +1,12 @@
+.thead {
+  position: sticky;
+  top: -1px;
+  z-index: var(--z-index-default);
+  pointer-events: auto;
+  background-color: var(--bg-widget);
+}
+
+.header_row {
+  display: flex;
+  width: 100%;
+}

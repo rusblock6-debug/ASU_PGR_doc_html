@@ -1,0 +1,10 @@
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 300px;
+}
+
+.divider_container {
+  padding: 4px 8px;
+}

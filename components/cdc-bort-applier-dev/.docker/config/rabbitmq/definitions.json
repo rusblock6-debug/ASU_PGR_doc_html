@@ -1,0 +1,79 @@
+{
+  "users": [
+    {
+      "name": "admin",
+      "password": "public",
+      "tags": "administrator"
+    },
+    {
+      "name": "debezium",
+      "password": "debezium",
+      "tags": ""
+    },
+    {
+      "name": "guest",
+      "password": "guest",
+      "tags": ""
+    }
+  ],
+  "vhosts": [
+    { "name": "/" }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "debezium",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "policies": [],
+  "queues": [
+    {
+      "name": "cdc-graph-service",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "stream"
+      }
+    },
+    {
+      "name": "cdc-enterprise-service",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "stream"
+      }
+    },
+    {
+      "name": "cdc-auth-service",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "stream"
+      }
+    }
+  ],
+  "exchanges": [],
+  "bindings": [],
+  "parameters": [],
+  "global_parameters": []
+}
