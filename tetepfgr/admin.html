@@ -3304,10 +3304,10 @@
                 let html = '';
                 
                 for (const [key, dir] of Object.entries(data.directories)) {
-                    html += `<li>
-                        <a href="#dir-${key}" onclick="showDirectory('${key}', this); return false;">${dir.title}</a>
-                        <span class="toc-item-download" id="download-dir-${key}" onclick="event.stopPropagation(); downloadDirectoryPdf('${key}', this)" title="Скачать PDF">↓</span>
-                        <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButtonDir('${key}')" title="Экспорт в PDF">⋮</span>
+                    html += `<li style="position:relative;">
+                        <a href="#dir-${key}" onclick="showDirectory('${key}', this); return false;" style="padding-left:20px;padding-right:48px;">${dir.title}</a>
+                        <span class="toc-item-download" id="download-dir-${key}" onclick="event.stopPropagation(); downloadDirectoryPdf('${key}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
+                        <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButtonDir('${key}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
                     </li>`;
                 }
                 
