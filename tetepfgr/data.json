@@ -539,15 +539,15 @@
         "subtitle": "Настройка цифровой модели рудника",
         "description": "Основной раздел для настройки цифровой модели рудника. Здесь создаются и редактируются все объекты системы.",
         "items": [
-          "Горизонты — <a href='#' onclick='event.preventDefault(); showDirectory(\"horizons\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>уровни рудника</a> с высотными отметками",
-          "Места — <a href='#' onclick='event.preventDefault(); showDirectory(\"work_places\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>точки погрузки и разгрузки</a>",
-          "Участки — <a href='#' onclick='event.preventDefault(); showDirectory(\"sections\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>производственные участки предприятия</a>",
-          "Метки — <a href='#' onclick='event.preventDefault(); showDirectory(\"positioning_tags\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>метки позиционирования</a> для техники",
-          "Персонал — <a href='#' onclick='event.preventDefault(); showDirectory(\"staff\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>сотрудники предприятия</a> и их учетные записи",
-          "Роли — <a href='#' onclick='event.preventDefault(); showDirectory(\"roles\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>роли пользователей</a> с настройкой прав доступа",
-          "Оборудование — модели техники и <a href='#' onclick='event.preventDefault(); showDirectory(\"vehicles\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>единицы оборудования</a>",
-          "Статусы — <a href='#' onclick='event.preventDefault(); showDirectory(\"statuses\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>статусы для классификации рабочего времени</a>",
-          "Виды груза — <a href='#' onclick='event.preventDefault(); showDirectory(\"cargo_types\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>типы материалов</a> с параметрами плотности"
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"horizons\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Горизонты</a> — уровни рудника с высотными отметками",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"work_places\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Места</a> — точки погрузки и разгрузки",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"sections\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Участки</a> — производственные участки предприятия",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"positioning_tags\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Метки</a> — метки позиционирования для техники",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"staff\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Персонал</a> — сотрудники предприятия и их учетные записи",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"roles\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Роли</a> — роли пользователей с настройкой прав доступа",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"vehicles\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Оборудование</a> — модели техники и единицы оборудования",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"statuses\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Статусы</a> — статусы для классификации рабочего времени",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"cargo_types\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Виды груза</a> — типы материалов с параметрами плотности"
         ],
         "image": "screenshots/main-windows/handbooks.png",
         "images": [
@@ -561,12 +561,12 @@
         "subtitle": "Ежедневное планирование и мониторинг",
         "description": "Раздел для ежедневного планирования и мониторинга. Основное рабочее место диспетчера.",
         "items": [
-          "Управление техникой — мониторинг состояния и управление парком техники",
+          "Управление техникой — мониторинг состояния и управление парком <a href='#' onclick='event.preventDefault(); showDirectory(\"vehicles\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>техники</a>",
           "Карта — 3D визуализация рудника с техникой в реальном времени",
-          "Карта (2D) — 2D отображение рудника с техникой и местами",
-          "Карта рабочего времени (КРВ) — визуализация статусов техники на временной шкале",
-          "Управление рейсами — просмотр и редактирование текущих и завершенных рейсов",
-          "Наряд-задание — создание сменных заданий для техники"
+          "Карта (2D) — 2D отображение рудника с техникой и <a href='#' onclick='event.preventDefault(); showDirectory(\"work_places\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>местами</a>",
+          "Карта рабочего времени (КРВ) — визуализация <a href='#' onclick='event.preventDefault(); showDirectory(\"statuses\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>статусов</a> техники на временной шкале",
+          "Управление <a href='#' onclick='event.preventDefault(); showDirectory(\"trips\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>рейсами</a> — просмотр и редактирование текущих и завершенных рейсов",
+          "<a href='#' onclick='event.preventDefault(); showDirectory(\"work_orders\"); return false;' style='color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;font-weight:500;' title='📖 Открыть справочник'>Наряд-задание</a> — создание сменных заданий для техники"
         ],
         "image": "screenshots/main-windows/operational.png",
         "images": [
