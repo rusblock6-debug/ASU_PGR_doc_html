@@ -747,12 +747,23 @@
         }
         .key-indicators ul { 
             margin: 0; 
-            padding-left: 24px;
+            padding-left: 0;
+            list-style: none;
         }
         .key-indicators li { 
+            position: relative;
+            padding-left: 24px;
             margin-bottom: 10px;
             line-height: 1.6;
             color: var(--text-secondary);
+        }
+        .key-indicators li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 18px;
         }
 
         .instruction-content { 
@@ -789,16 +800,23 @@
         }
         .instruction-content ul { 
             margin: 24px 0; 
-            padding-left: 28px;
+            padding-left: 0;
+            list-style: none;
         }
         .instruction-content li { 
+            position: relative;
+            padding-left: 24px;
             margin-bottom: 12px;
             line-height: 1.7;
             color: var(--text-secondary);
         }
-        .instruction-content li::marker { 
+        .instruction-content li::before { 
+            content: '▸';
+            position: absolute;
+            left: 0;
             color: var(--accent-color);
             font-weight: bold;
+            font-size: 18px;
         }
 
         /* --- Editor Panel --- */
@@ -2622,15 +2640,13 @@
                                     inWarningBlock = false;
                                 }
                                 
-                                // Если строка начинается с ▸ - рендерим с оранжевым маркером
-                                if (detail.trim().startsWith('▸')) {
-                                    const text = detail.trim().substring(1).trim();
-                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
-                                }
                                 // Если строка начинается с тире - рендерим с оранжевым маркером
-                                else if (detail.trim().startsWith('-')) {
+                                if (detail.trim().startsWith('—') || detail.trim().startsWith('-') || detail.trim().startsWith('▸')) {
                                     const text = detail.trim().substring(1).trim();
                                     html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                } else if (detail.match(/^\d+\./)) {
+                                    // Нумерованный список
+                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
                                 } else {
                                     // Обычный текст без маркера
                                     html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
@@ -2741,15 +2757,13 @@
                                     inWarningBlock = false;
                                 }
                                 
-                                // Если строка начинается с ▸ - рендерим с оранжевым маркером
-                                if (detail.trim().startsWith('▸')) {
-                                    const text = detail.trim().substring(1).trim();
-                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
-                                }
                                 // Если строка начинается с тире - рендерим с оранжевым маркером
-                                else if (detail.trim().startsWith('-')) {
+                                if (detail.trim().startsWith('—') || detail.trim().startsWith('-') || detail.trim().startsWith('▸')) {
                                     const text = detail.trim().substring(1).trim();
                                     html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                } else if (detail.match(/^\d+\./)) {
+                                    // Нумерованный список
+                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
                                 } else {
                                     // Обычный текст без маркера
                                     html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
@@ -2928,53 +2942,47 @@
                                     return;
                                 }
                                 
-                                // Проверяем является ли строка предупреждением
-                                const isWarning = detail.toUpperCase().includes('ВНИМАНИЕ') || detail.toUpperCase().includes('ВАЖНО');
+                                // Если строка начинается с ⚠️
+                                if (detail.trim().startsWith('⚠️')) {
+                                    const text = detail.trim().substring(2).trim();
+                                    if (!inWarningBlock) {
+                                        inWarningBlock = true;
+                                    }
+                                    warningBlock.push(text);
+                                } else {
+                                    // Закрываем блок предупреждения если он открыт
+                                    if (inWarningBlock && warningBlock.length > 0) {
+                                        contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                        warningBlock.forEach(line => {
+                                            contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
+                                        });
+                                        contentHtml += '</div>';
+                                        warningBlock = [];
+                                        inWarningBlock = false;
+                                    }
+                                    
+                                    // Если строка начинается с тире - рендерим с оранжевым маркером
+                                    if (detail.trim().startsWith('—')) {
+                                        const text = detail.trim().substring(1).trim();
+                                        contentHtml += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                    } else if (detail.match(/^\d+\./)) {
+                                        // Нумерованный список
+                                        contentHtml += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                    } else {
+                                        // Обычный текст
+                                        contentHtml += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                    }
+                                }
                                 
-                                if (isWarning && !inWarningBlock) {
-                                    // Начинаем новый блок предупреждения
-                                    inWarningBlock = true;
-                                    warningBlock.push(detail);
-                                } else if (isWarning && inWarningBlock) {
-                                    // Закрываем предыдущий блок и начинаем новый
+                                // Закрываем последний блок предупреждения если он открыт
+                                if (detailIndex === step.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
                                     contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                     warningBlock.forEach(line => {
                                         contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
                                     });
                                     contentHtml += '</div>';
-                                    warningBlock = [detail];
-                                } else if (inWarningBlock) {
-                                    // Добавляем в текущий блок предупреждения
-                                    warningBlock.push(detail);
-                                } else {
-                                    // Обычная строка
-                                    let formattedDetail = detail;
-                                    
-                                    // Форматируем списки с тире
-                                    if (detail.trim().startsWith('—')) {
-                                        const indentLevel = (detail.match(/^\s*/)[0].length / 3);
-                                        const paddingLeft = indentLevel * 20;
-                                        formattedDetail = `<div style="padding-left:${paddingLeft}px;margin:4px 0;">${detail}</div>`;
-                                    } else if (detail.match(/^\d+\./)) {
-                                        // Нумерованный список
-                                        formattedDetail = `<div style="padding-left:20px;margin:4px 0;">${detail}</div>`;
-                                    } else {
-                                        // Обычный текст
-                                        formattedDetail = `<div style="margin:4px 0;">${detail}</div>`;
-                                    }
-                                    
-                                    contentHtml += formattedDetail;
                                 }
                             });
-                            
-                            // Закрываем последний блок предупреждения если он открыт
-                            if (inWarningBlock && warningBlock.length > 0) {
-                                contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
-                                warningBlock.forEach(line => {
-                                    contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
-                                });
-                                contentHtml += '</div>';
-                            }
                             
                             contentHtml += '</div>';
                         }
