@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>НАВИГАТОР.ПГР - Документация</title>
-    <!-- Локальная версия - без внешних зависимостей -->
-    <script src="library/pdf-lib.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         :root {
             /* Modern Pandoc-inspired Theme */
@@ -13,10 +15,9 @@
             --sidebar-bg: #2c3e50;
             --sidebar-hover: #34495e;
             --card-bg: #ffffff;
-            --text-primary: #1a202c;
-            --text-secondary: #4a5568;
-            --text-tertiary: #718096;
-            --text-light: #a0aec0;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6c7d;
+            --text-light: #95a5a6;
             --border-color: #e1e8ed;
             --accent-color: #ed8d48;
             --accent-hover-color: #d67a38;
@@ -65,9 +66,9 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-secondary);
+            color: var(--text-primary);
             line-height: 1.7;
             font-size: 15px;
         }
@@ -189,6 +190,11 @@
             border-left: 1px solid var(--border-color);
             border-radius: 8px 0 0 8px;
         }
+        .sidebar-toggle::after {
+            content: '◀';
+            font-size: 14px;
+            font-weight: bold;
+        }
         .sidebar.collapsed + .sidebar-toggle::after {
             content: '▶';
         }
@@ -200,7 +206,7 @@
         }
         .sidebar-title {
             font-size: 18px;
-            font-weight: 600;
+            font-weight: 700;
             color: #ffffff;
             letter-spacing: 0.3px;
         }
@@ -261,7 +267,7 @@
         }
 
         .toc-group-title {
-            font-weight: 600;
+            font-weight: 700;
             color: rgba(255,255,255,0.5);
             text-transform: uppercase;
             font-size: 11px;
@@ -359,7 +365,7 @@
             color: white;
             border-radius: 4px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: bold;
             box-shadow: 0 2px 4px rgba(237, 141, 72, 0.3);
             transition: all 0.2s;
         }
@@ -410,7 +416,7 @@
 
         h1.main-title {
             font-size: 36px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
@@ -422,7 +428,7 @@
             margin-bottom: 40px;
             padding-bottom: 20px;
             border-bottom: 3px solid var(--accent-color);
-            color: #1A1A1A;
+            color: var(--text-primary);
             position: relative;
         }
         .section-group-title::after {
@@ -462,17 +468,17 @@
             background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
         }
         .card-path {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            color: #1A1A1A;
+            color: var(--text-primary);
             flex-grow: 1;
-            letter-spacing: -0.4px;
+            letter-spacing: -0.3px;
         }
         .card-description {
             padding: 28px 32px;
             font-size: 15px;
             line-height: 1.8;
-            color: #2B2B2B;
+            color: var(--text-secondary);
             border-bottom: 1px solid var(--border-color);
             background-color: var(--card-bg);
         }
@@ -482,8 +488,6 @@
             padding-left: 28px; 
             margin-bottom: 14px; 
             line-height: 1.7;
-            color: #2B2B2B;
-            font-size: 15px;
         }
         .card-description li::before { 
             content: '▸'; 
@@ -491,7 +495,7 @@
             left: 0; 
             top: 0; 
             color: var(--accent-color); 
-            font-weight: 500; 
+            font-weight: bold; 
             font-size: 18px;
         }
         
@@ -525,7 +529,7 @@
             border: none;
             padding: 14px 28px;
             border-radius: 10px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', sans-serif;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -658,7 +662,7 @@
         .instruction-header h2 { 
             margin: 0; 
             font-size: 22px; 
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.3px;
         }
         .instruction-close { 
@@ -698,7 +702,7 @@
         .guidde-step:last-child { border-bottom: none; }
         .step-number { 
             font-size: 18px; 
-            font-weight: 600; 
+            font-weight: 700; 
             color: var(--accent-color); 
             margin-bottom: 12px;
             display: inline-block;
@@ -707,15 +711,10 @@
             border-radius: 8px;
         }
         .step-text { 
-            font-size: 16px; 
-            line-height: 1.7; 
-            color: #1A1A1A;
-            margin-bottom: 16px;
-            font-weight: 600;
-        }
-        .step-text strong {
-            font-weight: 600;
-            color: #1A1A1A;
+            font-size: 15px; 
+            line-height: 1.8; 
+            color: var(--text-secondary); 
+            margin-bottom: 20px;
         }
         .step-images { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
         .step-images.horizontal { flex-direction: row; justify-content: flex-start; flex-wrap: wrap; }
@@ -746,28 +745,16 @@
             color: var(--accent-color); 
             margin-bottom: 14px; 
             font-size: 17px;
-            font-weight: 600;
+            font-weight: 700;
         }
         .key-indicators ul { 
             margin: 0; 
-            padding-left: 0;
-            list-style: none;
+            padding-left: 24px;
         }
         .key-indicators li { 
-            position: relative;
-            padding-left: 24px;
             margin-bottom: 10px;
             line-height: 1.6;
-            color: #2B2B2B;
-            font-size: 14px;
-        }
-        .key-indicators li::before {
-            content: '▸';
-            position: absolute;
-            left: 0;
-            color: var(--accent-color);
-            font-weight: 500;
-            font-size: 18px;
+            color: var(--text-secondary);
         }
 
         .instruction-content { 
@@ -775,9 +762,9 @@
             line-height: 1.8;
         }
         .instruction-content h3 { 
-            color: #1A1A1A; 
+            color: var(--text-primary); 
             margin: 32px 0 18px 0; 
-            font-size: 24px; 
+            font-size: 22px; 
             font-weight: 700; 
             border-bottom: 2px solid var(--accent-color);
             padding-bottom: 12px;
@@ -793,36 +780,27 @@
             background: var(--accent-color);
         }
         .instruction-content h4 { 
-            color: #1A1A1A; 
+            color: var(--text-primary); 
             margin: 24px 0 14px 0; 
-            font-size: 18px; 
-            font-weight: 600;
+            font-size: 17px; 
+            font-weight: 700;
         }
         .instruction-content p { 
             margin: 0 0 18px 0;
-            color: #2B2B2B;
-            font-size: 15px;
+            color: var(--text-secondary);
         }
         .instruction-content ul { 
             margin: 24px 0; 
-            padding-left: 0;
-            list-style: none;
+            padding-left: 28px;
         }
         .instruction-content li { 
-            position: relative;
-            padding-left: 24px;
             margin-bottom: 12px;
             line-height: 1.7;
-            color: #2B2B2B;
-            font-size: 15px;
+            color: var(--text-secondary);
         }
-        .instruction-content li::before { 
-            content: '▸';
-            position: absolute;
-            left: 0;
+        .instruction-content li::marker { 
             color: var(--accent-color);
-            font-weight: 500;
-            font-size: 18px;
+            font-weight: bold;
         }
 
         /* --- Editor Panel --- */
@@ -885,7 +863,7 @@
         .editor-header h2 { 
             margin: 0; 
             font-size: 20px; 
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.3px;
         }
         .editor-close { 
@@ -945,7 +923,7 @@
         }
         .card-type-btn .label { 
             font-size: 13px; 
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.3px;
         }
 
@@ -990,7 +968,7 @@
             margin-bottom: 14px;
         }
         .step-block-title { 
-            font-weight: 600; 
+            font-weight: 700; 
             color: var(--accent-color);
             font-size: 15px;
         }
@@ -1033,7 +1011,7 @@
             padding: 16px; 
             border: none; 
             border-radius: 12px; 
-            font-weight: 600; 
+            font-weight: 700; 
             cursor: pointer; 
             font-size: 16px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1125,7 +1103,7 @@
         }
         .directory-table-title {
             font-size: 18px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-primary);
             letter-spacing: -0.2px;
         }
@@ -1146,7 +1124,7 @@
             background: linear-gradient(135deg, #f7f9fa 0%, #fafbfc 100%);
             padding: 14px 24px;
             text-align: left;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 12px;
             color: var(--text-primary);
             text-transform: uppercase;
@@ -1205,7 +1183,7 @@
             position: absolute;
             left: 0;
             color: var(--accent-color);
-            font-weight: 500;
+            font-weight: bold;
         }
         .param-impact-list li:last-child {
             margin-bottom: 0;
@@ -1309,7 +1287,7 @@
             right: 40px;
             color: #f1f1f1;
             font-size: 50px;
-            font-weight: 500;
+            font-weight: bold;
             cursor: pointer;
             z-index: 10001;
             transition: all 0.3s;
@@ -1341,7 +1319,7 @@
             padding: 14px 20px;
             border: none;
             border-radius: 10px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             font-size: 15px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1447,14 +1425,6 @@
                     <div id="section-quickstart" class="content-section active">
                         <h2 class="section-group-title">Быстрый старт</h2>
                         <div id="quickstartContent">
-                            <div class="loading">Загрузка...</div>
-                        </div>
-                    </div>
-
-                    <!-- Section 0.5: Quick Start Bort -->
-                    <div id="section-quickstart_bort" class="content-section">
-                        <h2 class="section-group-title">Быстрый старт (Борт)</h2>
-                        <div id="quickstartBortContent">
                             <div class="loading">Загрузка...</div>
                         </div>
                     </div>
@@ -1702,7 +1672,7 @@
     </div>
 
     <!-- Include html2pdf.js library -->
-    <script src="library/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
         // Функция для транслитерации имени файла
@@ -1801,29 +1771,6 @@
                 `;
             }
 
-            // Добавляем Быстрый старт (Борт) вторым с сворачиваемым деревом
-            if (appData.cards.quickstart_bort) {
-                const quickstartBortSteps = appData.cards.quickstart_bort.steps || [];
-                tocHTML += `
-                    <div class="toc-level-1">
-                        <li style="list-style:none;">
-                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 12px;cursor:pointer;color:#ffffff;font-weight:600;">
-                                <span class="toc-toggle-icon" id="toggle-quickstart-bort-tree" style="transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-bort-tree')">▶</span>
-                                <span style="flex:1;" onclick="navigateToSection('quickstart_bort', this.parentElement)">Быстрый старт (Борт)</span>
-                            </div>
-                            <ul id="quickstart-bort-tree" class="toc-tree-children" style="display:none;list-style:none;padding-left:16px;">
-                                ${quickstartBortSteps.map((step, idx) => {
-                                    const stepId = `quickstart-bort-step-${idx}`;
-                                    return `<li>
-                                        <a href="#section-quickstart_bort" onclick="navigateToSection('quickstart_bort', this); scrollToQuickstartBortStep(${idx})" style="display:block;padding:12px 48px 12px 32px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='36px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='32px'">${step.title}</a>
-                                    </li>`;
-                                }).join('')}
-                            </ul>
-                        </li>
-                    </div>
-                `;
-            }
-
             // Добавляем "Администрирование" сразу после Быстрого старта (всегда раскрыто)
             const adminSection = { id: 'admin', title: 'Администрирование', cards: appData.cards.admin_instructions || [] };
             if (adminSection.cards.length > 0) {
@@ -1838,7 +1785,7 @@
                                 if (card.steps && card.steps.length > 0) {
                                     const cardTreeId = `admin-card-${card.id}-tree`;
                                     return `<li style="margin-bottom:2px;">
-                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:12px 48px 12px 12px;cursor:pointer;color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;transition:all 0.2s;border-left:3px solid transparent;" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.9)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
+                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:12px 48px 12px 12px;cursor:pointer;color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.9)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
                                             <span class="toc-toggle-icon" id="toggle-${cardTreeId}" style="transition:all 0.3s;display:inline-block;font-size:10px;opacity:0;" onclick="event.stopPropagation(); toggleTocSection('${cardTreeId}')">▶</span>
                                             <span style="flex:1;">${displayName}</span>
                                             <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="margin-left:auto;margin-right:4px;">↓</span>
@@ -1847,7 +1794,7 @@
                                         <ul id="${cardTreeId}" class="toc-tree-children" style="display:none;list-style:none;padding-left:16px;">
                                             ${card.steps.map((step, stepIdx) => {
                                                 return `<li>
-                                                    <a href="#card-${card.id}-step-${stepIdx}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}-step-${stepIdx}', this); scrollToAdminStep('${card.id}', ${stepIdx})" style="display:block;padding:10px 48px 10px 32px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:400;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='rgba(255,255,255,0.95)';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.65)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${step.text}</a>
+                                                    <a href="#card-${card.id}-step-${stepIdx}" style="display:block;padding:10px 48px 10px 32px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:400;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='rgba(255,255,255,0.95)';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.65)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${step.text}</a>
                                                 </li>`;
                                             }).join('')}
                                         </ul>
@@ -1855,7 +1802,7 @@
                                 } else {
                                     // Обычная карточка без подпунктов - добавляем отступ слева как у треугольника
                                     return `<li>
-                                        <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
+                                        <a href="#card-${card.id}" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
                                             ${displayName}
                                             <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
                                             <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${adminSection.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
@@ -1893,7 +1840,7 @@
                                         displayName = capitalizeFirst(navTitle) || 'Без названия';
                                     }
                                     return `<li>
-                                        <a href="#card-${card.id}" onclick="navigateToCard('${section.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${displayName}</a>
+                                        <a href="#card-${card.id}" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${displayName}</a>
                                         <span class="toc-item-download" id="download-${section.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${section.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
                                         <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${section.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
                                     </li>`
@@ -1924,7 +1871,7 @@
                             ${aboutSection.cards.map(card => {
                                 const displayName = card.navTitle || card.title || 'Без названия';
                                 return `<li>
-                                    <a href="#card-${card.id}" onclick="navigateToCard('${aboutSection.id}', 'card-${card.id}', this)">${displayName}</a>
+                                    <a href="#card-${card.id}">${displayName}</a>
                                     <span class="toc-item-download" id="download-${aboutSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${aboutSection.id}', '${card.id}', this)" title="Скачать PDF">↓</span>
                                     <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${aboutSection.id}', '${card.id}')" title="Экспорт в PDF">⋮</span>
                                 </li>`
@@ -1980,22 +1927,6 @@
             }, 100);
         }
         
-        // Функция для прокрутки к конкретному шагу в Быстром старте (Борт)
-        function scrollToQuickstartBortStep(stepIndex) {
-            setTimeout(() => {
-                const stepCards = document.querySelectorAll('#quickstartBortContent .card');
-                if (stepCards[stepIndex]) {
-                    stepCards[stepIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
-                    // Добавляем временную подсветку
-                    stepCards[stepIndex].style.transition = 'box-shadow 0.3s';
-                    stepCards[stepIndex].style.boxShadow = '0 0 15px var(--accent-color)';
-                    setTimeout(() => {
-                        stepCards[stepIndex].style.boxShadow = '';
-                    }, 1000);
-                }
-            }, 100);
-        }
-        
         // Функция для прокрутки к конкретному шагу в карточке администрирования
         function scrollToAdminStep(cardId, stepIndex) {
             setTimeout(() => {
@@ -2013,8 +1944,7 @@
         }
         
         function navigateToSection(sectionId, linkElement) {
-            showSection(sectionId);
-            document.querySelector('.content-pane').scrollTo({ top: 0, behavior: 'auto' });
+            showSection(sectionId, true);
             
             // Set active state in ToC
             document.querySelectorAll('.toc-level-1 a').forEach(link => link.classList.remove('active'));
@@ -2022,29 +1952,41 @@
         }
         
         function navigateToCard(sectionId, cardId, linkElement) {
-            // Show correct section first
+            // Show section without scrolling to top
             showSection(sectionId, false);
             
-            // Force reflow to ensure section is visible
-            document.getElementById(`section-${sectionId}`).offsetHeight;
-            
-            // Now scroll to card immediately
-            requestAnimationFrame(() => {
-                const cardElement = document.getElementById(cardId);
-                if (cardElement) {
-                    scrollToCard(cardId);
-                } else {
-                    console.error('Card not found:', cardId);
-                    const contentPane = document.querySelector('.content-pane');
-                    if (contentPane) {
-                        contentPane.scrollTo({ top: 0, behavior: 'auto' });
-                    }
-                }
-            });
-
             // Set active state in ToC
             document.querySelectorAll('.toc-level-1 a, .toc-card-item').forEach(link => link.classList.remove('active'));
             if (linkElement) linkElement.classList.add('active');
+            
+            // Wait for DOM to render, then scroll to card with offset
+            setTimeout(() => {
+                const cardElement = document.getElementById(cardId);
+                if (cardElement) {
+                    const contentPane = document.querySelector('.content-pane');
+                    if (contentPane) {
+                        // Get absolute position relative to content pane
+                        let cardTop = 0;
+                        let element = cardElement;
+                        while (element && element !== contentPane) {
+                            cardTop += element.offsetTop;
+                            element = element.offsetParent;
+                        }
+                        
+                        const offset = 80; // 64px header + 16px padding
+                        contentPane.scrollTo({ top: cardTop - offset, behavior: 'auto' });
+                        
+                        // Highlight effect
+                        cardElement.style.transition = 'box-shadow 0.3s';
+                        cardElement.style.boxShadow = '0 0 15px var(--accent-color)';
+                        setTimeout(() => {
+                            cardElement.style.boxShadow = '';
+                        }, 1000);
+                    }
+                }
+            }, 50);
+            
+            return false; // Prevent default href behavior
         }
 
         function showSection(sectionId, scrollToTop = true) {
@@ -2082,7 +2024,7 @@
             });
             document.getElementById(`section-${sectionId}`).classList.add('active');
             
-            // Прокрутка наверх при переключении любой секции (если scrollToTop = true)
+            // Прокрутка наверх только если требуется
             if (scrollToTop) {
                 const contentPane = document.querySelector('.content-pane');
                 if (contentPane) {
@@ -2094,13 +2036,26 @@
         function scrollToCard(cardId) {
             const cardElement = document.getElementById(cardId);
             if (cardElement) {
-                cardElement.scrollIntoView({ behavior: 'auto', block: 'start' });
-                // Add a temporary highlight effect
-                cardElement.style.transition = 'box-shadow 0.3s';
-                cardElement.style.boxShadow = '0 0 15px var(--accent-color)';
-                setTimeout(() => {
-                    cardElement.style.boxShadow = '';
-                }, 1000);
+                const contentPane = document.querySelector('.content-pane');
+                if (contentPane) {
+                    // Get absolute position relative to content pane
+                    let cardTop = 0;
+                    let element = cardElement;
+                    while (element && element !== contentPane) {
+                        cardTop += element.offsetTop;
+                        element = element.offsetParent;
+                    }
+                    
+                    const offset = 80; // 64px header + 16px padding
+                    contentPane.scrollTo({ top: cardTop - offset, behavior: 'auto' });
+                    
+                    // Highlight effect
+                    cardElement.style.transition = 'box-shadow 0.3s';
+                    cardElement.style.boxShadow = '0 0 15px var(--accent-color)';
+                    setTimeout(() => {
+                        cardElement.style.boxShadow = '';
+                    }, 1000);
+                }
             }
         }
 
@@ -2526,7 +2481,7 @@
         // Загрузка данных
         async function loadData() {
             try {
-                const response = await fetch('data.json?t=' + Date.now());
+                const response = await fetch('../data.json?t=' + Date.now());
                 if (!response.ok) throw new Error('Ошибка загрузки данных');
                 appData = await response.json();
                 renderAll();
@@ -2575,7 +2530,6 @@
         // Рендер всех секций
         function renderAll() {
             renderQuickstart();
-            renderQuickstartBort();
             renderDescriptive();
             renderInstructions();
             renderAdminInstructions();
@@ -2646,13 +2600,15 @@
                                     inWarningBlock = false;
                                 }
                                 
-                                // Если строка начинается с тире - рендерим с оранжевым маркером
-                                if (detail.trim().startsWith('—') || detail.trim().startsWith('-') || detail.trim().startsWith('▸')) {
+                                // Если строка начинается с ▸ - рендерим с оранжевым маркером
+                                if (detail.trim().startsWith('▸')) {
                                     const text = detail.trim().substring(1).trim();
-                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;">▸</span>${text}</div>`;
-                                } else if (detail.match(/^\d+\./)) {
-                                    // Нумерованный список
-                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                }
+                                // Если строка начинается с тире - рендерим с оранжевым маркером
+                                else if (detail.trim().startsWith('-')) {
+                                    const text = detail.trim().substring(1).trim();
+                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
                                 } else {
                                     // Обычный текст без маркера
                                     html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
@@ -2698,205 +2654,6 @@
             });
             
             container.innerHTML = html;
-        }
-
-        function renderQuickstartBort() {
-            const container = document.getElementById('quickstartBortContent');
-            const quickstartBort = appData.cards.quickstart_bort;
-            if (!quickstartBort) {
-                container.innerHTML = '<p style="color:var(--text-light);">Нет данных</p>';
-                return;
-            }
-            
-            let html = '';
-            (quickstartBort.steps || []).forEach((step, stepIndex) => {
-                html += `
-                    <div class="card" style="margin-bottom:30px;">
-                        <div class="card-head">
-                            <div class="card-path">${step.title}</div>
-                        </div>
-                `;
-                
-                (step.substeps || []).forEach((substep, subIndex) => {
-                    html += `<div class="card-description"><div style="margin-bottom:20px;"><p style="margin-bottom:8px;"><strong>${substep.text}</strong></p>`;
-                    
-                    // Отображаем детали
-                    if (substep.details && substep.details.length > 0) {
-                        html += '<div style="padding-left:0;margin-top:8px;">';
-                        
-                        let warningBlock = [];
-                        let inWarningBlock = false;
-                        
-                        substep.details.forEach((detail, index) => {
-                            // Пропускаем пустые строки
-                            if (!detail.trim()) {
-                                // Закрываем блок предупреждения если он открыт
-                                if (inWarningBlock && warningBlock.length > 0) {
-                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
-                                    warningBlock.forEach(line => {
-                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
-                                    });
-                                    html += '</div>';
-                                    warningBlock = [];
-                                    inWarningBlock = false;
-                                }
-                                html += '<div style="height:8px;"></div>';
-                                return;
-                            }
-                            
-                            // Если строка начинается с ⚠️
-                            if (detail.trim().startsWith('⚠️')) {
-                                const text = detail.trim().substring(2).trim();
-                                if (!inWarningBlock) {
-                                    inWarningBlock = true;
-                                }
-                                warningBlock.push(text);
-                            } else {
-                                // Закрываем блок предупреждения если он открыт
-                                if (inWarningBlock && warningBlock.length > 0) {
-                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
-                                    warningBlock.forEach(line => {
-                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
-                                    });
-                                    html += '</div>';
-                                    warningBlock = [];
-                                    inWarningBlock = false;
-                                }
-                                
-                                // Если строка начинается с тире - рендерим с оранжевым маркером
-                                if (detail.trim().startsWith('—') || detail.trim().startsWith('-') || detail.trim().startsWith('▸')) {
-                                    const text = detail.trim().substring(1).trim();
-                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;">▸</span>${text}</div>`;
-                                } else if (detail.match(/^\d+\./)) {
-                                    // Нумерованный список
-                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
-                                } else {
-                                    // Обычный текст без маркера
-                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
-                                }
-                            }
-                            
-                            // Закрываем блок в конце если он остался открытым
-                            if (index === substep.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
-                                html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
-                                warningBlock.forEach(line => {
-                                    html += `<div style="margin-bottom:4px;">${line}</div>`;
-                                });
-                                html += '</div>';
-                            }
-                        });
-                        html += '</div>';
-                    }
-                    
-                    html += '</div>';
-                    
-                    // Отображаем скриншоты сеткой
-                    if (substep.images && substep.images.length > 0) {
-                        html += '<div class="card-screenshot" style="padding:20px 25px;background-color:#fafafa;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">';
-                        substep.images.forEach(img => {
-                            html += `
-                                <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;height:180px;" 
-                                     onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
-                                     onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'"
-                                     onclick="openImageModal('${img}', '${step.title}', this)">
-                                    <img src="${img}" alt="Скриншот" style="width:100%;height:100%;object-fit:cover;display:block;">
-                                </div>
-                            `;
-                        });
-                        html += '</div></div>';
-                    }
-                    
-                    html += '</div>';
-                });
-                
-                html += `
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        // Маппинг терминов на ID справочников (глобальный)
-        const termToDirectoryMap = {
-            'виды груза': 'cargo_types',
-            'вид груза': 'cargo_types',
-            'плотность': 'cargo_types',
-            'статусы': 'statuses',
-            'статус': 'statuses',
-            'горизонты': 'horizons',
-            'горизонт': 'horizons',
-            'участки': 'sections',
-            'участок': 'sections',
-            'места работ': 'work_places',
-            'место работ': 'work_places',
-            'места': 'work_places',
-            'место': 'work_places',
-            'метки позиционирования': 'positioning_tags',
-            'метка позиционирования': 'positioning_tags',
-            'метки': 'positioning_tags',
-            'метка': 'positioning_tags',
-            'наряд-задания': 'work_orders',
-            'наряд-задание': 'work_orders',
-            'рейсы': 'trips',
-            'рейс': 'trips',
-            'персонал': 'staff',
-            'роли': 'roles',
-            'роль': 'roles',
-            'шахты': 'shafts',
-            'шахта': 'shafts',
-            'оборудование': 'vehicles',
-            'техника': 'vehicles',
-            'единицы оборудования': 'vehicles'
-        };
-        
-        // Функция для добавления ссылок на справочники (глобальная)
-        function addDirectoryLinks(text, addedTerms = null) {
-            if (!text) return text;
-            
-            // Если не передан Set, создаем новый (для обратной совместимости)
-            const isNewContext = !addedTerms;
-            const termsSet = addedTerms || new Set();
-            
-            let result = text;
-            
-            // Сортируем термины по длине (от длинных к коротким) чтобы избежать конфликтов
-            const sortedTerms = Object.keys(termToDirectoryMap).sort((a, b) => b.length - a.length);
-            
-            sortedTerms.forEach(term => {
-                const directoryId = termToDirectoryMap[term];
-                
-                // Пропускаем если уже добавили ссылку на этот справочник в текущем контексте
-                if (termsSet.has(directoryId)) {
-                    return;
-                }
-                
-                // Ищем паттерн: "Термин — определение с термином"
-                // Сначала пробуем найти термин ПОСЛЕ тире (в определении)
-                const definitionRegex = new RegExp(`—[^—]*?(?<![а-яёА-ЯЁa-zA-Z])(${term})(?![а-яёА-ЯЁa-zA-Z])`, 'i');
-                let match = result.match(definitionRegex);
-                
-                // Если не нашли после тире, ищем просто в тексте
-                if (!match) {
-                    const simpleRegex = new RegExp(`(?<![а-яёА-ЯЁa-zA-Z])(${term})(?![а-яёА-ЯЁa-zA-Z])`, 'i');
-                    match = result.match(simpleRegex);
-                }
-                
-                if (match) {
-                    const matchText = match[1];
-                    // Проверяем что это не внутри HTML тега
-                    if (result.indexOf(`>${matchText}<`) === -1 && result.indexOf(`"${matchText}"`) === -1) {
-                        // Заменяем только первое вхождение
-                        const replaceRegex = new RegExp(`(?<![а-яёА-ЯЁa-zA-Z])(${term})(?![а-яёА-ЯЁa-zA-Z])`, 'i');
-                        result = result.replace(replaceRegex, `<a href="#" onclick="event.preventDefault(); showDirectory('${directoryId}'); return false;" style="color:#ed8d48;text-decoration:none;border-bottom:1px dashed #ed8d48;transition:all 0.2s;font-weight:500;" onmouseover="this.style.borderBottom='1px solid #ed8d48';this.style.color='#d67a38'" onmouseout="this.style.borderBottom='1px dashed #ed8d48';this.style.color='#ed8d48'" title="📖 Открыть справочник">$1</a>`);
-                        termsSet.add(directoryId);
-                        console.log(`Добавлена ссылка на "${matchText}" → ${directoryId}`);
-                    }
-                }
-            });
-            
-            // Возвращаем результат и Set (если это новый контекст)
-            return isNewContext ? result : { result, termsSet };
         }
 
         function renderDescriptive() {
@@ -2907,7 +2664,7 @@
                 return;
             }
             container.innerHTML = cards.map((card, i) => {
-                // Обработка items с поддержкой ⚠️ (БЕЗ автоматических ссылок - они уже в JSON)
+                // Обработка items с поддержкой ⚠️
                 let itemsHtml = '';
                 if (card.items && card.items.length > 0) {
                     itemsHtml += '<div style="margin-top:15px;">';
@@ -2920,9 +2677,9 @@
                         if (!item.trim()) {
                             // Закрываем блок предупреждения если он открыт
                             if (inWarningBlock && warningBlock.length > 0) {
-                                itemsHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                                itemsHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                 warningBlock.forEach(line => {
-                                    itemsHtml += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${line}</div>`;
+                                    itemsHtml += `<div style="margin-bottom:4px;">${line}</div>`;
                                 });
                                 itemsHtml += '</div>';
                                 warningBlock = [];
@@ -2942,24 +2699,24 @@
                         } else {
                             // Закрываем блок предупреждения если он открыт
                             if (inWarningBlock && warningBlock.length > 0) {
-                                itemsHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                                itemsHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                 warningBlock.forEach(line => {
-                                    itemsHtml += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${line}</div>`;
+                                    itemsHtml += `<div style="margin-bottom:4px;">${line}</div>`;
                                 });
                                 itemsHtml += '</div>';
                                 warningBlock = [];
                                 inWarningBlock = false;
                             }
                             
-                            // Обычный элемент списка с оранжевым маркером (HTML уже в JSON)
-                            itemsHtml += `<div style="position:relative;padding-left:24px;margin-bottom:12px;line-height:1.6;color:#2B2B2B;font-size:15px;"><span style="position:absolute;left:0;top:0;color:var(--accent-color);font-weight:500;font-size:16px;">▸</span>${item}</div>`;
+                            // Обычный элемент списка с оранжевым маркером
+                            itemsHtml += `<div style="position:relative;padding-left:24px;margin-bottom:12px;line-height:1.6;"><span style="position:absolute;left:0;top:0;color:var(--accent-color);font-weight:bold;font-size:16px;">▸</span>${item}</div>`;
                         }
                         
                         // Закрываем блок в конце если он остался открытым
                         if (index === card.items.length - 1 && inWarningBlock && warningBlock.length > 0) {
-                            itemsHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                            itemsHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                             warningBlock.forEach(line => {
-                                itemsHtml += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${line}</div>`;
+                                itemsHtml += `<div style="margin-bottom:4px;">${line}</div>`;
                             });
                             itemsHtml += '</div>';
                         }
@@ -2975,7 +2732,7 @@
                             <div class="card-path">${card.title || ''}</div>
                         </div>
                         <div class="card-description">
-                            <div style="color:#2B2B2B;font-size:15px;line-height:1.8;">${card.description || ''}</div>
+                            <div>${card.description || ''}</div>
                             ${itemsHtml}
                         </div>
                         <div class="card-screenshot">
@@ -3008,7 +2765,7 @@
                         
                         // Отображаем детали шага
                         if (step.details && step.details.length > 0) {
-                            contentHtml += '<div style="padding-left:0;margin-top:12px;">';
+                            contentHtml += '<div style="padding-left:0;margin-top:8px;">';
                             
                             let warningBlock = [];
                             let inWarningBlock = false;
@@ -3018,9 +2775,9 @@
                                 if (!detail.trim()) {
                                     // Закрываем блок предупреждения если он открыт
                                     if (inWarningBlock && warningBlock.length > 0) {
-                                        contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                                        contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                         warningBlock.forEach(line => {
-                                            contentHtml += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${line}</div>`;
+                                            contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
                                         });
                                         contentHtml += '</div>';
                                         warningBlock = [];
@@ -3030,54 +2787,53 @@
                                     return;
                                 }
                                 
-                                // Если строка начинается с ⚠️
-                                if (detail.trim().startsWith('⚠️')) {
-                                    const text = detail.trim().substring(2).trim();
-                                    if (!inWarningBlock) {
-                                        inWarningBlock = true;
-                                    }
-                                    warningBlock.push(text);
-                                } else {
-                                    // Закрываем блок предупреждения если он открыт
-                                    if (inWarningBlock && warningBlock.length > 0) {
-                                        contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
-                                        warningBlock.forEach(line => {
-                                            contentHtml += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${line}</div>`;
-                                        });
-                                        contentHtml += '</div>';
-                                        warningBlock = [];
-                                        inWarningBlock = false;
-                                    }
-                                    
-                                    // Если строка начинается с тире - подпункт (вторичный текст)
-                                    if (detail.trim().startsWith('—')) {
-                                        const text = detail.trim().substring(1).trim();
-                                        contentHtml += `<div style="position:relative;padding-left:24px;margin-bottom:6px;line-height:1.6;color:#6B6B6B;font-size:14px;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;font-size:16px;">▸</span>${text}</div>`;
-                                    } else if (detail.match(/^\d+\./)) {
-                                        // Нумерованный список - основной текст с жирным номером
-                                        const match = detail.match(/^(\d+\.)\s*(.+)/);
-                                        if (match) {
-                                            const number = match[1];
-                                            const text = match[2];
-                                            contentHtml += `<div style="margin-bottom:10px;margin-top:10px;line-height:1.7;color:#2B2B2B;font-size:15px;"><span style="font-weight:600;">${number}</span> ${text}</div>`;
-                                        } else {
-                                            contentHtml += `<div style="margin-bottom:10px;margin-top:10px;line-height:1.7;color:#2B2B2B;font-size:15px;font-weight:600;">${detail}</div>`;
-                                        }
-                                    } else {
-                                        // Обычный текст - средний вес
-                                        contentHtml += `<div style="margin-bottom:8px;line-height:1.7;color:#2B2B2B;font-size:14px;">${detail}</div>`;
-                                    }
-                                }
+                                // Проверяем является ли строка предупреждением
+                                const isWarning = detail.toUpperCase().includes('ВНИМАНИЕ') || detail.toUpperCase().includes('ВАЖНО');
                                 
-                                // Закрываем последний блок предупреждения если он открыт
-                                if (detailIndex === step.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
-                                    contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                                if (isWarning && !inWarningBlock) {
+                                    // Начинаем новый блок предупреждения
+                                    inWarningBlock = true;
+                                    warningBlock.push(detail);
+                                } else if (isWarning && inWarningBlock) {
+                                    // Закрываем предыдущий блок и начинаем новый
+                                    contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                     warningBlock.forEach(line => {
-                                        contentHtml += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${line}</div>`;
+                                        contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
                                     });
                                     contentHtml += '</div>';
+                                    warningBlock = [detail];
+                                } else if (inWarningBlock) {
+                                    // Добавляем в текущий блок предупреждения
+                                    warningBlock.push(detail);
+                                } else {
+                                    // Обычная строка
+                                    let formattedDetail = detail;
+                                    
+                                    // Форматируем списки с тире
+                                    if (detail.trim().startsWith('—')) {
+                                        const indentLevel = (detail.match(/^\s*/)[0].length / 3);
+                                        const paddingLeft = indentLevel * 20;
+                                        formattedDetail = `<div style="padding-left:${paddingLeft}px;margin:4px 0;">${detail}</div>`;
+                                    } else if (detail.match(/^\d+\./)) {
+                                        // Нумерованный список
+                                        formattedDetail = `<div style="padding-left:20px;margin:4px 0;">${detail}</div>`;
+                                    } else {
+                                        // Обычный текст
+                                        formattedDetail = `<div style="margin:4px 0;">${detail}</div>`;
+                                    }
+                                    
+                                    contentHtml += formattedDetail;
                                 }
                             });
+                            
+                            // Закрываем последний блок предупреждения если он открыт
+                            if (inWarningBlock && warningBlock.length > 0) {
+                                contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                warningBlock.forEach(line => {
+                                    contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
+                                });
+                                contentHtml += '</div>';
+                            }
                             
                             contentHtml += '</div>';
                         }
@@ -3121,9 +2877,6 @@
                     // Добавляем невидимый якорь перед первым шагом с отступом для header
                     html += `<div id="card-${card.id}" style="position:relative;top:-80px;"></div>`;
                     
-                    // Создаем общий Set для отслеживания добавленных ссылок в этой карточке
-                    let addedTermsForCard = new Set();
-                    
                     card.steps.forEach((step, stepIndex) => {
                         html += `
                             <div class="card admin-step-card" id="card-${card.id}-step-${stepIndex}" style="margin-bottom:30px;">
@@ -3135,7 +2888,7 @@
                         
                         // Отображаем детали
                         if (step.details && step.details.length > 0) {
-                            html += '<div style="padding-left:0;margin-top:12px;">';
+                            html += '<div style="padding-left:0;margin-top:8px;">';
                             
                             let warningBlock = [];
                             let inWarningBlock = false;
@@ -3145,11 +2898,9 @@
                                 if (!detail.trim()) {
                                     // Закрываем блок предупреждения если он открыт
                                     if (inWarningBlock && warningBlock.length > 0) {
-                                        html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                                        html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                         warningBlock.forEach(line => {
-                                            const linkResult = addDirectoryLinks(line, addedTermsForCard);
-                                            html += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${linkResult.result}</div>`;
-                                            addedTermsForCard = linkResult.termsSet;
+                                            html += `<div style="margin-bottom:4px;">${line}</div>`;
                                         });
                                         html += '</div>';
                                         warningBlock = [];
@@ -3169,52 +2920,33 @@
                                 } else {
                                     // Закрываем блок предупреждения если он открыт
                                     if (inWarningBlock && warningBlock.length > 0) {
-                                        html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                                        html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                         warningBlock.forEach(line => {
-                                            const linkResult = addDirectoryLinks(line, addedTermsForCard);
-                                            html += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${linkResult.result}</div>`;
-                                            addedTermsForCard = linkResult.termsSet;
+                                            html += `<div style="margin-bottom:4px;">${line}</div>`;
                                         });
                                         html += '</div>';
                                         warningBlock = [];
                                         inWarningBlock = false;
                                     }
                                     
-                                    // Если строка начинается с тире - подпункт (вторичный текст)
+                                    // Если строка начинается с тире - рендерим с оранжевым маркером
                                     if (detail.trim().startsWith('—')) {
                                         const text = detail.trim().substring(1).trim();
-                                        const linkResult = addDirectoryLinks(text, addedTermsForCard);
-                                        html += `<div style="position:relative;padding-left:24px;margin-bottom:6px;line-height:1.6;color:#6B6B6B;font-size:14px;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;font-size:16px;">▸</span>${linkResult.result}</div>`;
-                                        addedTermsForCard = linkResult.termsSet;
+                                        html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
                                     } else if (detail.match(/^\d+\./)) {
-                                        // Нумерованный список - основной текст с жирным номером
-                                        const match = detail.match(/^(\d+\.)\s*(.+)/);
-                                        if (match) {
-                                            const number = match[1];
-                                            const text = match[2];
-                                            const linkResult = addDirectoryLinks(text, addedTermsForCard);
-                                            html += `<div style="margin-bottom:10px;margin-top:10px;line-height:1.7;color:#2B2B2B;font-size:15px;"><span style="font-weight:600;">${number}</span> ${linkResult.result}</div>`;
-                                            addedTermsForCard = linkResult.termsSet;
-                                        } else {
-                                            const linkResult = addDirectoryLinks(detail, addedTermsForCard);
-                                            html += `<div style="margin-bottom:10px;margin-top:10px;line-height:1.7;color:#2B2B2B;font-size:15px;font-weight:600;">${linkResult.result}</div>`;
-                                            addedTermsForCard = linkResult.termsSet;
-                                        }
+                                        // Нумерованный список
+                                        html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
                                     } else {
-                                        // Обычный текст - средний вес
-                                        const linkResult = addDirectoryLinks(detail, addedTermsForCard);
-                                        html += `<div style="margin-bottom:8px;line-height:1.7;color:#2B2B2B;font-size:14px;">${linkResult.result}</div>`;
-                                        addedTermsForCard = linkResult.termsSet;
+                                        // Обычный текст
+                                        html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
                                     }
                                 }
                                 
                                 // Закрываем последний блок предупреждения если он открыт
                                 if (index === step.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
-                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.7;background:var(--accent-light);padding-top:12px;padding-bottom:12px;border-radius:4px;">';
+                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                     warningBlock.forEach(line => {
-                                        const linkResult = addDirectoryLinks(line, addedTermsForCard);
-                                        html += `<div style="margin-bottom:4px;color:#2B2B2B;font-size:14px;">${linkResult.result}</div>`;
-                                        addedTermsForCard = linkResult.termsSet;
+                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
                                     });
                                     html += '</div>';
                                 }
@@ -5377,7 +5109,7 @@
         async function generateAdminPdfContent(card) {
             const container = document.createElement('div');
             container.className = 'pdf-content-admin';
-            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: white;';
+            container.style.cssText = 'font-family: Inter, sans-serif; padding: 20px; background: white;';
             
             let html = `
                 <div style="margin-bottom: 30px; border-bottom: 3px solid #ed8d48; padding-bottom: 15px;">
@@ -5404,7 +5136,7 @@
                             let processedDetail = detail;
                             
                             // Заменяем <strong> на жирный текст
-                            processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 600;">');
+                            processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 700;">');
                             processedDetail = processedDetail.replace(/<\/strong>/g, '</span>');
                             
                             if (processedDetail.trim().startsWith('—')) {
@@ -5594,11 +5326,11 @@
 
         async function generatePdfContentWithAllImages(card, sectionId) {
             const container = document.createElement('div');
-            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
+            container.style.cssText = 'font-family: Inter, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
             container.className = 'pdf-content-' + Date.now();
             
             const title = document.createElement('h1');
-            title.style.cssText = 'font-size: 22px; font-weight: 600; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
+            title.style.cssText = 'font-size: 22px; font-weight: 700; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
             title.textContent = card.title || card.navTitle || 'Без названия';
             container.appendChild(title);
             
@@ -5617,7 +5349,7 @@
                 card.selectedStepTitles.forEach(stepTitle => {
                     const stepItem = document.createElement('div');
                     stepItem.style.cssText = 'font-size: 12px; color: #6c757d; margin-bottom: 4px; position: relative; padding-left: 16px;';
-                    stepItem.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${stepTitle}`;
+                    stepItem.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${stepTitle}`;
                     stepsList.appendChild(stepItem);
                 });
                 
@@ -5658,7 +5390,7 @@
                                 
                                 // Обрабатываем HTML теги
                                 let processedDetail = detail;
-                                processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 600;">');
+                                processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 700;">');
                                 processedDetail = processedDetail.replace(/<\/strong>/g, '</span>');
                                 
                                 if (processedDetail.trim().startsWith('⚠️')) {
@@ -5671,7 +5403,7 @@
                                     detailDiv.style.paddingLeft = '16px';
                                     detailDiv.style.position = 'relative';
                                     const text = processedDetail.trim().substring(1).trim();
-                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${text}`;
+                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${text}`;
                                 } else {
                                     detailDiv.innerHTML = processedDetail;
                                 }
@@ -5753,10 +5485,10 @@
 
         async function generatePdfContent(card, sectionId) {
             const container = document.createElement('div');
-            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
+            container.style.cssText = 'font-family: Inter, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
             
             const title = document.createElement('h1');
-            title.style.cssText = 'font-size: 22px; font-weight: 600; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
+            title.style.cssText = 'font-size: 22px; font-weight: 700; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
             title.textContent = card.title || card.navTitle || 'Без названия';
             container.appendChild(title);
             
@@ -5783,7 +5515,7 @@
                     card.items.forEach(item => {
                         const li = document.createElement('div');
                         li.style.cssText = 'position: relative; padding-left: 20px; margin-bottom: 10px; line-height: 1.5; color: #6c757d; font-size: 13px;';
-                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${item}`;
+                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${item}`;
                         itemsList.appendChild(li);
                     });
                     container.appendChild(itemsList);
@@ -5825,7 +5557,7 @@
                     card.items.forEach(item => {
                         const li = document.createElement('div');
                         li.style.cssText = 'position: relative; padding-left: 18px; margin-bottom: 8px; line-height: 1.5; color: #6c757d; font-size: 12px;';
-                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${item}`;
+                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${item}`;
                         itemsList.appendChild(li);
                     });
                     container.appendChild(itemsList);
@@ -5874,7 +5606,7 @@
                                     } else if (detail.trim().startsWith('-')) {
                                         detailDiv.style.paddingLeft = '16px';
                                         detailDiv.style.position = 'relative';
-                                        detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${detail.substring(1).trim()}`;
+                                        detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${detail.substring(1).trim()}`;
                                     } else {
                                         detailDiv.textContent = detail;
                                     }
@@ -5958,7 +5690,7 @@
                                 } else if (detail.trim().startsWith('-')) {
                                     detailDiv.style.paddingLeft = '16px';
                                     detailDiv.style.position = 'relative';
-                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${detail.substring(1).trim()}`;
+                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${detail.substring(1).trim()}`;
                                 } else {
                                     detailDiv.textContent = detail;
                                 }
@@ -6029,7 +5761,7 @@
                     card.items.forEach(item => {
                         const li = document.createElement('div');
                         li.style.cssText = 'position: relative; padding-left: 18px; margin-bottom: 8px; line-height: 1.5; color: #6c757d; font-size: 12px;';
-                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${item}`;
+                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${item}`;
                         itemsList.appendChild(li);
                     });
                     container.appendChild(itemsList);
@@ -6072,7 +5804,7 @@
                                 } else if (detail.trim().startsWith('—') || detail.trim().startsWith('-')) {
                                     detailDiv.style.paddingLeft = '16px';
                                     detailDiv.style.position = 'relative';
-                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${detail.substring(1).trim()}`;
+                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${detail.substring(1).trim()}`;
                                 } else if (detail.trim() === '') {
                                     // Пустая строка - пропускаем
                                     return;
@@ -6153,7 +5885,7 @@
                         // Добавляем маркер если его нет
                         if (!li.querySelector('strong')) {
                             const marker = document.createElement('span');
-                            marker.style.cssText = 'position: absolute; left: 0; color: #ed8d48; font-weight: 500;';
+                            marker.style.cssText = 'position: absolute; left: 0; color: #ed8d48; font-weight: bold;';
                             marker.textContent = '▸';
                             li.insertBefore(marker, li.firstChild);
                         }
@@ -6212,12 +5944,12 @@
         async function generateDirectoryPdfContent(directory) {
             // Создание нового контейнера
             const container = document.createElement('div');
-            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
+            container.style.cssText = 'font-family: Inter, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
             container.className = 'pdf-content-' + Date.now(); // Уникальный класс
             
             // Заголовок
             const title = document.createElement('h1');
-            title.style.cssText = 'font-size: 22px; font-weight: 600; margin: 0 0 15px 0; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
+            title.style.cssText = 'font-size: 22px; font-weight: 700; margin: 0 0 15px 0; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
             title.textContent = directory.title;
             container.appendChild(title);
             
@@ -6279,7 +6011,7 @@
                         param.impact.forEach(impactItem => {
                             const impactDiv = document.createElement('div');
                             impactDiv.style.cssText = 'position: relative; padding-left: 18px; margin-bottom: 5px; font-size: 13px; color: #6c757d; line-height: 1.5;';
-                            impactDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${impactItem}`;
+                            impactDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${impactItem}`;
                             tdImpact.appendChild(impactDiv);
                         });
                     }

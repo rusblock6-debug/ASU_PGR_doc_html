@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -13,9 +13,10 @@
             --sidebar-bg: #2c3e50;
             --sidebar-hover: #34495e;
             --card-bg: #ffffff;
-            --text-primary: #2c3e50;
-            --text-secondary: #5a6c7d;
-            --text-light: #95a5a6;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-tertiary: #718096;
+            --text-light: #a0aec0;
             --border-color: #e1e8ed;
             --accent-color: #ed8d48;
             --accent-hover-color: #d67a38;
@@ -66,7 +67,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-primary);
+            color: var(--text-secondary);
             line-height: 1.7;
             font-size: 15px;
         }
@@ -188,11 +189,6 @@
             border-left: 1px solid var(--border-color);
             border-radius: 8px 0 0 8px;
         }
-        .sidebar-toggle::after {
-            content: '◀';
-            font-size: 14px;
-            font-weight: bold;
-        }
         .sidebar.collapsed + .sidebar-toggle::after {
             content: '▶';
         }
@@ -204,7 +200,7 @@
         }
         .sidebar-title {
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 600;
             color: #ffffff;
             letter-spacing: 0.3px;
         }
@@ -265,7 +261,7 @@
         }
 
         .toc-group-title {
-            font-weight: 700;
+            font-weight: 600;
             color: rgba(255,255,255,0.5);
             text-transform: uppercase;
             font-size: 11px;
@@ -363,7 +359,7 @@
             color: white;
             border-radius: 4px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
             box-shadow: 0 2px 4px rgba(237, 141, 72, 0.3);
             transition: all 0.2s;
         }
@@ -414,7 +410,7 @@
 
         h1.main-title {
             font-size: 36px;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
@@ -422,7 +418,7 @@
 
         .section-group-title {
             font-size: 36px;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 40px;
             padding-bottom: 20px;
             border-bottom: 3px solid var(--accent-color);
@@ -467,7 +463,7 @@
         }
         .card-path {
             font-size: 22px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-primary);
             flex-grow: 1;
             letter-spacing: -0.3px;
@@ -476,7 +472,7 @@
             padding: 28px 32px;
             font-size: 15px;
             line-height: 1.8;
-            color: var(--text-secondary);
+            color: #5a6c7d;
             border-bottom: 1px solid var(--border-color);
             background-color: var(--card-bg);
         }
@@ -486,6 +482,7 @@
             padding-left: 28px; 
             margin-bottom: 14px; 
             line-height: 1.7;
+            color: #5a6c7d;
         }
         .card-description li::before { 
             content: '▸'; 
@@ -493,7 +490,7 @@
             left: 0; 
             top: 0; 
             color: var(--accent-color); 
-            font-weight: bold; 
+            font-weight: 500; 
             font-size: 18px;
         }
         
@@ -660,7 +657,7 @@
         .instruction-header h2 { 
             margin: 0; 
             font-size: 22px; 
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: -0.3px;
         }
         .instruction-close { 
@@ -700,7 +697,7 @@
         .guidde-step:last-child { border-bottom: none; }
         .step-number { 
             font-size: 18px; 
-            font-weight: 700; 
+            font-weight: 600; 
             color: var(--accent-color); 
             margin-bottom: 12px;
             display: inline-block;
@@ -711,8 +708,12 @@
         .step-text { 
             font-size: 15px; 
             line-height: 1.8; 
-            color: var(--text-secondary); 
+            color: #4a5568;
             margin-bottom: 20px;
+        }
+        .step-text strong {
+            font-weight: 500;
+            color: #2d3748;
         }
         .step-images { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
         .step-images.horizontal { flex-direction: row; justify-content: flex-start; flex-wrap: wrap; }
@@ -743,16 +744,27 @@
             color: var(--accent-color); 
             margin-bottom: 14px; 
             font-size: 17px;
-            font-weight: 700;
+            font-weight: 600;
         }
         .key-indicators ul { 
             margin: 0; 
-            padding-left: 24px;
+            padding-left: 0;
+            list-style: none;
         }
         .key-indicators li { 
+            position: relative;
+            padding-left: 24px;
             margin-bottom: 10px;
             line-height: 1.6;
-            color: var(--text-secondary);
+            color: #5a6c7d;
+        }
+        .key-indicators li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: 500;
+            font-size: 18px;
         }
 
         .instruction-content { 
@@ -763,7 +775,7 @@
             color: var(--text-primary); 
             margin: 32px 0 18px 0; 
             font-size: 22px; 
-            font-weight: 700; 
+            font-weight: 600; 
             border-bottom: 2px solid var(--accent-color);
             padding-bottom: 12px;
             position: relative;
@@ -781,24 +793,31 @@
             color: var(--text-primary); 
             margin: 24px 0 14px 0; 
             font-size: 17px; 
-            font-weight: 700;
+            font-weight: 600;
         }
         .instruction-content p { 
             margin: 0 0 18px 0;
-            color: var(--text-secondary);
+            color: #5a6c7d;
         }
         .instruction-content ul { 
             margin: 24px 0; 
-            padding-left: 28px;
+            padding-left: 0;
+            list-style: none;
         }
         .instruction-content li { 
+            position: relative;
+            padding-left: 24px;
             margin-bottom: 12px;
             line-height: 1.7;
-            color: var(--text-secondary);
+            color: #5a6c7d;
         }
-        .instruction-content li::marker { 
+        .instruction-content li::before { 
+            content: '▸';
+            position: absolute;
+            left: 0;
             color: var(--accent-color);
-            font-weight: bold;
+            font-weight: 500;
+            font-size: 18px;
         }
 
         /* --- Editor Panel --- */
@@ -861,7 +880,7 @@
         .editor-header h2 { 
             margin: 0; 
             font-size: 20px; 
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: -0.3px;
         }
         .editor-close { 
@@ -921,7 +940,7 @@
         }
         .card-type-btn .label { 
             font-size: 13px; 
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: 0.3px;
         }
 
@@ -966,7 +985,7 @@
             margin-bottom: 14px;
         }
         .step-block-title { 
-            font-weight: 700; 
+            font-weight: 600; 
             color: var(--accent-color);
             font-size: 15px;
         }
@@ -1009,7 +1028,7 @@
             padding: 16px; 
             border: none; 
             border-radius: 12px; 
-            font-weight: 700; 
+            font-weight: 600; 
             cursor: pointer; 
             font-size: 16px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1101,7 +1120,7 @@
         }
         .directory-table-title {
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-primary);
             letter-spacing: -0.2px;
         }
@@ -1122,7 +1141,7 @@
             background: linear-gradient(135deg, #f7f9fa 0%, #fafbfc 100%);
             padding: 14px 24px;
             text-align: left;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 12px;
             color: var(--text-primary);
             text-transform: uppercase;
@@ -1181,7 +1200,7 @@
             position: absolute;
             left: 0;
             color: var(--accent-color);
-            font-weight: bold;
+            font-weight: 500;
         }
         .param-impact-list li:last-child {
             margin-bottom: 0;
@@ -1285,7 +1304,7 @@
             right: 40px;
             color: #f1f1f1;
             font-size: 50px;
-            font-weight: bold;
+            font-weight: 500;
             cursor: pointer;
             z-index: 10001;
             transition: all 0.3s;
@@ -1317,7 +1336,7 @@
             padding: 14px 20px;
             border: none;
             border-radius: 10px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
             font-size: 15px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1423,6 +1442,14 @@
                     <div id="section-quickstart" class="content-section active">
                         <h2 class="section-group-title">Быстрый старт</h2>
                         <div id="quickstartContent">
+                            <div class="loading">Загрузка...</div>
+                        </div>
+                    </div>
+
+                    <!-- Section 0.5: Quick Start Bort -->
+                    <div id="section-quickstart_bort" class="content-section">
+                        <h2 class="section-group-title">Быстрый старт (Борт)</h2>
+                        <div id="quickstartBortContent">
                             <div class="loading">Загрузка...</div>
                         </div>
                     </div>
@@ -1769,6 +1796,29 @@
                 `;
             }
 
+            // Добавляем Быстрый старт (Борт) вторым с сворачиваемым деревом
+            if (appData.cards.quickstart_bort) {
+                const quickstartBortSteps = appData.cards.quickstart_bort.steps || [];
+                tocHTML += `
+                    <div class="toc-level-1">
+                        <li style="list-style:none;">
+                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 12px;cursor:pointer;color:#ffffff;font-weight:600;">
+                                <span class="toc-toggle-icon" id="toggle-quickstart-bort-tree" style="transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-bort-tree')">▶</span>
+                                <span style="flex:1;" onclick="navigateToSection('quickstart_bort', this.parentElement)">Быстрый старт (Борт)</span>
+                            </div>
+                            <ul id="quickstart-bort-tree" class="toc-tree-children" style="display:none;list-style:none;padding-left:16px;">
+                                ${quickstartBortSteps.map((step, idx) => {
+                                    const stepId = `quickstart-bort-step-${idx}`;
+                                    return `<li>
+                                        <a href="#section-quickstart_bort" onclick="navigateToSection('quickstart_bort', this); scrollToQuickstartBortStep(${idx})" style="display:block;padding:12px 48px 12px 32px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='36px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='32px'">${step.title}</a>
+                                    </li>`;
+                                }).join('')}
+                            </ul>
+                        </li>
+                    </div>
+                `;
+            }
+
             // Добавляем "Администрирование" сразу после Быстрого старта (всегда раскрыто)
             const adminSection = { id: 'admin', title: 'Администрирование', cards: appData.cards.admin_instructions || [] };
             if (adminSection.cards.length > 0) {
@@ -1913,6 +1963,22 @@
         function scrollToQuickstartStep(stepIndex) {
             setTimeout(() => {
                 const stepCards = document.querySelectorAll('#quickstartContent .card');
+                if (stepCards[stepIndex]) {
+                    stepCards[stepIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
+                    // Добавляем временную подсветку
+                    stepCards[stepIndex].style.transition = 'box-shadow 0.3s';
+                    stepCards[stepIndex].style.boxShadow = '0 0 15px var(--accent-color)';
+                    setTimeout(() => {
+                        stepCards[stepIndex].style.boxShadow = '';
+                    }, 1000);
+                }
+            }, 100);
+        }
+        
+        // Функция для прокрутки к конкретному шагу в Быстром старте (Борт)
+        function scrollToQuickstartBortStep(stepIndex) {
+            setTimeout(() => {
+                const stepCards = document.querySelectorAll('#quickstartBortContent .card');
                 if (stepCards[stepIndex]) {
                     stepCards[stepIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
                     // Добавляем временную подсветку
@@ -2504,6 +2570,7 @@
         // Рендер всех секций
         function renderAll() {
             renderQuickstart();
+            renderQuickstartBort();
             renderDescriptive();
             renderInstructions();
             renderAdminInstructions();
@@ -2574,15 +2641,130 @@
                                     inWarningBlock = false;
                                 }
                                 
-                                // Если строка начинается с ▸ - рендерим с оранжевым маркером
-                                if (detail.trim().startsWith('▸')) {
-                                    const text = detail.trim().substring(1).trim();
-                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
-                                }
                                 // Если строка начинается с тире - рендерим с оранжевым маркером
-                                else if (detail.trim().startsWith('-')) {
+                                if (detail.trim().startsWith('—') || detail.trim().startsWith('-') || detail.trim().startsWith('▸')) {
                                     const text = detail.trim().substring(1).trim();
-                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;">▸</span>${text}</div>`;
+                                } else if (detail.match(/^\d+\./)) {
+                                    // Нумерованный список
+                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                } else {
+                                    // Обычный текст без маркера
+                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                }
+                            }
+                            
+                            // Закрываем блок в конце если он остался открытым
+                            if (index === substep.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
+                                html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                warningBlock.forEach(line => {
+                                    html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                });
+                                html += '</div>';
+                            }
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                    
+                    // Отображаем скриншоты сеткой
+                    if (substep.images && substep.images.length > 0) {
+                        html += '<div class="card-screenshot" style="padding:20px 25px;background-color:#fafafa;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">';
+                        substep.images.forEach(img => {
+                            html += `
+                                <div style="position:relative;overflow:hidden;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;height:180px;" 
+                                     onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
+                                     onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'"
+                                     onclick="openImageModal('${img}', '${step.title}', this)">
+                                    <img src="${img}" alt="Скриншот" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </div>
+                            `;
+                        });
+                        html += '</div></div>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += `
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function renderQuickstartBort() {
+            const container = document.getElementById('quickstartBortContent');
+            const quickstartBort = appData.cards.quickstart_bort;
+            if (!quickstartBort) {
+                container.innerHTML = '<p style="color:var(--text-light);">Нет данных</p>';
+                return;
+            }
+            
+            let html = '';
+            (quickstartBort.steps || []).forEach((step, stepIndex) => {
+                html += `
+                    <div class="card" style="margin-bottom:30px;">
+                        <div class="card-head">
+                            <div class="card-path">${step.title}</div>
+                        </div>
+                `;
+                
+                (step.substeps || []).forEach((substep, subIndex) => {
+                    html += `<div class="card-description"><div style="margin-bottom:20px;"><p style="margin-bottom:8px;"><strong>${substep.text}</strong></p>`;
+                    
+                    // Отображаем детали
+                    if (substep.details && substep.details.length > 0) {
+                        html += '<div style="padding-left:0;margin-top:8px;">';
+                        
+                        let warningBlock = [];
+                        let inWarningBlock = false;
+                        
+                        substep.details.forEach((detail, index) => {
+                            // Пропускаем пустые строки
+                            if (!detail.trim()) {
+                                // Закрываем блок предупреждения если он открыт
+                                if (inWarningBlock && warningBlock.length > 0) {
+                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                    warningBlock.forEach(line => {
+                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                    });
+                                    html += '</div>';
+                                    warningBlock = [];
+                                    inWarningBlock = false;
+                                }
+                                html += '<div style="height:8px;"></div>';
+                                return;
+                            }
+                            
+                            // Если строка начинается с ⚠️
+                            if (detail.trim().startsWith('⚠️')) {
+                                const text = detail.trim().substring(2).trim();
+                                if (!inWarningBlock) {
+                                    inWarningBlock = true;
+                                }
+                                warningBlock.push(text);
+                            } else {
+                                // Закрываем блок предупреждения если он открыт
+                                if (inWarningBlock && warningBlock.length > 0) {
+                                    html += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                    warningBlock.forEach(line => {
+                                        html += `<div style="margin-bottom:4px;">${line}</div>`;
+                                    });
+                                    html += '</div>';
+                                    warningBlock = [];
+                                    inWarningBlock = false;
+                                }
+                                
+                                // Если строка начинается с тире - рендерим с оранжевым маркером
+                                if (detail.trim().startsWith('—') || detail.trim().startsWith('-') || detail.trim().startsWith('▸')) {
+                                    const text = detail.trim().substring(1).trim();
+                                    html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;">▸</span>${text}</div>`;
+                                } else if (detail.match(/^\d+\./)) {
+                                    // Нумерованный список
+                                    html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
                                 } else {
                                     // Обычный текст без маркера
                                     html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
@@ -2683,7 +2865,7 @@
                             }
                             
                             // Обычный элемент списка с оранжевым маркером
-                            itemsHtml += `<div style="position:relative;padding-left:24px;margin-bottom:12px;line-height:1.6;"><span style="position:absolute;left:0;top:0;color:var(--accent-color);font-weight:bold;font-size:16px;">▸</span>${item}</div>`;
+                            itemsHtml += `<div style="position:relative;padding-left:24px;margin-bottom:12px;line-height:1.6;"><span style="position:absolute;left:0;top:0;color:var(--accent-color);font-weight:500;font-size:16px;">▸</span>${item}</div>`;
                         }
                         
                         // Закрываем блок в конце если он остался открытым
@@ -2761,53 +2943,47 @@
                                     return;
                                 }
                                 
-                                // Проверяем является ли строка предупреждением
-                                const isWarning = detail.toUpperCase().includes('ВНИМАНИЕ') || detail.toUpperCase().includes('ВАЖНО');
+                                // Если строка начинается с ⚠️
+                                if (detail.trim().startsWith('⚠️')) {
+                                    const text = detail.trim().substring(2).trim();
+                                    if (!inWarningBlock) {
+                                        inWarningBlock = true;
+                                    }
+                                    warningBlock.push(text);
+                                } else {
+                                    // Закрываем блок предупреждения если он открыт
+                                    if (inWarningBlock && warningBlock.length > 0) {
+                                        contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
+                                        warningBlock.forEach(line => {
+                                            contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
+                                        });
+                                        contentHtml += '</div>';
+                                        warningBlock = [];
+                                        inWarningBlock = false;
+                                    }
+                                    
+                                    // Если строка начинается с тире - рендерим с оранжевым маркером
+                                    if (detail.trim().startsWith('—')) {
+                                        const text = detail.trim().substring(1).trim();
+                                        contentHtml += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;">▸</span>${text}</div>`;
+                                    } else if (detail.match(/^\d+\./)) {
+                                        // Нумерованный список
+                                        contentHtml += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                    } else {
+                                        // Обычный текст
+                                        contentHtml += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
+                                    }
+                                }
                                 
-                                if (isWarning && !inWarningBlock) {
-                                    // Начинаем новый блок предупреждения
-                                    inWarningBlock = true;
-                                    warningBlock.push(detail);
-                                } else if (isWarning && inWarningBlock) {
-                                    // Закрываем предыдущий блок и начинаем новый
+                                // Закрываем последний блок предупреждения если он открыт
+                                if (detailIndex === step.details.length - 1 && inWarningBlock && warningBlock.length > 0) {
                                     contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
                                     warningBlock.forEach(line => {
                                         contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
                                     });
                                     contentHtml += '</div>';
-                                    warningBlock = [detail];
-                                } else if (inWarningBlock) {
-                                    // Добавляем в текущий блок предупреждения
-                                    warningBlock.push(detail);
-                                } else {
-                                    // Обычная строка
-                                    let formattedDetail = detail;
-                                    
-                                    // Форматируем списки с тире
-                                    if (detail.trim().startsWith('—')) {
-                                        const indentLevel = (detail.match(/^\s*/)[0].length / 3);
-                                        const paddingLeft = indentLevel * 20;
-                                        formattedDetail = `<div style="padding-left:${paddingLeft}px;margin:4px 0;">${detail}</div>`;
-                                    } else if (detail.match(/^\d+\./)) {
-                                        // Нумерованный список
-                                        formattedDetail = `<div style="padding-left:20px;margin:4px 0;">${detail}</div>`;
-                                    } else {
-                                        // Обычный текст
-                                        formattedDetail = `<div style="margin:4px 0;">${detail}</div>`;
-                                    }
-                                    
-                                    contentHtml += formattedDetail;
                                 }
                             });
-                            
-                            // Закрываем последний блок предупреждения если он открыт
-                            if (inWarningBlock && warningBlock.length > 0) {
-                                contentHtml += '<div style="border-left:3px solid var(--accent-color);padding-left:16px;margin:12px 0;line-height:1.6;">';
-                                warningBlock.forEach(line => {
-                                    contentHtml += `<div style="margin-bottom:4px;">${line}</div>`;
-                                });
-                                contentHtml += '</div>';
-                            }
                             
                             contentHtml += '</div>';
                         }
@@ -2906,7 +3082,7 @@
                                     // Если строка начинается с тире - рендерим с оранжевым маркером
                                     if (detail.trim().startsWith('—')) {
                                         const text = detail.trim().substring(1).trim();
-                                        html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:bold;">▸</span>${text}</div>`;
+                                        html += `<div style="position:relative;padding-left:24px;margin-bottom:8px;line-height:1.6;"><span style="position:absolute;left:0;color:var(--accent-color);font-weight:500;">▸</span>${text}</div>`;
                                     } else if (detail.match(/^\d+\./)) {
                                         // Нумерованный список
                                         html += `<div style="margin-bottom:8px;line-height:1.6;">${detail}</div>`;
@@ -5110,7 +5286,7 @@
                             let processedDetail = detail;
                             
                             // Заменяем <strong> на жирный текст
-                            processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 700;">');
+                            processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 600;">');
                             processedDetail = processedDetail.replace(/<\/strong>/g, '</span>');
                             
                             if (processedDetail.trim().startsWith('—')) {
@@ -5304,7 +5480,7 @@
             container.className = 'pdf-content-' + Date.now();
             
             const title = document.createElement('h1');
-            title.style.cssText = 'font-size: 22px; font-weight: 700; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
+            title.style.cssText = 'font-size: 22px; font-weight: 600; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
             title.textContent = card.title || card.navTitle || 'Без названия';
             container.appendChild(title);
             
@@ -5323,7 +5499,7 @@
                 card.selectedStepTitles.forEach(stepTitle => {
                     const stepItem = document.createElement('div');
                     stepItem.style.cssText = 'font-size: 12px; color: #6c757d; margin-bottom: 4px; position: relative; padding-left: 16px;';
-                    stepItem.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${stepTitle}`;
+                    stepItem.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${stepTitle}`;
                     stepsList.appendChild(stepItem);
                 });
                 
@@ -5364,7 +5540,7 @@
                                 
                                 // Обрабатываем HTML теги
                                 let processedDetail = detail;
-                                processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 700;">');
+                                processedDetail = processedDetail.replace(/<strong>/g, '<span style="font-weight: 600;">');
                                 processedDetail = processedDetail.replace(/<\/strong>/g, '</span>');
                                 
                                 if (processedDetail.trim().startsWith('⚠️')) {
@@ -5377,7 +5553,7 @@
                                     detailDiv.style.paddingLeft = '16px';
                                     detailDiv.style.position = 'relative';
                                     const text = processedDetail.trim().substring(1).trim();
-                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${text}`;
+                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${text}`;
                                 } else {
                                     detailDiv.innerHTML = processedDetail;
                                 }
@@ -5462,7 +5638,7 @@
             container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto;';
             
             const title = document.createElement('h1');
-            title.style.cssText = 'font-size: 22px; font-weight: 700; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
+            title.style.cssText = 'font-size: 22px; font-weight: 600; margin-bottom: 15px; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
             title.textContent = card.title || card.navTitle || 'Без названия';
             container.appendChild(title);
             
@@ -5489,7 +5665,7 @@
                     card.items.forEach(item => {
                         const li = document.createElement('div');
                         li.style.cssText = 'position: relative; padding-left: 20px; margin-bottom: 10px; line-height: 1.5; color: #6c757d; font-size: 13px;';
-                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${item}`;
+                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${item}`;
                         itemsList.appendChild(li);
                     });
                     container.appendChild(itemsList);
@@ -5531,7 +5707,7 @@
                     card.items.forEach(item => {
                         const li = document.createElement('div');
                         li.style.cssText = 'position: relative; padding-left: 18px; margin-bottom: 8px; line-height: 1.5; color: #6c757d; font-size: 12px;';
-                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${item}`;
+                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${item}`;
                         itemsList.appendChild(li);
                     });
                     container.appendChild(itemsList);
@@ -5580,7 +5756,7 @@
                                     } else if (detail.trim().startsWith('-')) {
                                         detailDiv.style.paddingLeft = '16px';
                                         detailDiv.style.position = 'relative';
-                                        detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${detail.substring(1).trim()}`;
+                                        detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${detail.substring(1).trim()}`;
                                     } else {
                                         detailDiv.textContent = detail;
                                     }
@@ -5664,7 +5840,7 @@
                                 } else if (detail.trim().startsWith('-')) {
                                     detailDiv.style.paddingLeft = '16px';
                                     detailDiv.style.position = 'relative';
-                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${detail.substring(1).trim()}`;
+                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${detail.substring(1).trim()}`;
                                 } else {
                                     detailDiv.textContent = detail;
                                 }
@@ -5735,7 +5911,7 @@
                     card.items.forEach(item => {
                         const li = document.createElement('div');
                         li.style.cssText = 'position: relative; padding-left: 18px; margin-bottom: 8px; line-height: 1.5; color: #6c757d; font-size: 12px;';
-                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${item}`;
+                        li.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${item}`;
                         itemsList.appendChild(li);
                     });
                     container.appendChild(itemsList);
@@ -5778,7 +5954,7 @@
                                 } else if (detail.trim().startsWith('—') || detail.trim().startsWith('-')) {
                                     detailDiv.style.paddingLeft = '16px';
                                     detailDiv.style.position = 'relative';
-                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${detail.substring(1).trim()}`;
+                                    detailDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${detail.substring(1).trim()}`;
                                 } else if (detail.trim() === '') {
                                     // Пустая строка - пропускаем
                                     return;
@@ -5859,7 +6035,7 @@
                         // Добавляем маркер если его нет
                         if (!li.querySelector('strong')) {
                             const marker = document.createElement('span');
-                            marker.style.cssText = 'position: absolute; left: 0; color: #ed8d48; font-weight: bold;';
+                            marker.style.cssText = 'position: absolute; left: 0; color: #ed8d48; font-weight: 500;';
                             marker.textContent = '▸';
                             li.insertBefore(marker, li.firstChild);
                         }
@@ -5923,7 +6099,7 @@
             
             // Заголовок
             const title = document.createElement('h1');
-            title.style.cssText = 'font-size: 22px; font-weight: 700; margin: 0 0 15px 0; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
+            title.style.cssText = 'font-size: 22px; font-weight: 600; margin: 0 0 15px 0; color: #343a40; border-bottom: 2px solid #ed8d48; padding-bottom: 8px;';
             title.textContent = directory.title;
             container.appendChild(title);
             
@@ -5985,7 +6161,7 @@
                         param.impact.forEach(impactItem => {
                             const impactDiv = document.createElement('div');
                             impactDiv.style.cssText = 'position: relative; padding-left: 18px; margin-bottom: 5px; font-size: 13px; color: #6c757d; line-height: 1.5;';
-                            impactDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: bold;">▸</span>${impactItem}`;
+                            impactDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${impactItem}`;
                             tdImpact.appendChild(impactDiv);
                         });
                     }
