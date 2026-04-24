@@ -1810,6 +1810,8 @@
                             <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 20px;cursor:pointer;color:#ffffff;font-weight:600;">
                                 <span class="toc-toggle-icon" id="toggle-quickstart-bort-tree" style="transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-bort-tree')">▶</span>
                                 <span style="flex:1;" onclick="navigateToSection('quickstart_bort', this.parentElement)">Быстрый старт (Борт)</span>
+                                <span class="toc-item-download" id="download-quickstart-bort" onclick="event.stopPropagation(); downloadQuickstartBortPdf(this)" title="Скачать PDF" style="margin-left:auto;">↓</span>
+                                <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButtonQuickstartBort()" title="Экспорт в PDF">⋮</span>
                             </div>
                             <ul id="quickstart-bort-tree" class="toc-tree-children" style="display:none;list-style:none;padding-left:16px;">
                                 ${quickstartBortSteps.map((step, idx) => {
@@ -1907,7 +1909,13 @@
             // Добавляем справочники
             tocHTML += `
                 <div class="toc-level-1">
-                    <div class="toc-group-title">Справочники</div>
+                    <div class="toc-group-title" style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 24px 8px 20px;cursor:pointer;" onclick="showDownloadButtonDirectories()">
+                        Справочники
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="toc-item-download" id="download-directories" onclick="event.stopPropagation(); downloadDirectoriesPdf(this)" title="Скачать PDF" style="margin-left:auto;">↓</span>
+                            <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButtonDirectories()" title="Экспорт в PDF">⋮</span>
+                        </div>
+                    </div>
                     <ul id="directories-toc-list">
                         <li style="color:var(--text-light);font-size:13px;">Загрузка...</li>
                     </ul>
@@ -5063,6 +5071,538 @@
         // Шапка всегда видима - код скрытия/показа удален
 
         // Показать кнопку скачивания
+        function showDownloadButtonQuickstartBort() {
+            document.querySelectorAll('.toc-item-download').forEach(btn => {
+                btn.classList.remove('visible');
+            });
+            
+            const downloadBtn = document.getElementById('download-quickstart-bort');
+            if (downloadBtn) {
+                downloadBtn.classList.add('visible');
+                
+                setTimeout(() => {
+                    const hideButton = (e) => {
+                        if (!downloadBtn.contains(e.target)) {
+                            downloadBtn.classList.remove('visible');
+                            document.removeEventListener('click', hideButton);
+                        }
+                    };
+                    document.addEventListener('click', hideButton);
+                }, 100);
+            }
+        }
+        
+        async function downloadQuickstartBortPdf(buttonElement) {
+            try {
+                if (buttonElement) {
+                    buttonElement.classList.remove('visible');
+                }
+                
+                if (!appData.cards.quickstart_bort) {
+                    console.error('Быстрый старт (Борт) не найден');
+                    return;
+                }
+                
+                // Открываем диалог выбора шагов для Быстрого старта (Борт)
+                openQuickstartBortStepSelectionModal();
+                
+            } catch (error) {
+                console.error('Ошибка при открытии диалога выбора:', error);
+            }
+        }
+        
+        function openQuickstartBortStepSelectionModal() {
+            const modal = document.getElementById('stepSelectionModal');
+            const listContainer = document.getElementById('stepSelectionList');
+            
+            // Генерируем список шагов для Быстрого старта (Борт)
+            let html = '';
+            appData.cards.quickstart_bort.steps.forEach((step, index) => {
+                const substepsCount = step.substeps ? step.substeps.length : 0;
+                const imagesCount = step.substeps ? step.substeps.reduce((sum, substep) => sum + (substep.images ? substep.images.length : 0), 0) : 0;
+                
+                html += `
+                    <div style="margin-bottom: 12px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg);">
+                        <label style="display: flex; align-items: flex-start; cursor: pointer; gap: 12px;">
+                            <input type="checkbox" value="${index}" checked data-type="bort" style="margin-top: 4px; transform: scale(1.2);">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; font-size: 15px;">
+                                    ${step.title}
+                                </div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">
+                                    ${substepsCount} подшагов • ${imagesCount} изображений
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+            
+            // Меняем обработчик кнопки скачивания
+            const downloadBtn = document.querySelector('#stepSelectionModal .modal-footer button:last-child');
+            if (downloadBtn) {
+                downloadBtn.onclick = downloadSelectedQuickstartBortSteps;
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        async function downloadSelectedQuickstartBortSteps() {
+            try {
+                const selectedIndexes = Array.from(document.querySelectorAll('#stepSelectionList input[type="checkbox"]:checked'))
+                    .map(cb => parseInt(cb.value));
+                
+                if (selectedIndexes.length === 0) {
+                    alert('Выберите хотя бы один шаг для скачивания');
+                    return;
+                }
+                
+                closeStepSelectionModal();
+                
+                // Создаем урезанную версию данных с выбранными шагами
+                const selectedSteps = selectedIndexes.map(index => appData.cards.quickstart_bort.steps[index]);
+                const customQuickstart = {
+                    title: "Быстрый старт (Борт)",
+                    description: appData.cards.quickstart_bort.description || "",
+                    selectedStepTitles: selectedSteps.map(step => step.title),
+                    steps: selectedSteps
+                };
+                
+                console.log(`Генерируем PDF для ${selectedSteps.length} выбранных шагов...`);
+                
+                // Разбиваем выбранные шаги на части (по 2 шага в каждой)
+                const stepsPerPart = 2;
+                const parts = [];
+                
+                for (let i = 0; i < selectedSteps.length; i += stepsPerPart) {
+                    const partSteps = selectedSteps.slice(i, i + stepsPerPart);
+                    parts.push({
+                        title: "Быстрый старт (Борт)",
+                        description: customQuickstart.description,
+                        selectedStepTitles: customQuickstart.selectedStepTitles,
+                        steps: partSteps,
+                        isFirstPart: i === 0
+                    });
+                }
+                
+                // Генерируем каждую часть отдельно
+                const pdfParts = [];
+                for (let i = 0; i < parts.length; i++) {
+                    console.log(`Генерируем часть ${i + 1}/${parts.length}...`);
+                    
+                    const pdfContent = await generatePdfContentWithAllImages(parts[i], 'instruction');
+                    
+                    const opt = {
+                        margin: [8, 8, 8, 8],
+                        image: { type: 'jpeg', quality: 0.95 },
+                        html2canvas: { 
+                            scale: 2,
+                            useCORS: true,
+                            logging: false,
+                            letterRendering: true,
+                            allowTaint: false,
+                            backgroundColor: '#ffffff',
+                            windowWidth: 800,
+                            x: 0,
+                            y: 0,
+                            scrollY: 0,
+                            scrollX: 0
+                        },
+                        jsPDF: { 
+                            unit: 'mm', 
+                            format: 'a4', 
+                            orientation: 'portrait',
+                            compress: true
+                        },
+                        pagebreak: { 
+                            mode: ['avoid-all', 'css', 'legacy'],
+                            avoid: '.no-break'
+                        }
+                    };
+                    
+                    const pdfObj = await html2pdf().set(opt).from(pdfContent).outputPdf('datauristring');
+                    pdfParts.push(pdfObj);
+                    
+                    // Очищаем DOM
+                    const oldPdfElements = document.querySelectorAll('[class^="pdf-content-"]');
+                    oldPdfElements.forEach(el => el.remove());
+                }
+                
+                // Склеиваем все части в один PDF
+                console.log('Склеиваем части в один PDF...');
+                const filename = `Быстрый_старт_Борт.pdf`;
+                await mergeAndDownloadPdfs(pdfParts, filename);
+                
+            } catch (error) {
+                console.error('Ошибка при генерации выбранных шагов:', error);
+            }
+        }
+        
+        function showDownloadButtonDirectories() {
+            document.querySelectorAll('.toc-item-download').forEach(btn => {
+                btn.classList.remove('visible');
+            });
+            
+            const downloadBtn = document.getElementById('download-directories');
+            if (downloadBtn) {
+                downloadBtn.classList.add('visible');
+                setTimeout(() => {
+                    const hideButton = (e) => {
+                        if (!downloadBtn.contains(e.target)) {
+                            downloadBtn.classList.remove('visible');
+                            document.removeEventListener('click', hideButton);
+                        }
+                    };
+                    document.addEventListener('click', hideButton);
+                }, 100);
+            }
+        }
+        
+        async function downloadDirectoriesPdf(buttonElement) {
+            try {
+                // Скрытие кнопки после клика
+                if (buttonElement) {
+                    buttonElement.classList.remove('visible');
+                }
+                
+                const response = await fetch('directory_data.json');
+                const data = await response.json();
+                
+                if (!data.directories) {
+                    console.error('Справочники не найдены');
+                    return;
+                }
+                
+                // Открываем диалог выбора справочников
+                openDirectoriesSelectionModal(data.directories);
+                
+            } catch (error) {
+                console.error('Ошибка при загрузке справочников:', error);
+            }
+        }
+        
+        function openDirectoriesSelectionModal(directories) {
+            const modal = document.getElementById('stepSelectionModal');
+            const listContainer = document.getElementById('stepSelectionList');
+            
+            // Генерируем список справочников
+            let html = '';
+            for (const [key, directory] of Object.entries(directories)) {
+                const parametersCount = directory.parameters ? directory.parameters.length : 0;
+                
+                html += `
+                    <div style="margin-bottom: 12px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg);">
+                        <label style="display: flex; align-items: flex-start; cursor: pointer; gap: 12px;">
+                            <input type="checkbox" value="${key}" checked data-type="directory" style="margin-top: 4px; transform: scale(1.2);">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; font-size: 15px;">
+                                    ${directory.title}
+                                </div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">
+                                    ${parametersCount} параметров
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            }
+            
+            listContainer.innerHTML = html;
+            
+            // Меняем обработчик кнопки скачивания
+            const downloadBtn = document.querySelector('#stepSelectionModal .modal-footer button:last-child');
+            if (downloadBtn) {
+                downloadBtn.onclick = () => downloadSelectedDirectories(directories);
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        async function downloadSelectedDirectories(allDirectories) {
+            try {
+                const selectedKeys = Array.from(document.querySelectorAll('#stepSelectionList input[type="checkbox"]:checked[data-type="directory"]'))
+                    .map(cb => cb.value);
+                
+                if (selectedKeys.length === 0) {
+                    alert('Выберите хотя бы один справочник для скачивания');
+                    return;
+                }
+                
+                closeStepSelectionModal();
+                
+                // Создаем объект с выбранными справочниками
+                const selectedDirectories = {};
+                selectedKeys.forEach(key => {
+                    selectedDirectories[key] = allDirectories[key];
+                });
+                
+                console.log(`Генерируем PDF для ${selectedKeys.length} выбранных справочников...`);
+                
+                // Генерируем PDF контент
+                const pdfContent = await generateAllDirectoriesPdfContent(selectedDirectories);
+                const filename = `Справочники.pdf`;
+                
+                const opt = {
+                    margin: [8, 8, 8, 8],
+                    filename: filename,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        letterRendering: true,
+                        allowTaint: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: 800,
+                        x: 0,
+                        y: 0,
+                        scrollY: 0,
+                        scrollX: 0
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'portrait',
+                        compress: true
+                    },
+                    pagebreak: { 
+                        mode: ['avoid-all', 'css', 'legacy'],
+                        avoid: '.no-break'
+                    }
+                };
+                
+                // Очищаем предыдущие элементы перед генерацией
+                const oldPdfElements = document.querySelectorAll('[class^="pdf-content-"]');
+                oldPdfElements.forEach(el => el.remove());
+                
+                await html2pdf().set(opt).from(pdfContent).save();
+                
+            } catch (error) {
+                console.error('Ошибка при генерации выбранных справочников:', error);
+            }
+        }
+        
+        async function generateAllDirectoriesPdfContent(directories) {
+            const container = document.createElement('div');
+            container.className = 'pdf-content-directories';
+            container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: white;';
+            
+            // Заголовок
+            const title = document.createElement('h1');
+            title.style.cssText = 'color: #2c3e50; font-size: 28px; margin: 0 0 30px 0; border-bottom: 3px solid #ed8d48; padding-bottom: 15px;';
+            title.textContent = 'Справочники системы';
+            container.appendChild(title);
+            
+            // Добавляем каждый справочник
+            let isFirst = true;
+            for (const [key, directory] of Object.entries(directories)) {
+                const dirSection = document.createElement('div');
+                dirSection.style.cssText = isFirst ? 'margin-bottom: 40px;' : 'page-break-before: always; margin-bottom: 40px;';
+                
+                // Заголовок справочника
+                const dirTitle = document.createElement('h2');
+                dirTitle.style.cssText = 'color: #ed8d48; font-size: 22px; margin: 0 0 20px 0; border-bottom: 2px solid #ed8d48; padding-bottom: 10px;';
+                dirTitle.textContent = directory.title;
+                dirSection.appendChild(dirTitle);
+                
+                // Таблица параметров (без изображений)
+                if (directory.parameters && directory.parameters.length > 0) {
+                    const table = document.createElement('table');
+                    table.style.cssText = 'width: 100%; border-collapse: collapse; margin: 0;';
+                    
+                    // Заголовок таблицы
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 12px; color: #343a40; text-transform: uppercase; width: 35%;">Параметр</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 12px; color: #343a40; text-transform: uppercase; width: 65%;">Влияние на результаты</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+                    
+                    // Тело таблицы
+                    const tbody = document.createElement('tbody');
+                    directory.parameters.forEach((param, index) => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'no-break';
+                        tr.style.cssText = 'border-bottom: 1px solid #dee2e6; page-break-inside: avoid;';
+                        if (index % 2 === 0) {
+                            tr.style.backgroundColor = '#fafafa';
+                        }
+                        
+                        // Колонка параметра
+                        const tdParam = document.createElement('td');
+                        tdParam.style.cssText = 'padding: 12px; vertical-align: top;';
+                        
+                        const paramName = document.createElement('div');
+                        paramName.style.cssText = 'font-weight: 600; color: #343a40; font-size: 14px; margin-bottom: 3px;';
+                        paramName.textContent = param.name;
+                        tdParam.appendChild(paramName);
+                        
+                        if (param.unit) {
+                            const paramUnit = document.createElement('div');
+                            paramUnit.style.cssText = 'font-size: 11px; color: #adb5bd; font-style: italic;';
+                            paramUnit.textContent = param.unit;
+                            tdParam.appendChild(paramUnit);
+                        }
+                        
+                        if (param.description) {
+                            const paramDesc = document.createElement('div');
+                            paramDesc.style.cssText = 'font-size: 12px; color: #6c757d; margin-top: 4px; line-height: 1.4;';
+                            paramDesc.textContent = param.description;
+                            tdParam.appendChild(paramDesc);
+                        }
+                        
+                        tr.appendChild(tdParam);
+                        
+                        // Колонка влияния
+                        const tdImpact = document.createElement('td');
+                        tdImpact.style.cssText = 'padding: 12px; vertical-align: top;';
+                        
+                        if (param.impact && param.impact.length > 0) {
+                            param.impact.forEach(impactItem => {
+                                const impactDiv = document.createElement('div');
+                                impactDiv.style.cssText = 'position: relative; padding-left: 18px; margin-bottom: 5px; font-size: 13px; color: #6c757d; line-height: 1.5;';
+                                impactDiv.innerHTML = `<span style="position: absolute; left: 0; color: #ed8d48; font-weight: 500;">▸</span>${impactItem}`;
+                                tdImpact.appendChild(impactDiv);
+                            });
+                        }
+                        
+                        tr.appendChild(tdImpact);
+                        tbody.appendChild(tr);
+                    });
+                    
+                    table.appendChild(tbody);
+                    dirSection.appendChild(table);
+                }
+                
+                container.appendChild(dirSection);
+                isFirst = false;
+            }
+            
+            // Футер
+            const footer = document.createElement('div');
+            footer.style.cssText = 'margin-top: 30px; padding-top: 15px; border-top: 1px solid #dee2e6; font-size: 10px; color: #adb5bd; text-align: center;';
+            footer.innerHTML = `
+                <div>ООО «НИР - Центр», г.Екатеринбург</div>
+                <div style="margin-top: 5px;">Цифровой двойник карьера - Справочники</div>
+            `;
+            container.appendChild(footer);
+            
+            document.body.appendChild(container);
+            return container;
+        }
+        
+        // Загрузка справочников в ToC
+        async function loadDirectoriesToc() {
+            try {
+                const response = await fetch('directory_data.json');
+                const data = await response.json();
+                
+                const tocList = document.getElementById('directories-toc-list');
+                if (!tocList) return;
+                
+                let html = '';
+                for (const [key, dir] of Object.entries(data.directories)) {
+                    html += `
+                        <li>
+                            <a href="#dir-${key}" onclick="showDirectory('${key}', this); return false;" style="display:block;padding:12px 48px 12px 36px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${dir.title}</a>
+                        </li>
+                    `;
+                }
+                
+                tocList.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Ошибка загрузки справочников:', error);
+                const tocList = document.getElementById('directories-toc-list');
+                if (tocList) {
+                    tocList.innerHTML = '<li style="color:var(--text-light);font-size:13px;">Ошибка загрузки</li>';
+                }
+            }
+        }
+        
+        async function showDirectory(key, linkElement) {
+            try {
+                const response = await fetch('directory_data.json');
+                const data = await response.json();
+                const directory = data.directories[key];
+                
+                if (!directory) {
+                    console.error('Справочник не найден');
+                    return;
+                }
+                
+                // Показываем секцию справочников
+                showSection('directories', false);
+                
+                // Генерируем контент справочника
+                const container = document.getElementById('directoriesCards');
+                let html = `
+                    <div id="dir-${key}-anchor" style="position:relative;top:-80px;"></div>
+                    <div class="directory-table-container" id="dir-${key}">
+                        <div class="directory-table-header">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span class="directory-table-title">${directory.title}</span>
+                            </div>
+                        </div>
+                        <div class="directory-table-content">
+                            <table class="directory-table">
+                                <thead>
+                                    <tr>
+                                        <th class="param-name-cell">Параметр</th>
+                                        <th class="param-impact-cell">Влияние на результаты</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                directory.parameters.forEach(param => {
+                    html += `
+                        <tr>
+                            <td class="param-name-cell">
+                                <div class="param-name">${param.name}</div>
+                                ${param.unit ? `<div class="param-unit">${param.unit}</div>` : ''}
+                                ${param.description ? `<div class="param-description">${param.description}</div>` : ''}
+                            </td>
+                            <td class="param-impact-cell">
+                                <ul class="param-impact-list">
+                                    ${param.impact ? param.impact.map(impact => `<li>${impact}</li>`).join('') : ''}
+                                </ul>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML = html;
+                
+                // Убираем активность со всех ссылок ToC
+                document.querySelectorAll('.toc-level-1 a').forEach(link => link.classList.remove('active'));
+                // Подсветка только активного справочника
+                if (linkElement) linkElement.classList.add('active');
+                
+                // Прокручиваем к якорю справочника
+                setTimeout(() => {
+                    const anchor = document.getElementById(`dir-${key}-anchor`);
+                    if (anchor) {
+                        anchor.scrollIntoView({ behavior: 'auto', block: 'start' });
+                    }
+                }, 50);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки справочника:', error);
+            }
+        }
+        
         function showDownloadButton(sectionId, cardId) {
             document.querySelectorAll('.toc-item-download').forEach(btn => {
                 btn.classList.remove('visible');
@@ -5265,11 +5805,46 @@
                     return;
                 }
                 
-                // Открываем диалог выбора шагов
-                openStepSelectionModal();
+                // Скачиваем как обычную карточку (без выбора шагов)
+                const pdfContent = await generatePdfContent(appData.cards.quickstart, 'instruction');
+                
+                const opt = {
+                    margin: [8, 8, 8, 8],
+                    filename: `${sanitizeFilename(appData.cards.quickstart.title || 'Быстрый_старт')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        letterRendering: true,
+                        allowTaint: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: 800,
+                        x: 0,
+                        y: 0,
+                        scrollY: 0,
+                        scrollX: 0
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'portrait',
+                        compress: true
+                    },
+                    pagebreak: { 
+                        mode: ['avoid-all', 'css', 'legacy'],
+                        avoid: '.no-break'
+                    }
+                };
+                
+                // Очищаем предыдущие элементы перед генерацией
+                const oldPdfElements = document.querySelectorAll('[class^="pdf-content-"]');
+                oldPdfElements.forEach(el => el.remove());
+                
+                await html2pdf().set(opt).from(pdfContent).save();
                 
             } catch (error) {
-                console.error('Ошибка при открытии диалога выбора:', error);
+                console.error('Ошибка при генерации PDF:', error);
             }
         }
         
