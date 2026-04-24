@@ -1485,7 +1485,7 @@
 
                     <!-- Section 4: Directories -->
                     <div id="section-directories" class="content-section">
-                        <h2 class="section-group-title">Справочники</h2>
+                        <h2 class="section-group-title">Параметры справочников</h2>
                         <div id="directoriesCards">
                             <div class="loading">Загрузка</div>
                         </div>
@@ -1906,11 +1906,11 @@
                 }
             });
 
-            // Добавляем справочники
+            // Добавляем параметры справочников
             tocHTML += `
                 <div class="toc-level-1">
                     <div class="toc-group-title" style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 24px 8px 20px;cursor:pointer;" onclick="showDownloadButtonDirectories()">
-                        Справочники
+                        Параметры справочников
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span class="toc-item-download" id="download-directories" onclick="event.stopPropagation(); downloadDirectoriesPdf(this)" title="Скачать PDF" style="margin-left:auto;">↓</span>
                             <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButtonDirectories()" title="Экспорт в PDF">⋮</span>
