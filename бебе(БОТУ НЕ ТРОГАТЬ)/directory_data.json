@@ -2,7 +2,6 @@
     "directories": {
         "vehicles": {
             "title": "Единицы оборудования",
-            "image": "screenshots/vehicles/parameters.png",
             "parameters": [
                 {
                     "name": "Тип техники",
@@ -101,7 +100,6 @@
         },
         "statuses": {
             "title": "Параметры статусов",
-            "image": "screenshots/statuses/parameters.png",
             "parameters": [
                 {
                     "name": "Отображаемое название",
@@ -182,7 +180,6 @@
         },
         "cargo_types": {
             "title": "Параметры видов груза",
-            "image": "screenshots/cargo/parameters.png",
             "parameters": [
                 {
                     "name": "Наименование вида груза",
@@ -229,7 +226,6 @@
         },
         "work_places": {
             "title": "Параметры мест работ",
-            "image": "screenshots/places/parameters.png",
             "parameters": [
                 {
                     "name": "Наименование",
@@ -307,7 +303,6 @@
         },
         "horizons": {
             "title": "Параметры горизонтов",
-            "image": "screenshots/horizons/parameters.png",
             "parameters": [
                 {
                     "name": "Наименование горизонта",
@@ -358,7 +353,6 @@
         },
         "positioning_tags": {
             "title": "Параметры меток позиционирования",
-            "image": "screenshots/tags/parameters.png",
             "parameters": [
                 {
                     "name": "Идентификатор метки",
@@ -414,7 +408,6 @@
         },
         "work_orders": {
             "title": "Параметры наряд-заданий",
-            "image": "screenshots/work-orders/parameters.png",
             "parameters": [
                 {
                     "name": "Место погрузки",
@@ -493,7 +486,6 @@
         },
         "trips": {
             "title": "Параметры рейсов",
-            "image": "screenshots/trips/parameters.png",
             "parameters": [
                 {
                     "name": "Наименование техники",
