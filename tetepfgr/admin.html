@@ -1782,7 +1782,7 @@
                 tocHTML += `
                     <div class="toc-level-1">
                         <li style="list-style:none;">
-                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 12px;cursor:pointer;color:#ffffff;font-weight:600;">
+                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 20px;cursor:pointer;color:#ffffff;font-weight:600;">
                                 <span class="toc-toggle-icon" id="toggle-quickstart-tree" style="transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-tree')">▶</span>
                                 <span style="flex:1;" onclick="navigateToSection('quickstart', this.parentElement)">Быстрый старт</span>
                                 <span class="toc-item-download" id="download-quickstart" onclick="event.stopPropagation(); downloadQuickstartPdf(this)" title="Скачать PDF" style="margin-left:auto;">↓</span>
@@ -1792,7 +1792,7 @@
                                 ${quickstartSteps.map((step, idx) => {
                                     const stepId = `quickstart-step-${idx}`;
                                     return `<li>
-                                        <a href="#section-quickstart" onclick="navigateToSection('quickstart', this); scrollToQuickstartStep(${idx})" style="display:block;padding:12px 48px 12px 32px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='36px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='32px'">${step.title}</a>
+                                        <a href="#section-quickstart" onclick="navigateToSection('quickstart', this); scrollToQuickstartStep(${idx})" style="display:block;padding:12px 48px 12px 28px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='32px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='28px'">${step.title}</a>
                                     </li>`;
                                 }).join('')}
                             </ul>
@@ -1807,7 +1807,7 @@
                 tocHTML += `
                     <div class="toc-level-1">
                         <li style="list-style:none;">
-                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 12px;cursor:pointer;color:#ffffff;font-weight:600;">
+                            <div class="toc-parent-item" style="position:relative;display:flex;align-items:center;padding:12px 20px 12px 20px;cursor:pointer;color:#ffffff;font-weight:600;">
                                 <span class="toc-toggle-icon" id="toggle-quickstart-bort-tree" style="transition:all 0.3s;display:inline-block;opacity:0;font-size:10px;" onclick="event.stopPropagation(); toggleTocSection('quickstart-bort-tree')">▶</span>
                                 <span style="flex:1;" onclick="navigateToSection('quickstart_bort', this.parentElement)">Быстрый старт (Борт)</span>
                             </div>
@@ -1815,7 +1815,7 @@
                                 ${quickstartBortSteps.map((step, idx) => {
                                     const stepId = `quickstart-bort-step-${idx}`;
                                     return `<li>
-                                        <a href="#section-quickstart_bort" onclick="navigateToSection('quickstart_bort', this); scrollToQuickstartBortStep(${idx})" style="display:block;padding:12px 48px 12px 32px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='36px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='32px'">${step.title}</a>
+                                        <a href="#section-quickstart_bort" onclick="navigateToSection('quickstart_bort', this); scrollToQuickstartBortStep(${idx})" style="display:block;padding:12px 48px 12px 28px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)';this.style.paddingLeft='32px'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent';this.style.paddingLeft='28px'">${step.title}</a>
                                     </li>`;
                                 }).join('')}
                             </ul>
@@ -1829,7 +1829,7 @@
             if (adminSection.cards.length > 0) {
                 tocHTML += `
                     <div class="toc-level-1">
-                        <div class="toc-group-title">${adminSection.title}</div>
+                        <div class="toc-group-title" style="padding:16px 24px 8px 4px;">${adminSection.title}</div>
                         <ul style="list-style:none;padding-left:0;">
                             ${adminSection.cards.map((card, cardIdx) => {
                                 const displayName = card.navTitle || card.title || 'Без названия';
@@ -1838,7 +1838,7 @@
                                 if (card.steps && card.steps.length > 0) {
                                     const cardTreeId = `admin-card-${card.id}-tree`;
                                     return `<li style="margin-bottom:2px;">
-                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:12px 48px 12px 12px;cursor:pointer;color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;transition:all 0.2s;border-left:3px solid transparent;" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.9)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
+                                        <div class="toc-card-item" style="position:relative;display:flex;align-items:center;padding:12px 48px 12px 16px;cursor:pointer;color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;transition:all 0.2s;border-left:3px solid transparent;" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.9)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
                                             <span class="toc-toggle-icon" id="toggle-${cardTreeId}" style="transition:all 0.3s;display:inline-block;font-size:10px;opacity:0;" onclick="event.stopPropagation(); toggleTocSection('${cardTreeId}')">▶</span>
                                             <span style="flex:1;">${displayName}</span>
                                             <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="margin-left:auto;margin-right:4px;">↓</span>
@@ -1847,7 +1847,7 @@
                                         <ul id="${cardTreeId}" class="toc-tree-children" style="display:none;list-style:none;padding-left:16px;">
                                             ${card.steps.map((step, stepIdx) => {
                                                 return `<li>
-                                                    <a href="#card-${card.id}-step-${stepIdx}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}-step-${stepIdx}', this); scrollToAdminStep('${card.id}', ${stepIdx})" style="display:block;padding:10px 48px 10px 32px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:400;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='rgba(255,255,255,0.95)';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.65)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${step.text}</a>
+                                                    <a href="#card-${card.id}-step-${stepIdx}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}-step-${stepIdx}', this); scrollToAdminStep('${card.id}', ${stepIdx})" style="display:block;padding:10px 48px 10px 20px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:400;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='rgba(255,255,255,0.95)';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.65)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${step.text}</a>
                                                 </li>`;
                                             }).join('')}
                                         </ul>
@@ -1855,7 +1855,7 @@
                                 } else {
                                     // Обычная карточка без подпунктов - добавляем отступ слева как у треугольника
                                     return `<li>
-                                        <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
+                                        <a href="#card-${card.id}" onclick="navigateToCard('${adminSection.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 16px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">
                                             ${displayName}
                                             <span class="toc-item-download" id="download-${adminSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${adminSection.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
                                             <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${adminSection.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
@@ -1893,7 +1893,7 @@
                                         displayName = capitalizeFirst(navTitle) || 'Без названия';
                                     }
                                     return `<li>
-                                        <a href="#card-${card.id}" onclick="navigateToCard('${section.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 34px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${displayName}</a>
+                                        <a href="#card-${card.id}" onclick="navigateToCard('${section.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 36px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${displayName}</a>
                                         <span class="toc-item-download" id="download-${section.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${section.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
                                         <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${section.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
                                     </li>`
@@ -1924,9 +1924,9 @@
                             ${aboutSection.cards.map(card => {
                                 const displayName = card.navTitle || card.title || 'Без названия';
                                 return `<li>
-                                    <a href="#card-${card.id}" onclick="navigateToCard('${aboutSection.id}', 'card-${card.id}', this)">${displayName}</a>
-                                    <span class="toc-item-download" id="download-${aboutSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${aboutSection.id}', '${card.id}', this)" title="Скачать PDF">↓</span>
-                                    <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${aboutSection.id}', '${card.id}')" title="Экспорт в PDF">⋮</span>
+                                    <a href="#card-${card.id}" onclick="navigateToCard('${aboutSection.id}', 'card-${card.id}', this)" style="display:block;padding:12px 48px 12px 36px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;font-weight:500;position:relative;transition:all 0.2s;border-left:3px solid transparent;" onmouseover="this.style.color='#ffffff';this.style.backgroundColor='var(--sidebar-hover)';this.style.borderLeftColor='var(--accent-color)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.backgroundColor='';this.style.borderLeftColor='transparent'">${displayName}</a>
+                                    <span class="toc-item-download" id="download-${aboutSection.id}-${card.id}" onclick="event.stopPropagation(); downloadPdf('${aboutSection.id}', '${card.id}', this)" title="Скачать PDF" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);">↓</span>
+                                    <span class="toc-item-menu" onclick="event.stopPropagation(); showDownloadButton('${aboutSection.id}', '${card.id}')" title="Экспорт в PDF" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);">⋮</span>
                                 </li>`
                             }).join('')}
                         </ul>
