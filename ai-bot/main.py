@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 import chromadb
-from chromadb.config import Settings
 import redis
 import hashlib
 import json
@@ -34,10 +33,7 @@ app.add_middleware(
 )
 
 # Инициализация клиентов
-chroma_client = chromadb.Client(Settings(
-    chroma_db_impl="duckdb+parquet",
-    persist_directory="/app/chroma_data"
-))
+chroma_client = chromadb.PersistentClient(path="/app/chroma_data")
 
 redis_client = redis.Redis(
     host=os.getenv("REDIS_HOST", "redis"),
@@ -47,6 +43,35 @@ redis_client = redis.Redis(
 
 API_KEY = os.getenv("API_KEY")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
+
+# Системный промпт для AI
+SYSTEM_PROMPT = """Ты — технический ассистент для системы "АСУ ПГР" (Автоматизированная Система Управления Подземными Горными Работами).
+
+ТВОЯ РОЛЬ:
+- Отвечай на вопросы по документации, коду и архитектуре проекта "Цифровой двойник карьера"
+- Используй ТОЛЬКО информацию из предоставленного контекста
+- Давай точные, технические ответы для разработчиков
+
+ПРАВИЛА ОТВЕТОВ:
+1. Ответ должен быть 3-5 предложений (максимум 8)
+2. Указывай конкретные файлы и компоненты
+3. Если информации нет в контексте — честно скажи "Информация не найдена в документации"
+4. НЕ отвечай на вопросы не связанные с проектом (философия, личные советы, общие темы)
+5. Используй технический язык, но понятный
+
+ОГРАНИЧЕНИЯ:
+- Отвечай ТОЛЬКО на вопросы о: коде, архитектуре, микросервисах, API, базах данных, конфигурации, документации проекта
+- НЕ отвечай на: личные вопросы, общие темы, философию, советы по жизни, цены, погоду
+
+ФОРМАТ ОТВЕТА:
+Краткий технический ответ с указанием источника (файл/компонент).
+
+Контекст из документации:
+{context}
+
+Вопрос: {question}
+
+Ответ:"""
 
 # Модели
 class QuestionRequest(BaseModel):
@@ -81,6 +106,16 @@ async def ask_question(req: QuestionRequest):
     start_time = datetime.now()
     logger.info(f"Получен вопрос: {req.question}")
     
+    # Проверка на нерелевантные вопросы
+    irrelevant_keywords = ['жизнь', 'любовь', 'счастье', 'золото', 'цена', 'погода', 'курс', 'политика']
+    if any(keyword in req.question.lower() for keyword in irrelevant_keywords):
+        return {
+            "answer": "Я отвечаю только на технические вопросы по проекту АСУ ПГР. Пожалуйста, задайте вопрос о коде, архитектуре, микросервисах или документации проекта.",
+            "sources": [],
+            "cached": False,
+            "response_time": (datetime.now() - start_time).total_seconds()
+        }
+    
     # Проверка кэша
     cache_key = f"q:{hashlib.md5(req.question.encode()).hexdigest()}"
     cached = redis_client.get(cache_key)
@@ -92,24 +127,94 @@ async def ask_question(req: QuestionRequest):
         response["response_time"] = (datetime.now() - start_time).total_seconds()
         return response
     
-    # TODO: Реализация RAG-поиска
-    # 1. Embedding вопроса
-    # 2. Поиск в ChromaDB (top-20)
-    # 3. Reranking (top-4)
-    # 4. Генерация ответа через Ollama
-    
-    answer = {
-        "answer": "Бот в процессе индексации. Пожалуйста, подождите завершения индексации.",
-        "sources": [],
-        "cached": False,
-        "response_time": (datetime.now() - start_time).total_seconds()
-    }
-    
-    # Кэширование
-    redis_client.setex(cache_key, 3600, json.dumps(answer))
-    
-    logger.info(f"Ответ сгенерирован за {answer['response_time']:.2f}с")
-    return answer
+    try:
+        # Получаем коллекцию
+        collection = chroma_client.get_or_create_collection(name="pgr_docs")
+        
+        # Проверяем есть ли документы
+        count = collection.count()
+        if count == 0:
+            return {
+                "answer": "База знаний пуста. Необходимо запустить индексацию репозитория через API: POST /api/index?mode=full",
+                "sources": [],
+                "cached": False,
+                "response_time": (datetime.now() - start_time).total_seconds()
+            }
+        
+        # Поиск похожих документов
+        results = collection.query(
+            query_texts=[req.question],
+            n_results=min(5, count)
+        )
+        
+        if not results['documents'] or not results['documents'][0]:
+            return {
+                "answer": "По вашему вопросу не найдено релевантной информации в документации. Попробуйте переформулировать вопрос или задать более конкретный.",
+                "sources": [],
+                "cached": False,
+                "response_time": (datetime.now() - start_time).total_seconds()
+            }
+        
+        # Формируем контекст
+        context_parts = []
+        sources = []
+        for i, doc in enumerate(results['documents'][0]):
+            metadata = results['metadatas'][0][i] if results['metadatas'] else {}
+            context_parts.append(f"[Источник {i+1}]: {doc}")
+            sources.append({
+                "file": metadata.get('file', 'unknown'),
+                "line": metadata.get('line', None),
+                "type": metadata.get('type', 'text')
+            })
+        
+        context = "\n\n".join(context_parts)
+        
+        # Генерация ответа через Ollama
+        prompt = SYSTEM_PROMPT.format(context=context, question=req.question)
+        
+        import httpx
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": "qwen2.5:3b",
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.3,
+                        "top_p": 0.9,
+                        "max_tokens": 500
+                    }
+                }
+            )
+            
+            if response.status_code != 200:
+                raise Exception(f"Ollama error: {response.status_code}")
+            
+            ollama_response = response.json()
+            answer_text = ollama_response.get('response', '').strip()
+        
+        answer = {
+            "answer": answer_text if answer_text else "Не удалось сгенерировать ответ. Попробуйте переформулировать вопрос.",
+            "sources": sources[:3],  # Топ-3 источника
+            "cached": False,
+            "response_time": (datetime.now() - start_time).total_seconds()
+        }
+        
+        # Кэширование
+        redis_client.setex(cache_key, 3600, json.dumps(answer))
+        
+        logger.info(f"Ответ сгенерирован за {answer['response_time']:.2f}с")
+        return answer
+        
+    except Exception as e:
+        logger.error(f"Ошибка при обработке вопроса: {e}")
+        return {
+            "answer": f"Произошла ошибка при обработке вопроса: {str(e)}",
+            "sources": [],
+            "cached": False,
+            "response_time": (datetime.now() - start_time).total_seconds()
+        }
 
 @app.post("/api/snapshot/create")
 async def create_snapshot(x_api_key: Optional[str] = Header(None)):
@@ -150,13 +255,83 @@ async def index_repository(
     
     logger.info(f"Запуск индексации: mode={mode}, snapshot={snapshot}")
     
-    # TODO: Реализация индексации
-    # 1. Сканирование файлов (с учётом чёрного списка)
-    # 2. Чанкование (Tree-sitter для кода)
-    # 3. Embedding
-    # 4. Сохранение в ChromaDB
-    
-    return {"status": "indexing_started", "mode": mode}
+    try:
+        from indexer import RepositoryScanner
+        from chunker import CodeChunker
+        
+        scanner = RepositoryScanner()
+        files = scanner.scan_files()
+        
+        logger.info(f"Найдено файлов для индексации: {len(files)}")
+        
+        # Получаем или создаём коллекцию
+        collection = chroma_client.get_or_create_collection(
+            name="pgr_docs",
+            metadata={"description": "АСУ ПГР documentation and code"}
+        )
+        
+        # Очищаем коллекцию при полной индексации
+        if mode == "full":
+            try:
+                chroma_client.delete_collection("pgr_docs")
+                collection = chroma_client.create_collection(
+                    name="pgr_docs",
+                    metadata={"description": "АСУ ПГР documentation and code"}
+                )
+                logger.info("Коллекция очищена для полной индексации")
+            except:
+                pass
+        
+        indexed_count = 0
+        chunk_count = 0
+        
+        for file_info in files:
+            try:
+                # Читаем файл
+                with open(file_info['full_path'], 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                
+                # Разбиваем на чанки
+                chunks = CodeChunker.chunk_file(file_info['path'], content)
+                
+                if not chunks:
+                    continue
+                
+                # Добавляем в ChromaDB
+                for chunk in chunks:
+                    chunk_id = f"{file_info['path']}_{chunk_count}"
+                    collection.add(
+                        documents=[chunk['content']],
+                        metadatas=[{
+                            'file': file_info['path'],
+                            'type': chunk.get('type', 'text'),
+                            'line': chunk.get('line_start', 0)
+                        }],
+                        ids=[chunk_id]
+                    )
+                    chunk_count += 1
+                
+                indexed_count += 1
+                
+                if indexed_count % 10 == 0:
+                    logger.info(f"Проиндексировано файлов: {indexed_count}/{len(files)}, чанков: {chunk_count}")
+                    
+            except Exception as e:
+                logger.warning(f"Ошибка индексации файла {file_info['path']}: {e}")
+                continue
+        
+        logger.info(f"Индексация завершена: {indexed_count} файлов, {chunk_count} чанков")
+        
+        return {
+            "status": "completed",
+            "mode": mode,
+            "files_indexed": indexed_count,
+            "chunks_created": chunk_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Ошибка индексации: {e}")
+        raise HTTPException(500, f"Ошибка индексации: {str(e)}")
 
 @app.post("/api/reindex")
 async def reindex_repository(
