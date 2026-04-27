@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>АСУ ПГР — Помощник на базе ИИ (RAG) — Полная схема работы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f5f7fb;
+            padding: 48px 24px;
+            color: #1a2c3e;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* Карточки и блоки */
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            padding: 28px;
+            margin-bottom: 32px;
+            border: 1px solid #e9edf2;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #ed8d48;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-right: 8px;
+        }
+
+        .badge-blue {
+            background: #2c6e9e;
+        }
+
+        .badge-green {
+            background: #2c8c5a;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a2c3e;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a2c3e;
+            margin: 24px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #ed8d48;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+            color: #2c6e9e;
+        }
+
+        .sub {
+            color: #5d6f83;
+            margin-bottom: 32px;
+            font-size: 16px;
+            border-left: 4px solid #ed8d48;
+            padding-left: 20px;
+        }
+
+        /* Схемы и таблицы */
+        .schema-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin: 32px 0;
+            justify-content: center;
+        }
+
+        .schema-box {
+            flex: 1;
+            min-width: 240px;
+            background: #f8fafd;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .schema-box:hover {
+            border-color: #ed8d48;
+            box-shadow: 0 6px 14px rgba(237,141,72,0.1);
+        }
+
+        .arrow-down {
+            text-align: center;
+            font-size: 32px;
+            color: #ed8d48;
+            margin: 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        th {
+            background: #1e2f3e;
+            color: white;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9edf2;
+            vertical-align: top;
+        }
+
+        code {
+            background: #f0f2f5;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-family: 'SF Mono', monospace;
+            font-size: 13px;
+            color: #c0342d;
+        }
+
+        pre {
+            background: #1a2c3e;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 16px;
+            overflow-x: auto;
+            font-size: 13px;
+            font-family: 'SF Mono', monospace;
+            margin: 20px 0;
+        }
+
+        .highlight {
+            background: #fef5e8;
+            border-left: 5px solid #ed8d48;
+            padding: 20px 24px;
+            border-radius: 16px;
+            margin: 24px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: #ed8d48;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 24px 16px;
+            }
+            .schema-box {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ЗАГОЛОВОК -->
+    <h1>🤖 АСУ ПГР — Умный помощник</h1>
+    <div class="sub">
+        Полная архитектура и пошаговый принцип работы для руководителя и бизнес‑аналитика.<br>
+        Всё открыто, никаких скрытых деталей. Ниже описано, КАК ИМЕННО бот работает.
+    </div>
+
+    <!-- 1. ЧТО ДЕЛАЕТ БОТ -->
+    <div class="card">
+        <h2>📌 1. Что делает бот? (Для бизнеса)</h2>
+        <div class="grid-3">
+            <div>
+                <strong>✅ Отвечает на вопросы по документации</strong><br>
+                data.json, справочники, инструкции.
+            </div>
+            <div>
+                <strong>✅ Отвечает на вопросы по КОДУ</strong><br>
+                Весь репозиторий (кроме мусора) — единственный актуальный источник правды.
+            </div>
+            <div>
+                <strong>✅ Даёт ссылки на источники</strong><br>
+                Прямо говорит: «смотри файл X, строка Y».
+            </div>
+        </div>
+        <div class="highlight">
+            🎯 Главная фишка: <strong>бот не выдумывает</strong> — он отвечает строго на основе того, что написано в коде и документации.
+            Код всегда актуален, документация — проверяется.
+        </div>
+    </div>
+
+    <!-- 2. АРХИТЕКТУРА — ПРОСТЫМИ СЛОВАМИ -->
+    <div class="card">
+        <h2>🧱 2. Архитектура: из чего состоит</h2>
+        <div class="schema-row">
+            <div class="schema-box">
+                <div style="font-size: 32px;">🌐</div>
+                <strong>docs-server</strong><br>
+                Порт 3000<br>
+                Ваш старый сервер + чат
+            </div>
+            <div class="schema-box">
+                <div style="font-size: 32px;">🧠</div>
+                <strong>ollama</strong><br>
+                Порт 11434<br>
+                Локальная нейросеть<br>
+                <span class="badge">qwen2.5:3b</span>
+            </div>
+            <div class="schema-box">
+                <div style="font-size: 32px;">⚙️</div>
+                <strong>ai-bot</strong><br>
+                Порт 8000<br>
+                Главный мозг: поиск + индексация
+            </div>
+            <div class="schema-box">
+                <div style="font-size: 32px;">🗃️</div>
+                <strong>redis</strong><br>
+                Порт 6379<br>
+                Кэш ответов (ускорение)
+            </div>
+        </div>
+        <p><span class="badge">🧩 Всё в одном Docker Compose</span> <span class="badge badge-blue">Запуск одной командой</span> <span class="badge badge-green">Работает на CPU</span></p>
+    </div>
+
+    <!-- 3. ПРИНЦИП РАБОТЫ — ДЕЙСТВИЕ ЗА ДЕЙСТВИЕМ -->
+    <div class="card">
+        <h2>⚙️ 3. Принцип работы — по шагам (без домыслов)</h2>
+
+        <!-- ЭТАП А: ИНДЕКСАЦИЯ -->
+        <h3>📚 Этап А. Индексация — как бот «читает» проект</h3>
+        <div class="highlight">
+            <strong>Важно:</strong> Бот сканирует <strong>ВЕСЬ репозиторий целиком</strong> (всё, что вы ему смонтировали).<br>
+            Но из сканирования <strong>исключается мусор</strong>: .git, node_modules, __pycache__, картинки, логи.
+        </div>
+
+        <div class="schema-row">
+            <div class="schema-box">
+                🔍 <strong>1. Сканирование файлов</strong><br>
+                ВСЕ файлы (кроме мусора).
+            </div>
+            <div class="schema-box">
+                ✂️ <strong>2. Чанкование</strong><br>
+                Код → режем на функции/классы.<br>
+                JSON → режем по объектам.<br>
+                Документы → по параграфам.
+            </div>
+            <div class="schema-box">
+                🧮 <strong>3. Embedding</strong><br>
+                Превращаем каждый кусочек в вектор (набор чисел).
+            </div>
+            <div class="schema-box">
+                💾 <strong>4. Сохранение</strong><br>
+                Вектор + текст + метаданные → ChromaDB.
+            </div>
+        </div>
+
+        <p><span class="step-number">1</span> Вы или CI/CD запускаете команду: <code>curl -X POST /api/index?mode=full</code><br>
+        <span class="step-number">2</span> Бот проходит по всем папкам (включая <strong>components/, infrastructure/, tetepfgr/</strong> — всё, что есть).<br>
+        <span class="step-number">3</span> Исключает .git, node_modules, __pycache__ и другие технические папки.<br>
+        <span class="step-number">4</span> Для каждого файла кода — разбивает на функции/классы (с помощью Tree-sitter).<br>
+        <span class="step-number">5</span> Сохраняет в ChromaDB (векторная база) — это и есть «база знаний».<br>
+        <span class="step-number">6</span> После этого бот готов отвечать на вопросы.</p>
+
+        <div class="arrow-down">▼</div>
+
+        <!-- ЭТАП Б: ОТВЕТ НА ВОПРОС -->
+        <h3>💬 Этап Б. Как бот отвечает на вопрос</h3>
+        <div class="schema-row">
+            <div class="schema-box">
+                ❓ <strong>Вопрос</strong><br>
+                Пользователь пишет в чат.
+            </div>
+            <div class="schema-box">
+                🔎 <strong>Поиск</strong><br>
+                Бот ищет в ChromaDB <strong>топ-20</strong> похожих кусочков.
+            </div>
+            <div class="schema-box">
+                🎯 <strong>Reranking</strong><br>
+                Уточняет и выбирает <strong>топ-4</strong> самых релевантных.
+            </div>
+            <div class="schema-box">
+                🧠 <strong>Генерация</strong><br>
+                Нейросеть (Ollama) пишет ответ по этим 4 кусочкам.
+            </div>
+        </div>
+
+        <p><span class="step-number">1</span> Пользователь пишет вопрос.<br>
+        <span class="step-number">2</span> Бот проверяет Redis — если такой же вопрос уже был, отвечает мгновенно.<br>
+        <span class="step-number">3</span> Если нет — превращает вопрос в вектор (embedding).<br>
+        <span class="step-number">4</span> Ищет в ChromaDB (базе знаний) самые похожие куски кода/документации (top-20).<br>
+        <span class="step-number">5</span> Reranker (модель bge-reranker) выбирает из них 4 лучших.<br>
+        <span class="step-number">6</span> Отправляет эти 4 кусочка в нейросеть (qwen2.5:3b) с чёткой инструкцией: «отвечай ТОЛЬКО по этим данным».<br>
+        <span class="step-number">7</span> Нейросеть генерирует ответ → пользователь видит его + ссылки на файлы и строки.</p>
+
+        <div class="highlight">
+            <strong>⏱️ Время ответа:</strong> 12–18 секунд (на CPU).<br>
+            <strong>⚡ Повторные вопросы:</strong> мгновенно (кэш Redis).
+        </div>
+    </div>
+
+    <!-- 4. ЦИФРОВОЙ СНИМОК И ОБНОВЛЕНИЯ -->
+    <div class="card">
+        <h2>📸 4. Цифровой снимок + Обновления (CI/CD ready)</h2>
+        <p><strong>Проблема:</strong> как понять, что именно проиндексировалось?<br>
+        <strong>Решение:</strong> сначала бот делает <strong>снимок проекта</strong> (snapshot) — JSON-файл со списком ВСЕХ файлов, их хешей и предупреждениями.</p>
+
+        <h3>Что такое снимок?</h3>
+        <pre>{
+  "timestamp": "2026-04-27T14:30:00Z",
+  "files": [
+    {"path": "components/analytics/__main__.py", "hash": "md5...", "size": 3200},
+    {"path": "infrastructure/postgres/init.sql", "hash": "md5...", "size": 5400}
+  ],
+  "excluded": [".git", "node_modules", "__pycache__"]
+}</pre>
+
+        <h3>Как вы управляете обновлениями</h3>
+        <div class="grid-3">
+            <div>
+                <span class="badge">1️⃣</span> <strong>Создать снимок</strong><br>
+                <code>curl -X POST /api/snapshot/create</code><br>
+                Бот сканирует всё (кроме мусора) → выдаёт JSON.
+            </div>
+            <div>
+                <span class="badge">2️⃣</span> <strong>Проверить снимок</strong><br>
+                <code>curl /api/snapshot/latest</code><br>
+                Вы видите, какие файлы попали в индекс, а какие исключены.
+            </div>
+            <div>
+                <span class="badge">3️⃣</span> <strong>Запустить индексацию</strong><br>
+                <code>curl -X POST "/api/index?snapshot=latest"</code><br>
+                Только после вашей команды бот строит базу знаний.
+            </div>
+        </div>
+
+        <h3>Автоматика (CI/CD) для нетерпеливых</h3>
+        <div class="grid-3">
+            <div>
+                <span class="badge badge-blue">📦 Push в main</span><br>
+                Автоматически создаётся снимок, но индексация НЕ запускается.
+            </div>
+            <div>
+                <span class="badge badge-blue">🏷️ Создание тега (релиз)</span><br>
+                Автоматически полная переиндексация.
+            </div>
+            <div>
+                <span class="badge badge-blue">⏰ Ежедневно в 3 часа ночи</span><br>
+                Инкрементальное обновление (только изменённые файлы).
+            </div>
+        </div>
+        <div class="highlight">
+            🔁 <strong>Что происходит, когда вы меняете папки или файлы?</strong><br>
+            — Переименовали папку → сработает <code>reindex</code> → старые векторы удалятся, новые создадутся.<br>
+            — Добавили новый файл → при следующем <code>reindex</code> он будет проиндексирован.<br>
+            — Удалили файл → его векторы исчезнут.<br>
+            <strong>Никакой магии — всё детерминировано.</strong>
+        </div>
+    </div>
+
+    <!-- 5. ЧТО ИСКЛЮЧАЕТСЯ (ЧЁРНЫЙ СПИСОК) -->
+    <div class="card">
+        <h2>🚫 5. Что бот НЕ читает (чёрный список)</h2>
+        <div class="grid-3">
+            <div>
+                <strong>Папки:</strong><br>
+                <code>.git</code><br>
+                <code>node_modules</code><br>
+                <code>__pycache__</code><br>
+                <code>logs</code><br>
+                <code>chroma_data</code><br>
+                <code>ollama_data</code><br>
+                <code>redis_data</code>
+            </div>
+            <div>
+                <strong>Расширения:</strong><br>
+                <code>.log</code><br>
+                <code>.pyc</code><br>
+                <code>.pyo</code><br>
+                <code>.so</code><br>
+                <code>.dll</code><br>
+                <code>.exe</code><br>
+                <code>.jpg, .png, .gif</code>
+            </div>
+            <div>
+                <strong>Служебные:</strong><br>
+                <code>.env</code><br>
+                <code>.gitignore</code><br>
+                <code>.dockerignore</code><br>
+                <code>.gitlab-ci.yml</code><br>
+                <code>*.lock</code>
+            </div>
+        </div>
+        <p><span class="badge">✅ ВСЁ остальное сканируется</span> — включая <strong>components/</strong> и <strong>infrastructure/</strong> (вы сами их туда положили, молодцы).</p>
+    </div>
+
+    <!-- 6. РЕСУРСЫ СЕРВЕРА -->
+    <div class="card">
+        <h2>🖥️ 6. Сколько нужно серверу ресурсов (для отдела)</h2>
+        <table>
+            <thead><tr><th>Сервис</th><th>RAM</th><th>CPU</th><th>Диск (SSD)</th></tr></thead>
+            <tbody>
+                <tr><td>ollama (qwen2.5:3b)</td><td>~2.5 GB</td><td>1-2 ядра</td><td>модель ~2 GB</td></tr>
+                <tr><td>ai-bot (FastAPI + Chroma)</td><td>~2 GB</td><td>1 ядро</td><td>векторы ~1 GB</td></tr>
+                <tr><td>reranker (bge-reranker)</td><td>~1.5 GB</td><td>0.5 ядра</td><td>модель ~1.5 GB</td></tr>
+                <tr><td>redis (кэш)</td><td>~0.5 GB</td><td>0.2 ядра</td><td>кэш ~0.5 GB</td></tr>
+                <tr><td>docs-server</td><td>~0.5 GB</td><td>0.1 ядра</td><td>—</td></tr>
+                <tr style="background:#f0f2f5;"><td><strong>ИТОГО минимум</strong></td><td><strong>~7-8 GB</strong></td><td><strong>3-4 ядра</strong></td><td><strong>~5-7 GB</strong></td></tr>
+            </tbody>
+        </table>
+        <div class="highlight">
+            ✅ Всё работает на обычном процессоре (CPU). Видеокарта не нужна.<br>
+            ✅ Рекомендовано: 12 ГБ RAM, 4 CPU, 20 ГБ диска.
+        </div>
+    </div>
+
+    <!-- 7. ИТОГ: ЧТО ПОЛУЧАЕТ ОТДЕЛ РАЗРАБОТКИ -->
+    <div class="card">
+        <h2>📦 7. Что получает отдел разработки</h2>
+        <div class="grid-3">
+            <div>
+                <span class="step-number">1</span> <strong>Установка</strong><br>
+                <code>git clone ...<br>
+                docker-compose up -d</code><br>
+                Ждём 15 минут первой индексации.
+            </div>
+            <div>
+                <span class="step-number">2</span> <strong>Ежедневное обновление</strong><br>
+                <code>git pull</code><br>
+                <code>curl -X POST /api/reindex?mode=incremental</code><br>
+                (или CI/CD сделает это сам)
+            </div>
+            <div>
+                <span class="step-number">3</span> <strong>Использование</strong><br>
+                Открыть браузер → порт 3000 → задать вопрос в чат.<br>
+                Бот отвечает со ссылками на файлы и строки.
+            </div>
+        </div>
+        <div class="highlight">
+            🚀 <strong>Ключевой результат для бизнеса:</strong><br>
+            — Новые сотрудники быстрее входят в курс дела.<br>
+            — Не нужно листать тонны документации — бот находит ответ за 12-18 секунд.<br>
+            — Ответы всегда по актуальному коду, потому что код сканируется целиком.
+        </div>
+    </div>
+
+    <!-- ФУТЕР -->
+    <div style="text-align: center; margin-top: 48px; padding-top: 24px; border-top: 2px solid #e9edf2; color: #6c7e91;">
+        📄 АСУ ПГР RAG Assistant — финальная спецификация.<br>
+        Вопросы и уточнения — в отдел разработки через тикеты.
+    </div>
+
+</div>
+</body>
+</html>
