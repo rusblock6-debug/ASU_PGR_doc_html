@@ -14,7 +14,10 @@ EXCLUDED_DIRS = {
     '.git', 'node_modules', '__pycache__', 'logs',
     'chroma_data', 'ollama_data', 'redis_data',
     '.vscode', '.idea', 'dist', 'build', 'target',
-    '.next', '.nuxt', 'coverage', '.pytest_cache'
+    '.next', '.nuxt', 'coverage', '.pytest_cache',
+    'screenshots', '.history', '.cursor', '.husky',
+    '.storybook', 'migrations', 'tests', 'test',
+    '.docker', '.bin', 'monitoring', 'telemetry-visualizer'
 }
 
 # Чёрный список расширений
@@ -23,15 +26,22 @@ EXCLUDED_EXTENSIONS = {
     '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.ico',
     '.mp4', '.avi', '.mov', '.mp3', '.wav',
     '.zip', '.tar', '.gz', '.rar', '.7z',
-    '.lock', '.sum'
+    '.lock', '.sum', '.sqlite3', '.db', '.rdb',
+    '.woff', '.woff2', '.ttf', '.eot', '.svg',
+    '.min.js', '.min.css', '.map'
 }
 
 # Служебные файлы
 EXCLUDED_FILES = {
-    '.env', '.env.local', '.env.production',
+    '.env', '.env.local', '.env.production', '.env.example',
     '.gitignore', '.dockerignore', '.eslintignore',
-    'package-lock.json', 'yarn.lock', 'poetry.lock'
+    'package-lock.json', 'yarn.lock', 'poetry.lock',
+    'uv.lock', 'go.sum', 'Dockerfile', 'docker-compose.yml',
+    'docker-compose.yaml', '.gitlab-ci.yml', '.pre-commit-config.yaml'
 }
+
+# Максимальный размер файла (1MB)
+MAX_FILE_SIZE = 1024 * 1024
 
 class RepositoryScanner:
     """Сканер репозитория"""
@@ -73,6 +83,12 @@ class RepositoryScanner:
                     continue
                 
                 try:
+                    # Проверка размера файла
+                    file_size = file_path.stat().st_size
+                    if file_size > MAX_FILE_SIZE:
+                        logger.debug(f"Файл слишком большой ({file_size} bytes): {file_path}")
+                        continue
+                    
                     # Вычисляем MD5
                     with open(file_path, 'rb') as f:
                         file_hash = hashlib.md5(f.read()).hexdigest()

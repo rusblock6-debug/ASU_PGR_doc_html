@@ -129,10 +129,14 @@ async def ask_question(req: QuestionRequest):
     
     try:
         # Получаем коллекцию
-        collection = chroma_client.get_or_create_collection(name="pgr_docs")
+        try:
+            collection = chroma_client.get_collection(name="pgr_docs")
+        except:
+            collection = chroma_client.get_or_create_collection(name="pgr_docs")
         
         # Проверяем есть ли документы
         count = collection.count()
+        logger.info(f"📊 Документов в базе: {count}")
         if count == 0:
             return {
                 "answer": "База знаний пуста. Необходимо запустить индексацию репозитория через API: POST /api/index?mode=full",
