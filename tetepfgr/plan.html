@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>АСУ ПГР — RAG Ассистент | Финальная архитектура (ПРОВЕРЕННАЯ)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f0f4f8;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 40px 24px;
+            color: #1a2c3e;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            border: 1px solid #e2e9f2;
+        }
+        .badge {
+            display: inline-block;
+            background: #ed8d48;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 40px;
+            margin-right: 8px;
+        }
+        .badge-blue {
+            background: #2c6e9e;
+        }
+        .badge-green {
+            background: #2c8c5a;
+        }
+        .badge-red {
+            background: #c0342d;
+        }
+        h1 {
+            font-size: 34px;
+            font-weight: 800;
+            color: #0f2b3b;
+            margin-bottom: 8px;
+        }
+        h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 20px 0 16px 0;
+            border-left: 5px solid #ed8d48;
+            padding-left: 18px;
+        }
+        h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+            color: #1e4a6e;
+        }
+        .sub {
+            font-size: 16px;
+            color: #4a627a;
+            margin-bottom: 32px;
+            border-left: 3px solid #ed8d48;
+            padding-left: 20px;
+        }
+        .grid-3, .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+        .serv-card {
+            background: #f9fbfd;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #e2edf2;
+            transition: all 0.2s;
+        }
+        .serv-card:hover {
+            border-color: #ed8d48;
+            box-shadow: 0 6px 14px rgba(237,141,72,0.1);
+        }
+        .arrow-down {
+            text-align: center;
+            font-size: 36px;
+            color: #ed8d48;
+            margin: 12px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        th {
+            background: #1e3a4d;
+            color: white;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2edf2;
+            vertical-align: top;
+        }
+        code {
+            background: #eef2f7;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #c0342d;
+        }
+        pre {
+            background: #1a2c3e;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 20px;
+            overflow-x: auto;
+            font-size: 13px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+        .highlight {
+            background: #fef5e8;
+            border-left: 5px solid #ed8d48;
+            padding: 20px 24px;
+            border-radius: 20px;
+            margin: 24px 0;
+        }
+        .step-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #ed8d48;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+        .critical {
+            background: #fef2f0;
+            border-left: 5px solid #c0342d;
+            padding: 20px 24px;
+            border-radius: 20px;
+            margin: 24px 0;
+        }
+        @media (max-width: 700px) {
+            body {
+                padding: 20px 16px;
+            }
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================================ -->
+<!-- ИНСТРУКЦИЯ ДЛЯ КЛОДА (AI ASSISTANT) — ОБЯЗАТЕЛЬНО К ПРОЧТЕНИЮ                   -->
+<!-- ============================================================================ -->
+<!--
+🤖 КЛОД, ВНИМАНИЕ! Ты должен создать РАБОТАЮЩУЮ систему RAG-бота по этому описанию.
+
+КРИТИЧЕСКИЕ ТРЕБОВАНИЯ (БЕЗ ЭТОГО СИСТЕМА НЕ ЗАРАБОТАЕТ):
+
+1. 🐳 docker-compose.yml ДОЛЖЕН лежать в КОРНЕ репозитория (ПГР-РЕПО/)
+   - Если там уже есть docker-compose.yml для других сервисов — НЕ ПЕРЕЗАПИСЫВАТЬ!
+   - Добавить НОВЫЙ сервис ai-bot к существующему compose
+   - Либо создать отдельный docker-compose.rag.yml и указать это в README
+
+2. 📥 Модель Ollama (qwen2.5:3b) нужно скачать ПРИ ПЕРВОМ ЗАПУСКЕ
+   - Сделать entrypoint.sh, который ждёт Ollama и выполняет ollama pull
+   - ИЛИ явно написать в README команду для отдела
+
+3. 🔑 API-ключ для эндпоинта /reindex — ОБЯЗАТЕЛЕН
+   - НЕ использовать значение по умолчанию в production
+   - В .env.example указать API_KEY=change-me-in-production
+
+4. 🚫 Исключения из индексации (чёрный список) — строго соблюдать:
+   - .git, node_modules, __pycache__, logs/, chroma_data/, ollama_data/, redis_data/
+   - .log, .pyc, .jpg, .png, .gif, .exe, .so, .dll, .env
+
+5. 🔄 Индексация должна быть транзакционной:
+   - Сначала создать ВРЕМЕННУЮ коллекцию в ChromaDB
+   - Заполнить её новыми чанками
+   - Удалить старые векторы из ОСНОВНОЙ коллекции
+   - Перенести из временной в основную
+   - Удалить временную
+
+6. 🧩 Парсеры кода (Tree-sitter + AST):
+   - Python: AST (по функциям/классам)
+   - Go: Tree-sitter (по функциям)
+   - TypeScript/JavaScript: Tree-sitter (по компонентам/функциям)
+   - SQL: по отдельным запросам
+
+7. 📁 Монтирование Volumes:
+   - Использовать ${PWD} или абсолютный путь, НЕ полагаться на точку "."
+   - В README объяснить, как настроить путь к репозиторию
+
+8. 🩺 Healthcheck для всех сервисов:
+   - ollama: ollama list
+   - ai-bot: curl /health
+   - redis: redis-cli ping
+   - docs-server: curl порт 3000
+
+9. 📝 Логирование:
+   - Все вопросы/ответы пишутся в ./logs/ai-bot.log
+   - Ротация логов: 10 MB на файл, хранить 5 файлов
+   - Уровень логирования: INFO (можно DEBUG для отладки)
+
+10. 🧹 При переименовании/удалении папок:
+    - Бот НЕ ДОЛЖЕН ломаться
+    - При reindex старые векторы удаляются автоматически
+
+Если что-то из этого пропустишь — система не заработает или будет работать некорректно.
+-->
+<!-- ============================================================================ -->
+
+<div class="container">
+
+    <!-- ШАПКА -->
+    <h1>📡 АСУ ПГР — RAG Ассистент</h1>
+    <div class="sub">
+        Финальная архитектура, состав Docker и принцип работы «от А до Я».<br>
+        Никаких скрытых деталей. Каждый шаг описан так, чтобы разработчик реализовал, а бизнес‑аналитик понял.<br>
+        <span class="badge-red" style="background:#c0342d; color:white;">❗ ВАЖНО: Прочитай инструкцию для Клода в начале HTML-файла</span>
+    </div>
+
+    <!-- ===== 1. ЧТО ЭТО И ДЛЯ ЧЕГО ===== -->
+    <div class="card">
+        <h2>🎯 1. Назначение системы (для бизнеса)</h2>
+        <div class="grid-3">
+            <div>✅ Отвечает на вопросы по <strong>технической документации</strong> (data.json, directory_data.json)</div>
+            <div>✅ Отвечает на вопросы по <strong>КОДУ</strong> всего проекта — потому что код всегда актуален</div>
+            <div>✅ Даёт точные ответы со <strong>ссылками на файлы и строки</strong></div>
+        </div>
+        <div class="highlight">
+            💡 <strong>Главная особенность:</strong> бот НЕ выдумывает — он ищет в реальном коде и документации и пересказывает только то, что нашёл.
+            Код всегда правда, документация — проверяется.
+        </div>
+    </div>
+
+    <!-- ===== 2. СОСТАВ DOCKER (4 СЕРВИСА) ===== -->
+    <div class="card">
+        <h2>🐳 2. Состав Docker Compose (4 сервиса, без сюрпризов)</h2>
+        <div class="grid-4">
+            <div class="serv-card">
+                <div style="font-size: 32px;">📄</div>
+                <strong>docs-server</strong><br>
+                Порт 3000<br>
+                Node.js + admin.html (ваш текущий сервер)
+            </div>
+            <div class="serv-card">
+                <div style="font-size: 32px;">🧠</div>
+                <strong>ollama</strong><br>
+                Порт 11434<br>
+                Локальная LLM <span class="badge">qwen2.5:3b</span>
+            </div>
+            <div class="serv-card">
+                <div style="font-size: 32px;">⚙️</div>
+                <strong>ai-bot</strong><br>
+                Порт 8000<br>
+                FastAPI + ChromaDB + Tree‑sitter + Reranker
+            </div>
+            <div class="serv-card">
+                <div style="font-size: 32px;">🗃️</div>
+                <strong>redis</strong><br>
+                Порт 6379<br>
+                Кэш ответов (ускорение)
+            </div>
+        </div>
+        <div><span class="badge">🐳 ВСЁ в одном docker-compose.yml</span> <span class="badge badge-blue">Одна команда — запуск</span> <span class="badge badge-green">Работает на CPU (видеокарта не нужна)</span></div>
+    </div>
+
+    <!-- ===== 3. ПУТЬ К docker-compose.yml (ВАЖНО!) ===== -->
+    <div class="card">
+        <h2>📁 2.1 Где лежит docker-compose.yml (КРИТИЧЕСКИ ВАЖНО)</h2>
+        <div class="critical">
+            <strong>🔴 ОБЯЗАТЕЛЬНОЕ УСЛОВИЕ:</strong> файл <code>docker-compose.yml</code> должен лежать в <strong>корне репозитория</strong> <code>ПГР-РЕПО/</code>.
+            <br><br>
+            Если в корне уже есть <code>docker-compose.yml</code> (от других сервисов), то:
+            <ul style="margin-top: 12px; margin-left: 24px;">
+                <li>❌ НЕ перезаписывать его!</li>
+                <li>✅ Добавить сервисы <code>ai-bot, ollama, redis</code> в существующий файл</li>
+                <li>✅ Либо создать <code>docker-compose.rag.yml</code> и задокументировать запуск: <code>docker-compose -f docker-compose.rag.yml up -d</code></li>
+            </ul>
+        </div>
+        <div class="highlight">
+            📌 <strong>Как указать путь к репозиторию в volumes (надёжный способ):</strong>
+            <pre>volumes:
+  - ${PWD}:/data/repo:ro   # PWD = текущая папка с docker-compose.yml</pre>
+            ИЛИ через <code>.env</code>:
+            <pre>volumes:
+  - ${REPO_PATH:-.}:/data/repo:ro</pre>
+        </div>
+    </div>
+
+    <!-- ===== 4. ПРИНЦИП РАБОТЫ ===== -->
+    <div class="card">
+        <h2>⚙️ 3. Принцип работы — по шагам (без домыслов)</h2>
+
+        <h3>📥 Этап 1. Индексация — как бот «читает» репозиторий</h3>
+        <div class="grid-3">
+            <div><span class="step-circle">1</span> Сканирование ВСЕГО репозитория (кроме мусора: .git, node_modules, __pycache__, картинки, логи)</div>
+            <div><span class="step-circle">2</span> Разбиение на чанки: код → функции/классы, JSON → объекты, документация → параграфы</div>
+            <div><span class="step-circle">3</span> Embedding → превращаем каждый чанк в вектор (числа)</div>
+            <div><span class="step-circle">4</span> Сохраняем в ChromaDB — это и есть «база знаний»</div>
+        </div>
+        <p><strong>Что важно:</strong> индексация НЕ происходит сама собой. Вы или CI/CD запускаете команду:<br>
+        <code>curl -X POST /api/index?mode=full</code><br>
+        После этого бот готов отвечать.</p>
+
+        <div class="arrow-down">▼</div>
+
+        <h3>💬 Этап 2. Как бот отвечает на вопрос пользователя</h3>
+        <div class="grid-3">
+            <div><span class="step-circle">1</span> Пользователь пишет вопрос в чат → попадает на ai-bot</div>
+            <div><span class="step-circle">2</span> Проверка Redis: если такой вопрос уже был — мгновенный ответ</div>
+            <div><span class="step-circle">3</span> Embedding вопроса → вектор</div>
+            <div><span class="step-circle">4</span> Поиск в ChromaDB → топ-20 похожих чанков</div>
+            <div><span class="step-circle">5</span> Reranker (bge-reranker-v2-m3) → выбирает топ-4 самых релевантных</div>
+            <div><span class="step-circle">6</span> Отправляем эти 4 чанка в Ollama (qwen2.5:3b) с инструкцией: «отвечай ТОЛЬКО на основе этих данных»</div>
+            <div><span class="step-circle">7</span> Нейросеть генерирует ответ + ссылки на источники</div>
+        </div>
+        <div class="highlight">
+            ⏱️ <strong>Время ответа:</strong> 12–18 секунд (первый раз). Повторные вопросы — мгновенно (кэш).<br>
+            🔗 <strong>Пример ответа:</strong> «Согласно функции get_vehicles() в файле enterprise-service/vehicles.py, строка 42…»
+        </div>
+    </div>
+
+    <!-- ===== 5. ПЕРВАЯ ЗАГРУЗКА МОДЕЛИ OLLAMA ===== -->
+    <div class="card">
+        <h2>📥 3.1 Первый запуск: загрузка модели Ollama (КРИТИЧЕСКИ ВАЖНО)</h2>
+        <div class="critical">
+            <strong>🔴 Ollama НЕ содержит модель qwen2.5:3b по умолчанию.</strong> Её нужно скачать ПРИ ПЕРВОМ ЗАПУСКЕ.
+            <br><br>
+            <strong>Способ 1 (рекомендуемый):</strong> добавить в <code>entrypoint.sh</code> ai-bot или отдельный init-контейнер:
+            <pre>#!/bin/bash
+# Ждём пока Ollama поднимется
+until curl -s http://ollama:11434/api/tags; do
+  echo "Ожидание Ollama..."
+  sleep 2
+done
+# Скачиваем модель (только один раз)
+ollama pull qwen2.5:3b
+exec "$@"</pre>
+            <strong>Способ 2 (для ручного запуска отделом):</strong> написать в README:
+            <pre>docker exec -it ollama ollama pull qwen2.5:3b</pre>
+        </div>
+    </div>
+
+    <!-- ===== 6. ЦИФРОВОЙ СНИМОК ===== -->
+    <div class="card">
+        <h2>📸 4. Цифровой снимок (Snapshot) — вы управляете процессом</h2>
+        <p><strong>Зачем?</strong> Вы должны знать, что именно попадёт в базу знаний, прежде чем запустить индексацию.</p>
+        <div class="grid-3">
+            <div>
+                <span class="badge">1️⃣</span> <strong>Создать снимок</strong><br>
+                <code>curl -X POST /api/snapshot/create</code><br>
+                → получаете JSON-файл со списком всех файлов, хешей, предупреждениями.
+            </div>
+            <div>
+                <span class="badge">2️⃣</span> <strong>Проверить снимок</strong><br>
+                <code>curl /api/snapshot/latest</code><br>
+                Вы видите, какие папки и файлы будут индексироваться, а какие исключены.
+            </div>
+            <div>
+                <span class="badge">3️⃣</span> <strong>Индексация по снимку</strong><br>
+                <code>curl -X POST "/api/index?snapshot=latest"</code><br>
+                Только после этой команды бот строит ChromaDB.
+            </div>
+        </div>
+        <div class="highlight">
+            ✅ <strong>Что даёт снимок:</strong><br>
+            — Вы НЕ теряете контроль: сначала посмотрели, потом запустили.<br>
+            — Снимки можно сохранять в Git (воспроизводимость).<br>
+            — Можно сравнить два снимка (что изменилось в проекте).
+        </div>
+    </div>
+
+    <!-- ===== 7. ЧТО СКАНИРУЕТСЯ, А ЧТО ИСКЛЮЧАЕТСЯ ===== -->
+    <div class="card">
+        <h2>📂 5. Что попадает в индекс, а что нет (чётко)</h2>
+        <div class="grid-3">
+            <div>
+                <strong>✅ Сканируется ВСЁ, КРОМЕ:</strong><br>
+                ‣ <code>.git</code> — история коммитов (не нужно)<br>
+                ‣ <code>node_modules</code> — чужие библиотеки<br>
+                ‣ <code>__pycache__</code> — кэш Python<br>
+                ‣ <code>logs/</code>, <code>chroma_data/</code>, <code>ollama_data/</code>, <code>redis_data/</code><br>
+                ‣ картинки (<code>.jpg, .png, .gif</code>)<br>
+                ‣ бинарники (<code>.exe, .so, .dll, .pyc</code>)<br>
+                ‣ служебные файлы (<code>.env, .gitignore, .dockerignore</code>)
+            </div>
+            <div>
+                <strong>✅ ВСЕ остальные файлы — в индексе:</strong><br>
+                ‣ Весь код (<code>.py, .go, .ts, .tsx, .js</code>)<br>
+                ‣ Инфраструктура (<code>Dockerfile, docker-compose.yml</code>)<br>
+                ‣ SQL (миграции, initdb)<br>
+                ‣ JSON, YAML, Markdown, HTML-документы<br>
+                ‣ ТЗ, тест-кейсы, документация
+            </div>
+            <div>
+                <strong>📌 Почему так:</strong><br>
+                Код всегда актуален — это единственный источник правды.<br>
+                Исключается только мусор, который не несёт смысловой нагрузки.
+            </div>
+        </div>
+        <div class="highlight">
+            🧠 <strong>Итог по объёму:</strong> ~1500–2000 файлов → ~20 000–30 000 чанков → ChromaDB легко тянет.
+        </div>
+    </div>
+
+    <!-- ===== 8. ТРАНЗАКЦИОННАЯ ИНДЕКСАЦИЯ ===== -->
+    <div class="card">
+        <h2>🔄 5.1 Транзакционная индексация (чтобы не сломать базу)</h2>
+        <div class="critical">
+            <strong>🔴 ОБЯЗАТЕЛЬНОЕ ТРЕБОВАНИЕ:</strong> при обновлении индекса использовать временную коллекцию.
+            <pre>def reindex_incremental():
+    # 1. Создаём временную коллекцию
+    temp_collection = client.create_collection("temp", temporary=True)
+    
+    # 2. Индексируем изменённые файлы во временную коллекцию
+    for file in changed_files:
+        chunks = chunk_file(file)
+        temp_collection.add(chunks)
+    
+    # 3. Атомарная замена
+    main_collection.delete(where={"file_path": {"$in": changed_files}})
+    main_collection.add(temp_collection.get())
+    
+    # 4. Удаляем временную
+    client.delete_collection("temp")</pre>
+        </div>
+    </div>
+
+    <!-- ===== 9. ПАРСЕРЫ КОДА ===== -->
+    <div class="card">
+        <h2>🧩 5.2 Парсеры кода (Tree-sitter + AST)</h2>
+        <table>
+            <thead><tr><th>Язык</th><th>Инструмент</th><th>Что чанкуем</th></tr></thead>
+            <tbody>
+                <tr><td>Python (.py)</td><td>AST (Abstract Syntax Tree)</td><td>каждая функция, класс, метод</td></tr>
+                <tr><td>Go (.go)</td><td>Tree-sitter для Go</td><td>каждая функция, метод</td></tr>
+                <tr><td>TypeScript (.ts, .tsx)</td><td>Tree-sitter для TypeScript</td><td>каждый компонент, функция, интерфейс</td></tr>
+                <tr><td>JavaScript (.js, .jsx)</td><td>Tree-sitter для JavaScript</td><td>каждая функция, компонент</td></tr>
+                <tr><td>SQL (.sql)</td><td>Регулярные выражения + парсинг</td><td>отдельные запросы (CREATE, INSERT, SELECT)</td></tr>
+            </tbody>
+        </table>
+        <div class="highlight">
+            📦 <strong>Установка Tree-sitter (requirements.txt):</strong><br>
+            <code>tree-sitter==0.21.0</code><br>
+            <code>tree-sitter-python==0.21.0</code><br>
+            <code>tree-sitter-go==0.21.0</code><br>
+            <code>tree-sitter-typescript==0.21.0</code>
+        </div>
+    </div>
+
+    <!-- ===== 10. API-КЛЮЧ ===== -->
+    <div class="card">
+        <h2>🔑 6. Безопасность: API-ключ для /reindex</h2>
+        <div class="critical">
+            <strong>🔴 Эндпоинт /reindex ОБЯЗАТЕЛЬНО должен быть защищён API-ключом.</strong>
+            <br><br>
+            <strong>В docker-compose.yml:</strong>
+            <pre>environment:
+  - API_KEY=${API_KEY}   # НЕТ значения по умолчанию в production!</pre>
+            <strong>В .env.example (отдать отделу):</strong>
+            <pre># Обязательно сменить на свой!
+API_KEY=change-me-in-production</pre>
+            <strong>В коде ai-bot (main.py):</strong>
+            <pre>@router.post("/api/reindex")
+async def reindex(request: Request):
+    api_key = request.headers.get("X-API-Key")
+    if api_key != os.getenv("API_KEY"):
+        raise HTTPException(401, "Invalid API key")
+    # ... остальной код</pre>
+        </div>
+    </div>
+
+    <!-- ===== 11. ОБНОВЛЕНИЕ ИНДЕКСА ===== -->
+    <div class="card">
+        <h2>🔄 7. Обновление знаний — инкрементально, без перестройки всего мира</h2>
+        <p>После изменений в коде или документации достаточно запустить:</p>
+        <pre>curl -X POST "/api/reindex?mode=incremental" -H "X-API-Key: ваш-ключ"</pre>
+        <div class="grid-3">
+            <div><span class="step-circle">1</span> Бот вычисляет MD5-хеши всех файлов</div>
+            <div><span class="step-circle">2</span> Сравнивает с хешами в ChromaDB</div>
+            <div><span class="step-circle">3</span> Для изменившихся файлов → удаляет старые векторы, создаёт новые</div>
+            <div><span class="step-circle">4</span> Новые файлы → добавляются, удалённые → векторы уходят</div>
+        </div>
+        <div class="highlight">
+            ⚡ <strong>Время инкрементального обновления:</strong> 1–3 минуты (вместо 15–35 минут полной индексации).<br>
+            🔁 <strong>Переименовали папку?</strong> — reindex подхватит.<br>
+            🆕 <strong>Добавили новый микросервис?</strong> — достаточно добавить его в <code>components/</code> (или куда вы его положили) и запустить reindex.
+        </div>
+    </div>
+
+    <!-- ===== 12. ЛОГИРОВАНИЕ ===== -->
+    <div class="card">
+        <h2>📝 8. Логирование (для отладки и аудита)</h2>
+        <div class="highlight">
+            <strong>Логи пишутся в <code>./logs/ai-bot.log</code></strong><br>
+            ‣ Каждый вопрос/ответ: timestamp, вопрос, ответ, источники, время ответа<br>
+            ‣ Ошибки: timestamp, тип ошибки, сообщение, stack trace<br>
+            ‣ Ротация логов: 10 MB на файл, хранить 5 файлов
+        </div>
+        <pre>import logging
+from logging.handlers import RotatingFileHandler
+
+handler = RotatingFileHandler('logs/ai-bot.log', maxBytes=10_000_000, backupCount=5)
+logging.basicConfig(handlers=[handler], level=logging.INFO)</pre>
+    </div>
+
+    <!-- ===== 13. HEALTHCHECK ===== -->
+    <div class="card">
+        <h2>🩺 9. Healthcheck для всех сервисов (Docker)</h2>
+        <div class="grid-3">
+            <div>
+                <strong>ollama:</strong>
+                <pre>healthcheck:
+  test: ["CMD", "ollama", "list"]
+  interval: 30s</pre>
+            </div>
+            <div>
+                <strong>ai-bot:</strong>
+                <pre>healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  interval: 30s</pre>
+            </div>
+            <div>
+                <strong>redis:</strong>
+                <pre>healthcheck:
+  test: ["CMD", "redis-cli", "ping"]
+  interval: 30s</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 14. CI/CD ===== -->
+    <div class="card">
+        <h2>🤖 10. CI/CD — всё само, вы только пишете код</h2>
+        <p>Пример <code>.gitlab-ci.yml</code> (отдел настраивает один раз):</p>
+        <pre>stages:
+  - snapshot
+  - index
+
+create_snapshot:
+  stage: snapshot
+  script: curl -X POST ${BOT_URL}/api/snapshot/create
+  only: [main, develop]
+
+index_full:
+  stage: index
+  script: curl -X POST "${BOT_URL}/api/index?mode=full"
+  only: [tags]                # при создании тега (релиз)
+
+index_incremental:
+  stage: index
+  script: curl -X POST "${BOT_URL}/api/reindex?mode=incremental"
+  only: [schedules]           # каждую ночь в 3:00
+  variables:
+    SCHEDULE: "0 3 * * *"</pre>
+        <div class="grid-3">
+            <div><span class="badge-blue">📦 Push в main</span> → создаётся снимок (индексация НЕ трогается)</div>
+            <div><span class="badge-blue">🏷️ Создание тега</span> → полная переиндексация (релиз)</div>
+            <div><span class="badge-blue">⏰ Ночной шедулер</span> → инкрементальное обновление</div>
+        </div>
+    </div>
+
+    <!-- ===== 15. РЕСУРСЫ СЕРВЕРА ===== -->
+    <div class="card">
+        <h2>🖥️ 11. Сколько нужно серверу ресурсов (точно)</h2>
+        <table>
+            <thead><tr><th>Сервис</th><th>RAM</th><th>CPU</th><th>Диск</th></tr></thead>
+            <tbody>
+                <tr><td>ollama (qwen2.5:3b)</td><td>~2.5 GB</td><td>1–2 ядра</td><td>модель ~2 GB</td></tr>
+                <tr><td>ai-bot (FastAPI+Chroma)</td><td>~2 GB</td><td>1 ядро</td><td>векторы ~1 GB</td></tr>
+                <tr><td>reranker (bge-reranker)</td><td>~1.5 GB</td><td>0.5 ядра</td><td>модель ~1.5 GB</td></tr>
+                <tr><td>redis</td><td>~0.5 GB</td><td>0.2 ядра</td><td>кэш ~0.5 GB</td></tr>
+                <tr><td>docs-server</td><td>~0.5 GB</td><td>0.1 ядра</td><td>—</td></tr>
+                <tr style="background:#f0f2f5;"><td><strong>ИТОГО минимум</strong></td><td><strong>7–8 GB</strong></td><td><strong>3–4 ядра</strong></td><td><strong>~5–7 GB</strong></td></tr>
+            </tbody>
+        </table>
+        <div class="highlight">✅ Всё работает на CPU. Рекомендовано: 12 GB RAM, 4 CPU, 20 GB диска.</div>
+    </div>
+
+    <!-- ===== 16. ЧТО ПОЛУЧАЕТ ОТДЕЛ ===== -->
+    <div class="card">
+        <h2>📦 12. Что отдел разработки получает «из коробки»</h2>
+        <div class="grid-3">
+            <div>
+                <span class="step-circle">1</span> <strong>Клонировать репозиторий</strong><br>
+                <code>git clone ...<br>cd pgr-repo</code>
+            </div>
+            <div>
+                <span class="step-circle">2</span> <strong>Настроить .env</strong><br>
+                <code>cp .env.example .env</code><br>
+                <code># изменить API_KEY</code>
+            </div>
+            <div>
+                <span class="step-circle">3</span> <strong>Запустить одной командой</strong><br>
+                <code>docker-compose up -d</code><br>
+                (первая индексация 15-35 мин)
+            </div>
+            <div>
+                <span class="step-circle">4</span> <strong>Дождаться загрузки модели</strong><br>
+                <code>docker logs -f ollama</code>
+            </div>
+            <div>
+                <span class="step-circle">5</span> <strong>Проверить работу</strong><br>
+                <code>curl http://localhost:8000/health</code>
+            </div>
+            <div>
+                <span class="step-circle">6</span> <strong>Задать вопрос</strong><br>
+                Открыть <code>http://localhost:3000</code> → чат
+            </div>
+        </div>
+        <div class="highlight">
+            🚀 <strong>Бизнес‑результат:</strong><br>
+            — Время поиска информации сокращается с часов до 10–18 секунд.<br>
+            — Ответы всегда по актуальному коду (потому что код сканируется целиком).<br>
+            — Новые сотрудники входят в проект в 5 раз быстрее.
+        </div>
+    </div>
+
+    <!-- ===== 17. ПОДВОДНЫЕ КАМНИ (РЕШЕННЫЕ) ===== -->
+    <div class="card">
+        <h2>⚠️ 13. Подводные камни (которые уже решены в этой спецификации)</h2>
+        <div class="grid-3">
+            <div>
+                <strong>❌ Проблема:</strong> монтирование всего репозитория <code>.:/data/repo</code> индексировало .git и node_modules.<br>
+                <strong>✅ Решение:</strong> чёрный список папок и расширений (см. раздел 5).
+            </div>
+            <div>
+                <strong>❌ Проблема:</strong> qwen2.5:7b на CPU отвечает 2–3 минуты.<br>
+                <strong>✅ Решение:</strong> дефолтная модель qwen2.5:3b (12–18 сек).
+            </div>
+            <div>
+                <strong>❌ Проблема:</strong> при ошибке индексации база знаний ломалась.<br>
+                <strong>✅ Решение:</strong> транзакционная индексация (раздел 5.1).
+            </div>
+            <div>
+                <strong>❌ Проблема:</strong> любой мог вызвать /reindex.<br>
+                <strong>✅ Решение:</strong> API-ключ для административных эндпоинтов (раздел 6).
+            </div>
+            <div>
+                <strong>❌ Проблема:</strong> при первом запуске Ollama не имеет модели.<br>
+                <strong>✅ Решение:</strong> entrypoint.sh с ollama pull (раздел 3.1).
+            </div>
+            <div>
+                <strong>❌ Проблема:</strong> docker-compose.yml не в корне — ломаются пути.<br>
+                <strong>✅ Решение:</strong> явное указание про корень репозитория (раздел 2.1).
+            </div>
+        </div>
+    </div>
+
+    <!-- ФУТЕР -->
+    <div style="text-align: center; margin-top: 48px; padding-top: 24px; border-top: 2px solid #dce5ef; color: #4f6f8f;">
+        📄 АСУ ПГР RAG Assistant — финальная версия спецификации.<br>
+        Все скрытые детали раскрыты. Все подводные камни учтены.<br>
+        Передаётся в отдел разработки как есть. Клод, приступай к реализации.
+    </div>
+
+</div>
+</body>
+</html>

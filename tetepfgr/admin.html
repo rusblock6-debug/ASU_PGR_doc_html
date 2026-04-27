@@ -230,10 +230,16 @@
         .search-container {
             padding: 20px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+        }
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
         .search-input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px 50px 12px 16px;
             background-color: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: 8px;
@@ -249,6 +255,39 @@
             border-color: var(--accent-color);
             background-color: rgba(255,255,255,0.15);
             box-shadow: 0 0 0 3px rgba(237, 141, 72, 0.1);
+        }
+        .ai-toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.6);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        .ai-toggle-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.9);
+        }
+        .ai-toggle-btn.active {
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover-color) 100%);
+            border-color: var(--accent-color);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(237, 141, 72, 0.4);
+        }
+        .ai-toggle-btn.loading {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
         }
         
         .toc-nav {
@@ -1430,8 +1469,13 @@
             
             <!-- Поиск в sidebar -->
             <div class="search-container">
-                <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Поиск..." 
-                    oninput="performGlobalSearch(this.value)">
+                <div class="search-input-wrapper">
+                    <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Поиск..." 
+                        oninput="handleSearch(this.value)">
+                    <button id="aiToggle" class="ai-toggle-btn" onclick="toggleAIMode()" title="Переключить AI-поиск">
+                        AI
+                    </button>
+                </div>
             </div>
 
             <nav class="toc-nav" id="toc">
@@ -6920,6 +6964,202 @@
                 const translitId = generateTranslitId(this.value, 'about');
                 aboutIdInput.value = translitId;
             });
+        }
+
+        // ============================================
+        // AI-ПОИСК ФУНКЦИОНАЛ
+        // ============================================
+        
+        let isAIMode = false;
+        const AI_BOT_URL = 'http://localhost:8000';
+        
+        // Переключение AI-режима
+        function toggleAIMode() {
+            isAIMode = !isAIMode;
+            const btn = document.getElementById('aiToggle');
+            const input = document.getElementById('globalSearch');
+            
+            if (isAIMode) {
+                btn.classList.add('active');
+                input.placeholder = '🤖 AI-поиск (задайте вопрос)...';
+            } else {
+                btn.classList.remove('active');
+                input.placeholder = '🔍 Поиск...';
+            }
+            
+            // Очистить поле при переключении
+            input.value = '';
+            performGlobalSearch('');
+        }
+        
+        // Обработчик поиска (AI или обычный)
+        function handleSearch(query) {
+            if (isAIMode) {
+                performAISearch(query);
+            } else {
+                performGlobalSearch(query);
+            }
+        }
+        
+        let aiSearchTimeout = null;
+        
+        // AI-поиск через бота
+        async function performAISearch(query) {
+            const searchQuery = query.trim();
+            clearTimeout(aiSearchTimeout);
+            
+            if (searchQuery === '') {
+                // Очистить результаты
+                clearAIResults();
+                return;
+            }
+            
+            // Задержка перед отправкой запроса
+            aiSearchTimeout = setTimeout(async () => {
+                const btn = document.getElementById('aiToggle');
+                btn.classList.add('loading');
+                
+                try {
+                    // Проверка доступности бота
+                    const healthResponse = await fetch(`${AI_BOT_URL}/health`);
+                    if (!healthResponse.ok) {
+                        throw new Error('AI-бот недоступен');
+                    }
+                    
+                    // Отправка вопроса
+                    const response = await fetch(`${AI_BOT_URL}/api/ask`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ question: searchQuery })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Ошибка AI-бота');
+                    }
+                    
+                    const data = await response.json();
+                    displayAIResults(data);
+                    
+                } catch (error) {
+                    console.error('AI Search Error:', error);
+                    displayAIError(error.message);
+                } finally {
+                    btn.classList.remove('loading');
+                }
+            }, 800); // Задержка 800мс
+        }
+        
+        // Отображение AI-результатов
+        function displayAIResults(data) {
+            // Скрыть все обычные секции
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Создать или найти секцию для AI-результатов
+            let aiSection = document.getElementById('ai-results-section');
+            if (!aiSection) {
+                aiSection = document.createElement('div');
+                aiSection.id = 'ai-results-section';
+                aiSection.className = 'content-section';
+                document.querySelector('.content-pane').prepend(aiSection);
+            }
+            
+            aiSection.classList.add('active');
+            
+            // Формирование HTML с результатами
+            let sourcesHTML = '';
+            if (data.sources && data.sources.length > 0) {
+                sourcesHTML = '<div style="margin-top: 24px; padding: 20px; background: #f7f9fa; border-radius: 12px; border-left: 4px solid var(--accent-color);">';
+                sourcesHTML += '<h4 style="margin: 0 0 12px 0; color: var(--accent-color); font-size: 16px;">📎 Источники:</h4>';
+                data.sources.forEach(source => {
+                    sourcesHTML += `<div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #e1e8ed;">`;
+                    sourcesHTML += `<code style="background: #f0f2f5; padding: 2px 8px; border-radius: 6px; font-size: 13px; color: #c0342d;">${source.file}</code>`;
+                    if (source.line) {
+                        sourcesHTML += ` <span style="color: #718096; font-size: 13px;">строка ${source.line}</span>`;
+                    }
+                    sourcesHTML += `</div>`;
+                });
+                sourcesHTML += '</div>';
+            }
+            
+            const cachedBadge = data.cached ? '<span style="display: inline-block; background: #2c8c5a; color: white; font-size: 11px; padding: 3px 10px; border-radius: 12px; margin-left: 12px;">из кэша</span>' : '';
+            
+            aiSection.innerHTML = `
+                <h2 class="section-group-title">🤖 AI-ответ ${cachedBadge}</h2>
+                <div class="card">
+                    <div class="card-description" style="font-size: 16px; line-height: 1.8;">
+                        ${data.answer}
+                    </div>
+                    ${sourcesHTML}
+                    <div style="padding: 16px 32px; background: #fafbfc; border-top: 1px solid #e1e8ed; font-size: 13px; color: #718096;">
+                        ⏱️ Время ответа: ${data.response_time ? data.response_time.toFixed(2) : '0'} сек
+                    </div>
+                </div>
+            `;
+            
+            // Прокрутка к результатам
+            document.querySelector('.content-pane').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Отображение ошибки AI
+        function displayAIError(errorMessage) {
+            let aiSection = document.getElementById('ai-results-section');
+            if (!aiSection) {
+                aiSection = document.createElement('div');
+                aiSection.id = 'ai-results-section';
+                aiSection.className = 'content-section';
+                document.querySelector('.content-pane').prepend(aiSection);
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            aiSection.classList.add('active');
+            
+            aiSection.innerHTML = `
+                <h2 class="section-group-title">⚠️ AI-бот недоступен</h2>
+                <div class="card">
+                    <div class="card-description" style="background: #fef2f0; border-left: 4px solid #c0342d;">
+                        <p style="color: #c0342d; font-weight: 600; margin-bottom: 12px;">❌ ${errorMessage}</p>
+                        <p style="margin-bottom: 8px;">Возможные причины:</p>
+                        <ul style="margin: 0; padding-left: 0; list-style: none;">
+                            <li style="padding-left: 24px; position: relative; margin-bottom: 8px;">
+                                <span style="position: absolute; left: 0; color: #c0342d;">▸</span>
+                                AI-бот не запущен (запустите Docker Compose)
+                            </li>
+                            <li style="padding-left: 24px; position: relative; margin-bottom: 8px;">
+                                <span style="position: absolute; left: 0; color: #c0342d;">▸</span>
+                                Бот ещё не проиндексировал репозиторий
+                            </li>
+                            <li style="padding-left: 24px; position: relative;">
+                                <span style="position: absolute; left: 0; color: #c0342d;">▸</span>
+                                Проблемы с подключением к localhost:8000
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Очистка AI-результатов
+        function clearAIResults() {
+            const aiSection = document.getElementById('ai-results-section');
+            if (aiSection) {
+                aiSection.classList.remove('active');
+            }
+            
+            // Вернуть активную секцию
+            const activeLink = document.querySelector('.toc-level-1 a.active');
+            if (activeLink) {
+                const sectionId = activeLink.getAttribute('href').substring(1);
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.classList.add('active');
+                }
+            }
         }
 
     </script>
