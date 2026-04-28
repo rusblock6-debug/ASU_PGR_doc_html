@@ -31,33 +31,18 @@ class CodeChunker:
             Список чанков или None если не удалось
         """
         try:
-            prompt = f"""Ты — эксперт по анализу технической документации.
+            prompt = f"""Split this {file_type} file into logical chunks. Return JSON array:
+[{{"content": "chunk text", "title": "short name"}}]
 
-Задача: Разбей этот {file_type} файл на логические смысловые блоки.
-
-Правила:
-1. Каждый блок должен быть самодостаточным (можно понять отдельно)
-2. Размер блока: 200-800 слов
-3. Сохраняй контекст (заголовки, описания)
-4. Для кода: группируй связанные функции/классы
-5. Для документации: группируй по темам/разделам
-
-Файл: {file_path}
-
-Содержимое:
+File: {file_path}
+Content:
 ```
-{content[:4000]}  # Ограничиваем для скорости
+{content[:2000]}
 ```
 
-Верни JSON массив чанков в формате:
-[
-  {{"content": "текст блока 1", "title": "краткое название", "type": "тип блока"}},
-  {{"content": "текст блока 2", "title": "краткое название", "type": "тип блока"}}
-]
+Return ONLY JSON array, no other text!"""
 
-ВАЖНО: Верни ТОЛЬКО JSON, без дополнительного текста!"""
-
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=1800.0) as client:  # 30 минут для больших JSON файлов
                 response = await client.post(
                     f"{OLLAMA_URL}/api/generate",
                     json={
@@ -65,9 +50,9 @@ class CodeChunker:
                         "prompt": prompt,
                         "stream": False,
                         "options": {
-                            "temperature": 0.1,  # Низкая температура для точности
+                            "temperature": 0.1,
                             "top_p": 0.9,
-                            "max_tokens": 2000
+                            "num_predict": 1000  # Уменьшил для скорости
                         }
                     }
                 )
@@ -206,19 +191,42 @@ class CodeChunker:
             if isinstance(data, dict):
                 # Если это объект, разбиваем по ключам верхнего уровня
                 for key, value in data.items():
-                    chunks.append({
-                        'content': json.dumps({key: value}, ensure_ascii=False, indent=2),
-                        'type': 'json_object',
-                        'name': key,
-                        'file': file_path
-                    })
+                    # Для больших вложенных объектов/массивов - разбиваем глубже
+                    if isinstance(value, list) and len(value) > 10:
+                        # Большой массив - разбиваем на батчи по 10 элементов
+                        for i in range(0, len(value), 10):
+                            batch = value[i:i+10]
+                            chunks.append({
+                                'content': json.dumps({f"{key}[{i}:{i+len(batch)}]": batch}, ensure_ascii=False, indent=2),
+                                'type': 'json_array_batch',
+                                'name': f'{key}_batch_{i//10}',
+                                'file': file_path
+                            })
+                    elif isinstance(value, dict) and len(json.dumps(value)) > 2000:
+                        # Большой объект - разбиваем по подключам
+                        for subkey, subvalue in value.items():
+                            chunks.append({
+                                'content': json.dumps({f"{key}.{subkey}": subvalue}, ensure_ascii=False, indent=2),
+                                'type': 'json_nested_object',
+                                'name': f'{key}.{subkey}',
+                                'file': file_path
+                            })
+                    else:
+                        # Обычный ключ
+                        chunks.append({
+                            'content': json.dumps({key: value}, ensure_ascii=False, indent=2),
+                            'type': 'json_object',
+                            'name': key,
+                            'file': file_path
+                        })
             elif isinstance(data, list):
-                # Если это массив, каждый элемент — отдельный чанк
-                for i, item in enumerate(data):
+                # Если это массив, разбиваем на батчи по 10 элементов
+                for i in range(0, len(data), 10):
+                    batch = data[i:i+10]
                     chunks.append({
-                        'content': json.dumps(item, ensure_ascii=False, indent=2),
-                        'type': 'json_array_item',
-                        'name': f'item_{i}',
+                        'content': json.dumps(batch, ensure_ascii=False, indent=2),
+                        'type': 'json_array_batch',
+                        'name': f'items_{i}_{i+len(batch)}',
                         'file': file_path
                     })
         except json.JSONDecodeError as e:

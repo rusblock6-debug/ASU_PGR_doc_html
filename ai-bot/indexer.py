@@ -38,7 +38,10 @@ EXCLUDED_FILES = {
     '.gitignore', '.dockerignore', '.eslintignore',
     'package-lock.json', 'yarn.lock', 'poetry.lock',
     'uv.lock', 'go.sum', 'Dockerfile', 'docker-compose.yml',
-    'docker-compose.yaml', '.gitlab-ci.yml', '.pre-commit-config.yaml'
+    'docker-compose.yaml', '.gitlab-ci.yml', '.pre-commit-config.yaml',
+    'admin_git.html',  # Дубликат admin.html для веб-просмотра
+    'QUICK_START_HYBRID.md',  # Временная документация
+    'DEPLOYMENT_FIXES.md'  # Лог исправлений
 }
 
 # Максимальный размер файла (1MB)

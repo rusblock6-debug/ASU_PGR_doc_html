@@ -187,7 +187,7 @@ async def ask_question(req: QuestionRequest):
                     "options": {
                         "temperature": 0.3,
                         "top_p": 0.9,
-                        "max_tokens": 500
+                        "num_predict": 500  # Ollama использует num_predict вместо max_tokens
                     }
                 }
             )
@@ -212,9 +212,11 @@ async def ask_question(req: QuestionRequest):
         return answer
         
     except Exception as e:
-        logger.error(f"Ошибка при обработке вопроса: {e}")
+        import traceback
+        error_details = traceback.format_exc()
+        logger.error(f"Ошибка при обработке вопроса: {e}\n{error_details}")
         return {
-            "answer": f"Произошла ошибка при обработке вопроса: {str(e)}",
+            "answer": f"Произошла ошибка при обработке вопроса: {str(e) if str(e) else 'Неизвестная ошибка'}",
             "sources": [],
             "cached": False,
             "response_time": (datetime.now() - start_time).total_seconds()
@@ -298,8 +300,8 @@ async def index_repository(
                 with open(file_info['full_path'], 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
                 
-                # Разбиваем на чанки (гибридный подход)
-                chunks = await CodeChunker.chunk_file_async(file_info['path'], content, use_phi4=True)
+                # Разбиваем на чанки (БЕЗ Phi-4 для быстрой индексации)
+                chunks = await CodeChunker.chunk_file_async(file_info['path'], content, use_phi4=False)
                 
                 if not chunks:
                     return None
