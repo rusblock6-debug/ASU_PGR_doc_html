@@ -1,16 +1,110 @@
 """
-Модуль разбиения файлов на чанки
+Модуль разбиения файлов на чанки (гибридный подход)
 """
 import ast
 import re
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 import logging
+import httpx
+import os
+import json
 
 logger = logging.getLogger(__name__)
 
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
+
 class CodeChunker:
-    """Разбиение кода на смысловые чанки"""
+    """Разбиение кода на смысловые чанки (гибридный подход)"""
+    
+    @staticmethod
+    async def chunk_with_phi4(content: str, file_path: str, file_type: str) -> Optional[List[Dict]]:
+        """
+        Умное чанкование через Phi-4-mini для сложных файлов
+        
+        Args:
+            content: Содержимое файла
+            file_path: Путь к файлу
+            file_type: Тип файла (markdown, yaml, config, etc.)
+        
+        Returns:
+            Список чанков или None если не удалось
+        """
+        try:
+            prompt = f"""Ты — эксперт по анализу технической документации.
+
+Задача: Разбей этот {file_type} файл на логические смысловые блоки.
+
+Правила:
+1. Каждый блок должен быть самодостаточным (можно понять отдельно)
+2. Размер блока: 200-800 слов
+3. Сохраняй контекст (заголовки, описания)
+4. Для кода: группируй связанные функции/классы
+5. Для документации: группируй по темам/разделам
+
+Файл: {file_path}
+
+Содержимое:
+```
+{content[:4000]}  # Ограничиваем для скорости
+```
+
+Верни JSON массив чанков в формате:
+[
+  {{"content": "текст блока 1", "title": "краткое название", "type": "тип блока"}},
+  {{"content": "текст блока 2", "title": "краткое название", "type": "тип блока"}}
+]
+
+ВАЖНО: Верни ТОЛЬКО JSON, без дополнительного текста!"""
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    f"{OLLAMA_URL}/api/generate",
+                    json={
+                        "model": "phi4-mini",
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {
+                            "temperature": 0.1,  # Низкая температура для точности
+                            "top_p": 0.9,
+                            "max_tokens": 2000
+                        }
+                    }
+                )
+                
+                if response.status_code != 200:
+                    logger.warning(f"Phi-4 chunking failed for {file_path}: {response.status_code}")
+                    return None
+                
+                result = response.json()
+                answer = result.get('response', '').strip()
+                
+                # Извлекаем JSON из ответа
+                json_match = re.search(r'\[.*\]', answer, re.DOTALL)
+                if not json_match:
+                    logger.warning(f"No JSON found in Phi-4 response for {file_path}")
+                    return None
+                
+                chunks_data = json.loads(json_match.group(0))
+                
+                # Преобразуем в нужный формат
+                chunks = []
+                for i, chunk_data in enumerate(chunks_data):
+                    chunks.append({
+                        'content': chunk_data.get('content', ''),
+                        'type': chunk_data.get('type', 'phi4_chunk'),
+                        'name': chunk_data.get('title', f'chunk_{i}'),
+                        'file': file_path,
+                        'line_start': 1,  # Phi-4 не знает точных строк
+                        'chunked_by': 'phi4-mini'
+                    })
+                
+                logger.info(f"✨ Phi-4 chunked {file_path}: {len(chunks)} chunks")
+                return chunks
+                
+        except Exception as e:
+            logger.warning(f"Phi-4 chunking error for {file_path}: {e}")
+            return None
     
     @staticmethod
     def chunk_python(content: str, file_path: str) -> List[Dict]:
@@ -166,17 +260,50 @@ class CodeChunker:
         return chunks
     
     @staticmethod
-    def chunk_file(file_path: str, content: str) -> List[Dict]:
-        """Разбиение файла на чанки в зависимости от типа"""
+    async def chunk_file_async(file_path: str, content: str, use_phi4: bool = True) -> List[Dict]:
+        """
+        Разбиение файла на чанки (гибридный подход)
+        
+        Args:
+            file_path: Путь к файлу
+            content: Содержимое файла
+            use_phi4: Использовать ли Phi-4 для сложных файлов
+        
+        Returns:
+            Список чанков
+        """
         ext = Path(file_path).suffix.lower()
         
+        # Быстрое чанкование для кода (Tree-sitter/AST)
         if ext == '.py':
             return CodeChunker.chunk_python(content, file_path)
         elif ext in ['.js', '.jsx', '.ts', '.tsx']:
             return CodeChunker.chunk_javascript(content, file_path)
         elif ext == '.sql':
             return CodeChunker.chunk_sql(content, file_path)
-        elif ext == '.json':
+        
+        # Умное чанкование для документации и конфигов (Phi-4)
+        if use_phi4 and ext in ['.md', '.yaml', '.yml', '.json', '.html', '.txt']:
+            file_type_map = {
+                '.md': 'Markdown документация',
+                '.yaml': 'YAML конфигурация',
+                '.yml': 'YAML конфигурация',
+                '.json': 'JSON данные',
+                '.html': 'HTML документация',
+                '.txt': 'текстовый файл'
+            }
+            file_type = file_type_map.get(ext, 'файл')
+            
+            # Пробуем Phi-4
+            phi4_chunks = await CodeChunker.chunk_with_phi4(content, file_path, file_type)
+            if phi4_chunks:
+                return phi4_chunks
+            
+            # Fallback: если Phi-4 не справился
+            logger.info(f"Fallback to simple chunking for {file_path}")
+        
+        # Простое чанкование для остальных
+        if ext == '.json':
             return CodeChunker.chunk_json(content, file_path)
         elif ext in ['.md', '.txt', '.html']:
             return CodeChunker.chunk_by_paragraphs(content, file_path)
@@ -187,3 +314,19 @@ class CodeChunker:
                 'type': 'file',
                 'file': file_path
             }]
+    
+    @staticmethod
+    def chunk_file(file_path: str, content: str) -> List[Dict]:
+        """
+        Синхронная обёртка для chunk_file_async (для обратной совместимости)
+        """
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        
+        return loop.run_until_complete(
+            CodeChunker.chunk_file_async(file_path, content, use_phi4=True)
+        )

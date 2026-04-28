@@ -173,7 +173,7 @@ async def ask_question(req: QuestionRequest):
         
         context = "\n\n".join(context_parts)
         
-        # Генерация ответа через Ollama
+        # Генерация ответа через Ollama (Phi-4-mini)
         prompt = SYSTEM_PROMPT.format(context=context, question=req.question)
         
         import httpx
@@ -181,7 +181,7 @@ async def ask_question(req: QuestionRequest):
             response = await client.post(
                 f"{OLLAMA_URL}/api/generate",
                 json={
-                    "model": "qwen2.5:3b",
+                    "model": "phi4-mini",
                     "prompt": prompt,
                     "stream": False,
                     "options": {
@@ -254,7 +254,7 @@ async def index_repository(
     snapshot: Optional[str] = None,
     x_api_key: Optional[str] = Header(None)
 ):
-    """Индексация репозитория"""
+    """Индексация репозитория с гибридным чанкованием"""
     verify_api_key(x_api_key)
     
     logger.info(f"Запуск индексации: mode={mode}, snapshot={snapshot}")
@@ -288,6 +288,7 @@ async def index_repository(
         
         indexed_count = 0
         chunk_count = 0
+        phi4_chunked_count = 0
         
         for file_info in files:
             try:
@@ -295,11 +296,17 @@ async def index_repository(
                 with open(file_info['full_path'], 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
                 
-                # Разбиваем на чанки
-                chunks = CodeChunker.chunk_file(file_info['path'], content)
+                # Разбиваем на чанки (гибридный подход)
+                chunks = await CodeChunker.chunk_file_async(file_info['path'], content, use_phi4=True)
                 
                 if not chunks:
                     continue
+                
+                # Считаем Phi-4 чанки
+                phi4_chunks = [c for c in chunks if c.get('chunked_by') == 'phi4-mini']
+                if phi4_chunks:
+                    phi4_chunked_count += 1
+                    logger.info(f"✨ Phi-4 обработал: {file_info['path']} ({len(phi4_chunks)} чанков)")
                 
                 # Добавляем в ChromaDB
                 for chunk in chunks:
@@ -309,7 +316,8 @@ async def index_repository(
                         metadatas=[{
                             'file': file_info['path'],
                             'type': chunk.get('type', 'text'),
-                            'line': chunk.get('line_start', 0)
+                            'line': chunk.get('line_start', 0),
+                            'chunked_by': chunk.get('chunked_by', 'tree-sitter')
                         }],
                         ids=[chunk_id]
                     )
@@ -318,19 +326,21 @@ async def index_repository(
                 indexed_count += 1
                 
                 if indexed_count % 10 == 0:
-                    logger.info(f"Проиндексировано файлов: {indexed_count}/{len(files)}, чанков: {chunk_count}")
+                    logger.info(f"Проиндексировано: {indexed_count}/{len(files)} файлов, {chunk_count} чанков (Phi-4: {phi4_chunked_count})")
                     
             except Exception as e:
                 logger.warning(f"Ошибка индексации файла {file_info['path']}: {e}")
                 continue
         
-        logger.info(f"Индексация завершена: {indexed_count} файлов, {chunk_count} чанков")
+        logger.info(f"✅ Индексация завершена: {indexed_count} файлов, {chunk_count} чанков")
+        logger.info(f"✨ Phi-4 обработал: {phi4_chunked_count} файлов")
         
         return {
             "status": "completed",
             "mode": mode,
             "files_indexed": indexed_count,
-            "chunks_created": chunk_count
+            "chunks_created": chunk_count,
+            "phi4_chunked_files": phi4_chunked_count
         }
         
     except Exception as e:

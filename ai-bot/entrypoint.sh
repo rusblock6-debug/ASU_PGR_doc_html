@@ -9,14 +9,14 @@ done
 
 echo "✅ Ollama запущен"
 
-# Проверка наличия модели
-if ! curl -s http://ollama:11434/api/tags | grep -q "qwen2.5:3b"; then
-  echo "📥 Загрузка модели qwen2.5:3b (это займёт несколько минут)..."
-  curl -X POST http://ollama:11434/api/pull -d '{"name":"qwen2.5:3b"}'
-  echo "✅ Модель загружена"
+# Проверка наличия модели Phi-4-mini
+if ! curl -s http://ollama:11434/api/tags | grep -q "phi4-mini"; then
+  echo "📥 Загрузка модели phi4-mini (это займёт несколько минут)..."
+  curl -X POST http://ollama:11434/api/pull -d '{"name":"phi4-mini"}'
+  echo "✅ Модель phi4-mini загружена"
 else
-  echo "✅ Модель qwen2.5:3b уже установлена"
+  echo "✅ Модель phi4-mini уже установлена"
 fi
 
-echo "🚀 Запуск AI-бота..."
+echo "🚀 Запуск AI-бота с гибридным чанкованием..."
 exec "$@"

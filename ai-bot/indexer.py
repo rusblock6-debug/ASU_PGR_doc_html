@@ -17,7 +17,8 @@ EXCLUDED_DIRS = {
     '.next', '.nuxt', 'coverage', '.pytest_cache',
     'screenshots', '.history', '.cursor', '.husky',
     '.storybook', 'migrations', 'tests', 'test',
-    '.docker', '.bin', 'monitoring', 'telemetry-visualizer'
+    '.docker', '.bin', 'monitoring', 'telemetry-visualizer',
+    'documentation'  # Временно исключено (docx/xlsx файлы)
 }
 
 # Чёрный список расширений
