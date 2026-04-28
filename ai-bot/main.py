@@ -254,12 +254,13 @@ async def index_repository(
     snapshot: Optional[str] = None,
     x_api_key: Optional[str] = Header(None)
 ):
-    """Индексация репозитория с гибридным чанкованием"""
+    """Индексация репозитория с гибридным чанкованием (параллельная обработка)"""
     verify_api_key(x_api_key)
     
     logger.info(f"Запуск индексации: mode={mode}, snapshot={snapshot}")
     
     try:
+        import asyncio
         from indexer import RepositoryScanner
         from chunker import CodeChunker
         
@@ -290,7 +291,8 @@ async def index_repository(
         chunk_count = 0
         phi4_chunked_count = 0
         
-        for file_info in files:
+        # Функция обработки одного файла
+        async def process_file(file_info):
             try:
                 # Читаем файл
                 with open(file_info['full_path'], 'r', encoding='utf-8', errors='ignore') as f:
@@ -300,13 +302,43 @@ async def index_repository(
                 chunks = await CodeChunker.chunk_file_async(file_info['path'], content, use_phi4=True)
                 
                 if not chunks:
-                    continue
+                    return None
                 
                 # Считаем Phi-4 чанки
                 phi4_chunks = [c for c in chunks if c.get('chunked_by') == 'phi4-mini']
-                if phi4_chunks:
-                    phi4_chunked_count += 1
+                used_phi4 = len(phi4_chunks) > 0
+                
+                if used_phi4:
                     logger.info(f"✨ Phi-4 обработал: {file_info['path']} ({len(phi4_chunks)} чанков)")
+                
+                return {
+                    'file_info': file_info,
+                    'chunks': chunks,
+                    'used_phi4': used_phi4
+                }
+                    
+            except Exception as e:
+                logger.warning(f"Ошибка индексации файла {file_info['path']}: {e}")
+                return None
+        
+        # Параллельная обработка батчами по 5 файлов
+        BATCH_SIZE = 5
+        for i in range(0, len(files), BATCH_SIZE):
+            batch = files[i:i+BATCH_SIZE]
+            
+            # Обрабатываем батч параллельно
+            results = await asyncio.gather(*[process_file(f) for f in batch])
+            
+            # Добавляем результаты в ChromaDB
+            for result in results:
+                if result is None:
+                    continue
+                
+                file_info = result['file_info']
+                chunks = result['chunks']
+                
+                if result['used_phi4']:
+                    phi4_chunked_count += 1
                 
                 # Добавляем в ChromaDB
                 for chunk in chunks:
@@ -324,13 +356,9 @@ async def index_repository(
                     chunk_count += 1
                 
                 indexed_count += 1
-                
-                if indexed_count % 10 == 0:
-                    logger.info(f"Проиндексировано: {indexed_count}/{len(files)} файлов, {chunk_count} чанков (Phi-4: {phi4_chunked_count})")
-                    
-            except Exception as e:
-                logger.warning(f"Ошибка индексации файла {file_info['path']}: {e}")
-                continue
+            
+            # Логируем прогресс
+            logger.info(f"📊 Прогресс: {indexed_count}/{len(files)} файлов, {chunk_count} чанков (Phi-4: {phi4_chunked_count})")
         
         logger.info(f"✅ Индексация завершена: {indexed_count} файлов, {chunk_count} чанков")
         logger.info(f"✨ Phi-4 обработал: {phi4_chunked_count} файлов")
