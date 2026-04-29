@@ -7,6 +7,130 @@
 2. Важные данные (`data.json`, `directory_data.json`) не проиндексированы
 3. Поиск не понимает опечатки и транслитерацию
 
+---
+
+### ШАГ 0: SQLite для метаданных и истории (инфраструктура)
+
+**Зачем нужно:**
+- ChromaDB хранит чанки + эмбеддинги (векторный поиск)
+- SQLite хранит структурированные данные (история, фидбек, метрики)
+
+**Что храним в SQLite:**
+1. **История чатов** (когда будем делать UI чата):
+   - Сессии пользователей
+   - Сообщения (вопросы и ответы)
+   - Временные метки
+
+2. **Фидбек пользователей**:
+   - 👍/👎 оценки ответов
+   - Комментарии к негативным оценкам
+   - Какие чанки использовались
+
+3. **Метрики качества**:
+   - Время поиска
+   - Время генерации ответа
+   - Уверенность бота
+   - Cache hit rate
+
+4. **Кэш извлечённых знаний** (для иерархической индексации):
+   - MD5 файла → описание от Phi-4
+   - Чтобы не пересчитывать неизменённые файлы
+
+**Почему SQLite а не PostgreSQL:**
+- ✅ Один файл (не нужен отдельный сервер)
+- ✅ Встроен в Python (не нужно устанавливать)
+- ✅ Достаточно для наших задач
+- ✅ Легко мигрировать на PostgreSQL потом если нужно
+
+**Структура БД:**
+
+```sql
+-- Таблица сессий
+CREATE TABLE chat_sessions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица сообщений
+CREATE TABLE chat_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT REFERENCES chat_sessions(id),
+    role TEXT CHECK(role IN ('user', 'assistant')),
+    content TEXT,
+    confidence REAL,
+    sources JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица фидбека
+CREATE TABLE feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message_id INTEGER REFERENCES chat_messages(id),
+    rating TEXT CHECK(rating IN ('positive', 'negative')),
+    issues JSON,  -- ["irrelevant", "incomplete", ...]
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица метрик
+CREATE TABLE metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question TEXT,
+    search_time REAL,
+    generation_time REAL,
+    confidence REAL,
+    chunks_found INTEGER,
+    cache_hit BOOLEAN,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица кэша знаний (для иерархической индексации)
+CREATE TABLE knowledge_cache (
+    file_hash TEXT PRIMARY KEY,  -- MD5 файла
+    file_path TEXT,
+    extracted_knowledge JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Интеграция:**
+
+```python
+# ai-bot/database.py
+import sqlite3
+from pathlib import Path
+
+DB_PATH = Path("/app/data/metadata.db")
+
+def get_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_connection()
+    with open("schema.sql") as f:
+        conn.executescript(f.read())
+    conn.close()
+```
+
+**Задачи:**
+- [ ] Создать `ai-bot/database.py` с функциями подключения
+- [ ] Создать `ai-bot/schema.sql` со структурой БД
+- [ ] Инициализировать БД при первом запуске
+- [ ] Добавить миграции (если схема меняется)
+- [ ] Интегрировать с `main.py` для сохранения метрик
+- [ ] Протестировать: запись/чтение данных
+
+**Когда используем:**
+- СЕЙЧАС: только для метрик и фидбека
+- ПОТОМ: для истории чатов (когда будем делать UI чата)
+
+---
+
 ## 📋 ПЛАН ДЕЙСТВИЙ (по порядку)
 
 ---
@@ -21,34 +145,39 @@
 **Логика:**
 
 1. **Парсим `data.json`:**
-   - `admin_instructions[]` → каждая инструкция = 1 чанк
-   - `instructions[]` → каждая инструкция = 1 чанк  
-   - `descriptive[]` → каждая карточка = 1 чанк
+   - ВСЕ секции: `admin_instructions[]`, `instructions[]`, `descriptive[]`, `quickstart`
+   - Каждая инструкция/карточка = 1 чанк
+   - Рекурсивный обход всех уровней вложенности
    - Собираем: title + description + steps + items + keyIndicators
 
 2. **Парсим `directory_data.json`:**
    - `directories{}` → каждый справочник = 1 чанк
    - Собираем: title + parameters + note + image
 
-**Формат чанка:**
+3. **Формат выходного чанка:**
 ```python
 {
   "content": """
-Настройка схемы дорог
+[ЗАГОЛОВОК] Настройка схемы дорог
 
-Описание: Создание дорожной сети рудника с узлами, дорогами и местами
+[ОПИСАНИЕ] Создание дорожной сети рудника с узлами, дорогами и местами
 
-Шаги:
+[ШАГИ]
 1. Открыть раздел Администрирование
 2. Выбрать 'Схема дорог'
 3. Добавить узлы на карте
 4. Соединить узлы дорогами
 
-Ключевые показатели: количество узлов, длина дорог
+[КЛЮЧЕВЫЕ ПОКАЗАТЕЛИ]
+- Количество узлов
+- Длина дорог
 """,
-  "type": "admin_instruction",
-  "id": "configure_road_schema",
-  "file": "tetepfgr/data.json"
+  "metadata": {
+    "source": "JSON",  # Помечаем источник (JSON vs Code)
+    "file": "tetepfgr/data.json",
+    "type": "admin_instruction",
+    "id": "configure_road_schema"
+  }
 }
 ```
 
@@ -56,9 +185,9 @@
 
 **Задачи:**
 - [ ] Создать `ai-bot/parsers/documentation_parser.py`
-- [ ] Функция `parse_data_json()` - рекурсивный обход
+- [ ] Функция `parse_data_json()` - рекурсивный обход ВСЕХ секций
 - [ ] Функция `parse_directory_data_json()` - обход справочников
-- [ ] Интегрировать в `ai-bot/indexer.py`
+- [ ] Интегрировать в `ai-bot/indexer.py` (вызывается при обнаружении JSON файлов)
 - [ ] Протестировать: сколько чанков получилось, проверить содержимое
 
 ---
