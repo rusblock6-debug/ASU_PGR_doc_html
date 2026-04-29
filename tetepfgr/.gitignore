@@ -1,6 +1,3 @@
 # AI Bot data folders
-ai-bot/ollama_data/
-ai-bot/redis_data/
-ai-bot/chroma_data/
-ai-bot/logs/
-ai-bot/snapshots/
+ollama_data/
+redis_data/
