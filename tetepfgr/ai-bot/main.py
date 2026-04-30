@@ -145,10 +145,10 @@ async def ask_question(req: QuestionRequest):
                 "response_time": (datetime.now() - start_time).total_seconds()
             }
         
-        # Поиск похожих документов
+        # Поиск похожих документов (уменьшено до 3 для ускорения)
         results = collection.query(
             query_texts=[req.question],
-            n_results=min(5, count)
+            n_results=min(3, count)
         )
         
         if not results['documents'] or not results['documents'][0]:
@@ -176,8 +176,12 @@ async def ask_question(req: QuestionRequest):
         # Генерация ответа через Ollama (Phi-4-mini)
         prompt = SYSTEM_PROMPT.format(context=context, question=req.question)
         
+        logger.info(f"📝 Отправка запроса в Ollama (длина промпта: {len(prompt)} символов)")
+        logger.info(f"❓ Вопрос: {req.question}")
+        logger.info(f"📄 Контекст (первые 500 символов): {context[:500]}...")
+        
         import httpx
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=180.0) as client:
             response = await client.post(
                 f"{OLLAMA_URL}/api/generate",
                 json={
