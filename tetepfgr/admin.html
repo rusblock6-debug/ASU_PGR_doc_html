@@ -6,6 +6,8 @@
     <title>НАВИГАТОР.ПГР - Документация</title>
     <!-- Локальная версия - без внешних зависимостей -->
     <script src="library/pdf-lib.min.js"></script>
+    <script src="library/marked.min.js"></script>
+    <link rel="stylesheet" href="chat.css">
     <style>
         :root {
             /* Modern Pandoc-inspired Theme */
@@ -1448,6 +1450,7 @@
             background: var(--accent-color);
         }
     </style>
+    <link rel="stylesheet" href="chat.css">
 </head>
 <body>
     <header class="main-header">
@@ -1472,7 +1475,7 @@
                 <div class="search-input-wrapper">
                     <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Поиск..." 
                         oninput="handleSearch(this.value)">
-                    <button id="aiToggle" class="ai-toggle-btn" onclick="toggleAIMode()" title="Переключить AI-поиск">
+                    <button id="aiToggle" class="ai-toggle-btn" onclick="toggleChatMode()" title="Переключить AI-чат">
                         AI
                     </button>
                 </div>
@@ -1550,7 +1553,27 @@
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- CHAT MODE CONTAINER (полноэкранный, заменяет content-wrapper) -->
+        <div id="chat-mode-container" class="chat-mode-container" style="display: none;">
+            <!-- Центральная панель: Чат -->
+            <main class="chat-main">
+                <div class="messages-container" id="messages-container">
+                    <!-- Сообщения будут добавляться динамически -->
+                </div>
+                
+                <div class="chat-input-container">
+                    <textarea 
+                        id="chat-input" 
+                        placeholder="Задайте вопрос по документации..."
+                        rows="1"
+                        oninput="autoResizeTextarea(this)"
+                        onkeydown="handleChatInputKeydown(event)"
+                    ></textarea>
+                    <button id="send-btn" class="send-btn" disabled onclick="sendChatMessage()">→</button>
+                </div>
+            </main>
+        </div>
 
     <!-- Модальное окно выбора шагов для скачивания -->
     <div id="stepSelectionModal" class="modal-overlay">
@@ -6974,23 +6997,6 @@
         const AI_BOT_URL = 'http://localhost:8000';
         
         // Переключение AI-режима
-        function toggleAIMode() {
-            isAIMode = !isAIMode;
-            const btn = document.getElementById('aiToggle');
-            const input = document.getElementById('globalSearch');
-            
-            if (isAIMode) {
-                btn.classList.add('active');
-                input.placeholder = '🤖 AI-поиск (задайте вопрос)...';
-            } else {
-                btn.classList.remove('active');
-                input.placeholder = '🔍 Поиск...';
-            }
-            
-            // Очистить поле при переключении
-            input.value = '';
-            performGlobalSearch('');
-        }
         
         // Обработчик поиска (AI или обычный)
         function handleSearch(query) {
@@ -7199,5 +7205,6 @@
             modal.style.display = 'none';
         }
     </script>
+    <script src="chat.js"></script>
 </body>
 </html>

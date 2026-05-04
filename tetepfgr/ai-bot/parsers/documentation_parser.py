@@ -1,7 +1,7 @@
 """
 Documentation parser for ASU PGR RAG bot.
 
-Parses data.json and directory_data.json into text chunks for indexing.
+Parses data.json, directory_data.json and markdown files into text chunks for indexing.
 """
 
 import json
@@ -345,10 +345,88 @@ def parse_directory_data_json(file_path: str) -> List[Dict[str, Any]]:
     return chunks
 
 
-def parse_documentation_files(data_json_path: str, directory_data_path: str) -> List[Dict[str, Any]]:
-    """Parse both documentation JSON files into chunks."""
+def parse_markdown_file(file_path: str) -> List[Dict[str, Any]]:
+    """
+    Parse a markdown file into chunks by splitting on ## headers.
+    
+    Each major section (## header) becomes a separate chunk.
+    """
+    logger.info(f"Parsing markdown file: {file_path}")
+    
+    with open(file_path, 'r', encoding='utf-8-sig') as f:
+        content = f.read()
+    
+    chunks = []
+    
+    # Split by ## headers (major sections)
+    sections = re.split(r'\n## ', content)
+    
+    for section_idx, section in enumerate(sections):
+        if not section.strip():
+            continue
+        
+        lines = section.strip().split('\n')
+        title = lines[0].strip()
+        
+        # Remove ## prefix if present
+        if title.startswith('##'):
+            title = title[2:].strip()
+        
+        # Body is everything after the title
+        body = '\n'.join(lines[1:]) if len(lines) > 1 else ''
+        
+        if not title or not body.strip():
+            continue
+        
+        # Skip metadata at beginning of file
+        if title.startswith('Дата создания:') or title.startswith('Статус:') or title.startswith('Метод:'):
+            continue
+        
+        # Format chunk
+        content_parts = [f"[ЗАГОЛОВОК] {title}"]
+        content_parts.append(f"\n[СОДЕРЖАНИЕ]")
+        content_parts.append(body.strip())
+        
+        chunk_content = "\n".join(content_parts)
+        
+        # Generate safe ID
+        chunk_id = _generate_id(title)
+        if not chunk_id:
+            chunk_id = f"markdown_section_{section_idx}"
+        
+        chunk = {
+            'content': chunk_content,
+            'metadata': {
+                'source': 'MARKDOWN',
+                'file': file_path,
+                'type': 'markdown_documentation',
+                'id': chunk_id,
+                'section': title
+            }
+        }
+        
+        chunks.append(chunk)
+        logger.debug(f"  Created chunk: {title[:50]}...")
+    
+    logger.info(f"Total chunks from markdown: {len(chunks)}")
+    return chunks
+
+
+def parse_documentation_files(data_json_path: str, directory_data_path: str, documentation_dir: str = None) -> List[Dict[str, Any]]:
+    """
+    Parse JSON documentation files and markdown files from documentation directory.
+    
+    Args:
+        data_json_path: Path to data.json
+        directory_data_path: Path to directory_data.json
+        documentation_dir: Optional path to documentation folder with .md files
+    
+    Returns:
+        List of chunk dictionaries ready for ChromaDB indexing
+    """
     all_chunks = []
     
+    # Parse JSON files (existing logic)
     try:
         data_chunks = parse_data_json(data_json_path)
         all_chunks.extend(data_chunks)
@@ -360,6 +438,26 @@ def parse_documentation_files(data_json_path: str, directory_data_path: str) -> 
         all_chunks.extend(dir_chunks)
     except Exception as e:
         logger.error(f"Error parsing directory_data.json: {e}")
+    
+    # Parse markdown files from documentation directory
+    if documentation_dir:
+        try:
+            doc_path = Path(documentation_dir)
+            if doc_path.exists() and doc_path.is_dir():
+                md_files = list(doc_path.glob('*.md'))
+                logger.info(f"Found {len(md_files)} markdown files in {documentation_dir}")
+                
+                for md_file in md_files:
+                    try:
+                        md_chunks = parse_markdown_file(str(md_file))
+                        all_chunks.extend(md_chunks)
+                        logger.info(f"✅ {md_file.name}: {len(md_chunks)} chunks")
+                    except Exception as e:
+                        logger.error(f"Error parsing {md_file.name}: {e}")
+            else:
+                logger.warning(f"Documentation directory not found: {documentation_dir}")
+        except Exception as e:
+            logger.error(f"Error scanning documentation directory: {e}")
     
     logger.info(f"Total documentation chunks: {len(all_chunks)}")
     return all_chunks
