@@ -230,18 +230,27 @@
 
         /* --- Improved Navigation --- */
         .search-container {
-            padding: 20px 20px;
+            padding: 20px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
             position: relative;
+            flex-shrink: 0;
+            height: 76px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 320px;
+            box-sizing: border-box;
         }
         .search-input-wrapper {
             position: relative;
             display: flex;
             align-items: center;
+            flex: 1;
+            width: 0;
         }
         .search-input {
             width: 100%;
-            padding: 12px 50px 12px 16px;
+            padding: 12px 16px;
             background-color: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: 8px;
@@ -259,20 +268,27 @@
             box-shadow: 0 0 0 3px rgba(237, 141, 72, 0.1);
         }
         .ai-toggle-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             color: rgba(255,255,255,0.6);
-            padding: 6px 12px;
+            width: 40px;
+            height: 32px;
+            min-width: 40px;
+            min-height: 32px;
+            max-width: 40px;
+            max-height: 32px;
+            padding: 0;
             border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
-            transition: all 0.3s;
+            transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            flex-shrink: 0;
         }
         .ai-toggle-btn:hover {
             background: rgba(255,255,255,0.15);
@@ -1475,10 +1491,10 @@
                 <div class="search-input-wrapper">
                     <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Поиск..." 
                         oninput="handleSearch(this.value)">
-                    <button id="aiToggle" class="ai-toggle-btn" onclick="toggleChatMode()" title="Переключить AI-чат">
-                        AI
-                    </button>
                 </div>
+                <button id="aiToggle" class="ai-toggle-btn" onclick="toggleChatMode()" title="Переключить AI-чат">
+                    AI
+                </button>
             </div>
 
             <nav class="toc-nav" id="toc">
