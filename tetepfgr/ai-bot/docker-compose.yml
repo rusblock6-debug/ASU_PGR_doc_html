@@ -49,7 +49,8 @@ services:
       - OLLAMA_URL=http://ollama:11434
       - API_KEY=${API_KEY}
     volumes:
-      - ..:/data/repo:ro
+      - ../..:/data/repo:ro
+      - ../../documentation:/data/documentation:ro
       - ./logs:/app/logs
       - ./chroma_data:/app/chroma_data
       - ./snapshots:/app/snapshots

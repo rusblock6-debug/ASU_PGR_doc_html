@@ -58,13 +58,14 @@
 
 /* Кнопка "Новый чат" */
 .new-chat-btn {
-    margin: 16px;
-    padding: 12px 16px;
+    margin: 8px 12px;
+    padding: 10px 14px;
+    width: calc(100% - 24px);
     background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover-color) 100%);
     color: white;
     border: none;
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: 6px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -78,6 +79,26 @@
 
 .new-chat-btn:active {
     transform: translateY(0);
+}
+
+/* Кнопка "Очистить историю" */
+.clear-history-btn {
+    margin: 8px 12px;
+    padding: 8px 12px;
+    width: calc(100% - 24px);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clear-history-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: #ef4444;
 }
 
 /* История чатов */

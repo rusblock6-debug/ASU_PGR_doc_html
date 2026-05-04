@@ -236,6 +236,51 @@ Return ONLY JSON array, no other text!"""
         return chunks
     
     @staticmethod
+    def chunk_markdown_by_sections(content: str, file_path: str) -> List[Dict]:
+        """Разбиение Markdown по заголовкам (секциям)"""
+        chunks = []
+        lines = content.split('\n')
+        
+        current_section = []
+        section_start_line = 1
+        current_line = 1
+        
+        for line in lines:
+            # Проверяем, является ли строка заголовком (# Заголовок)
+            if line.strip().startswith('#'):
+                # Сохраняем предыдущую секцию
+                if current_section:
+                    section_content = '\n'.join(current_section).strip()
+                    if section_content:  # Только непустые секции
+                        chunks.append({
+                            'content': section_content,
+                            'type': 'markdown_section',
+                            'file': file_path,
+                            'line_start': section_start_line
+                        })
+                
+                # Начинаем новую секцию
+                current_section = [line]
+                section_start_line = current_line
+            else:
+                current_section.append(line)
+            
+            current_line += 1
+        
+        # Сохраняем последнюю секцию
+        if current_section:
+            section_content = '\n'.join(current_section).strip()
+            if section_content:
+                chunks.append({
+                    'content': section_content,
+                    'type': 'markdown_section',
+                    'file': file_path,
+                    'line_start': section_start_line
+                })
+        
+        return chunks
+    
+    @staticmethod
     def chunk_by_paragraphs(content: str, file_path: str, max_size: int = 1000) -> List[Dict]:
         """Разбиение текста по параграфам"""
         chunks = []
@@ -243,8 +288,11 @@ Return ONLY JSON array, no other text!"""
         
         current_chunk = ""
         line_start = 1
+        current_line = 1
         
         for para in paragraphs:
+            para_lines = para.count('\n') + 1
+            
             if len(current_chunk) + len(para) > max_size and current_chunk:
                 chunks.append({
                     'content': current_chunk.strip(),
@@ -253,9 +301,11 @@ Return ONLY JSON array, no other text!"""
                     'line_start': line_start
                 })
                 current_chunk = para
-                line_start += current_chunk.count('\n')
+                line_start = current_line
             else:
                 current_chunk += '\n\n' + para if current_chunk else para
+            
+            current_line += para_lines + 1  # +1 за пустую строку между параграфами
         
         if current_chunk:
             chunks.append({
@@ -313,7 +363,10 @@ Return ONLY JSON array, no other text!"""
         # Простое чанкование для остальных
         if ext == '.json':
             return CodeChunker.chunk_json(content, file_path)
-        elif ext in ['.md', '.txt', '.html']:
+        elif ext == '.md':
+            # Для Markdown разбиваем по секциям (заголовкам)
+            return CodeChunker.chunk_markdown_by_sections(content, file_path)
+        elif ext in ['.txt', '.html']:
             return CodeChunker.chunk_by_paragraphs(content, file_path)
         else:
             # Для остальных — один чанк на файл

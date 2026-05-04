@@ -50,7 +50,7 @@ function toggleChatMode() {
             newChatBtn.className = 'new-chat-btn';
             newChatBtn.onclick = createNewChat;
             newChatBtn.textContent = '🆕 Новый чат';
-            newChatBtn.style.cssText = 'margin: 8px 12px; padding: 10px 14px; width: calc(100% - 24px); background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover-color) 100%); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;';
+            // Убираем inline стили - используем CSS класс
             searchContainer.after(newChatBtn);
         }
         
@@ -69,8 +69,8 @@ function toggleChatMode() {
             clearBtn.id = 'clear-history-btn';
             clearBtn.className = 'clear-history-btn';
             clearBtn.onclick = clearAllHistory;
-            clearBtn.textContent = '️ Очистить историю';
-            clearBtn.style.cssText = 'margin: 8px 12px; padding: 8px 12px; width: calc(100% - 24px); background: transparent; color: #999; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;';
+            clearBtn.textContent = '🗑️ Очистить историю';
+            // Убираем inline стили - используем CSS класс
             document.getElementById('chat-history-list').after(clearBtn);
         }
         

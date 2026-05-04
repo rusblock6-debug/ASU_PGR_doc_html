@@ -9,20 +9,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Импортируем парсер документации
-try:
-    import sys
-    from pathlib import Path as SysPath
-    # Добавляем родительскую директорию в путь для импорта parsers
-    parent_dir = str(SysPath(__file__).parent.parent)
-    if parent_dir not in sys.path:
-        sys.path.insert(0, parent_dir)
-    
-    from parsers.documentation_parser import parse_documentation_files
-    PARSER_AVAILABLE = True
-except ImportError:
-    PARSER_AVAILABLE = False
-    logger.warning("Documentation parser not available")
+# Парсер документации отключен - знания извлекаются из кода напрямую
+PARSER_AVAILABLE = False
 
 # Чёрный список папок
 EXCLUDED_DIRS = {
@@ -33,7 +21,7 @@ EXCLUDED_DIRS = {
     'screenshots', '.history', '.cursor', '.husky',
     '.storybook', 'migrations', 'tests', 'test',
     '.docker', '.bin', 'monitoring', 'telemetry-visualizer',
-    'documentation'  # Временно исключено (docx/xlsx файлы)
+    'library'  # JavaScript библиотеки (pdf-lib, html2pdf и т.д.)
 }
 
 # Чёрный список расширений
@@ -44,7 +32,8 @@ EXCLUDED_EXTENSIONS = {
     '.zip', '.tar', '.gz', '.rar', '.7z',
     '.lock', '.sum', '.sqlite3', '.db', '.rdb',
     '.woff', '.woff2', '.ttf', '.eot', '.svg',
-    '.min.js', '.min.css', '.map'
+    '.min.js', '.min.css', '.map',
+    '.bundle.js', '.bundle.css'  # Бандлы (webpack, rollup и т.д.)
 }
 
 # Служебные файлы
@@ -56,7 +45,9 @@ EXCLUDED_FILES = {
     'docker-compose.yaml', '.gitlab-ci.yml', '.pre-commit-config.yaml',
     'admin_git.html',  # Дубликат admin.html для веб-просмотра
     'QUICK_START_HYBRID.md',  # Временная документация
-    'DEPLOYMENT_FIXES.md'  # Лог исправлений
+    'DEPLOYMENT_FIXES.md',  # Лог исправлений
+    'chat.js', 'chat.css', 'server.js',  # Frontend файлы tetepfgr
+    'admin.html'  # HTML интерфейс (не нужен для RAG)
 }
 
 # Максимальный размер файла (1MB)
@@ -65,7 +56,7 @@ MAX_FILE_SIZE = 1024 * 1024
 class RepositoryScanner:
     """Сканер репозитория"""
     
-    def __init__(self, repo_path: str = "/data/repo"):
+    def __init__(self, repo_path: str = "/data/documentation"):
         self.repo_path = Path(repo_path)
         
     def should_exclude(self, path: Path) -> bool:
@@ -154,62 +145,12 @@ class RepositoryScanner:
     
     def get_documentation_chunks(self) -> List[Dict]:
         """
-        Parse documentation JSON files and markdown files into chunks.
+        Parse markdown files from documentation directory into chunks.
+        JSON parsing is disabled - knowledge is extracted from code directly.
         
         Returns:
-            List of chunk dictionaries from data.json, directory_data.json and documentation/*.md
+            List of chunk dictionaries from documentation/*.md files
         """
-        if not PARSER_AVAILABLE:
-            logger.warning("Documentation parser not available, skipping documentation parsing")
-            return []
-        
-        # Paths to documentation files
-        # repo_path is /data/repo which maps to tetepfgr/ folder on host
-        data_json = self.repo_path / 'data.json'
-        directory_data = self.repo_path / 'directory_data.json'
-        
-        # Path to documentation directory (markdown files)
-        # documentation/ is at same level as tetepfgr/, so go up one level from repo
-        documentation_dir = self.repo_path.parent / 'documentation'
-        
-        all_chunks = []
-        
-        # Parse JSON files if they exist
-        if data_json.exists() and directory_data.exists():
-            try:
-                logger.info("Parsing JSON documentation files...")
-                json_chunks = parse_documentation_files(
-                    str(data_json), 
-                    str(directory_data),
-                    None  # Don't pass documentation_dir here, we'll handle it separately
-                )
-                all_chunks.extend(json_chunks)
-                logger.info(f"Parsed {len(json_chunks)} JSON documentation chunks")
-            except Exception as e:
-                logger.error(f"Error parsing JSON files: {e}")
-        else:
-            if not data_json.exists():
-                logger.warning(f"data.json not found: {data_json}")
-            if not directory_data.exists():
-                logger.warning(f"directory_data.json not found: {directory_data}")
-        
-        # Parse markdown files from documentation directory
-        if documentation_dir.exists() and documentation_dir.is_dir():
-            try:
-                logger.info(f"Scanning documentation directory: {documentation_dir}")
-                md_files = list(documentation_dir.glob('*.md'))
-                logger.info(f"Found {len(md_files)} markdown files")
-                
-                for md_file in md_files:
-                    try:
-                        from parsers.documentation_parser import parse_markdown_file
-                        md_chunks = parse_markdown_file(str(md_file))
-                        all_chunks.extend(md_chunks)
-                        logger.info(f"✅ {md_file.name}: {len(md_chunks)} chunks")
-                    except Exception as e:
-                        logger.error(f"Error parsing {md_file.name}: {e}")
-            except Exception as e:
-                logger.error(f"Error scanning documentation directory: {e}")
-        
-        logger.info(f"Total documentation chunks: {len(all_chunks)}")
-        return all_chunks
+        # Парсер документации отключен - знания извлекаются из кода
+        logger.info("Documentation parser disabled - knowledge extracted from code")
+        return []
