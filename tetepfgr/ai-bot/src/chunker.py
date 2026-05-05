@@ -238,10 +238,10 @@ Return ONLY JSON array, no other text!"""
     @staticmethod
     def chunk_markdown_by_sections(content: str, file_path: str) -> List[Dict]:
         """
-        Разбиение Markdown по заголовкам с #
+        Разбиение Markdown по заголовкам с ### (3 уровень)
         
-        Разбивает только по заголовкам с # (любого уровня).
-        Подзаголовки без # остаются внутри секции.
+        Разбивает только по заголовкам с ### (3 решётки).
+        Заголовки ####, #####, ###### остаются внутри секции.
         """
         chunks = []
         lines = content.split('\n')
@@ -251,8 +251,9 @@ Return ONLY JSON array, no other text!"""
         current_line = 1
         
         for line in lines:
-            # Проверяем заголовок с #
-            if line.strip().startswith('#'):
+            # Проверяем заголовок с ### (ровно 3 решётки в начале)
+            stripped = line.strip()
+            if stripped.startswith('###') and not stripped.startswith('####'):
                 # Сохраняем предыдущую секцию
                 if current_section:
                     section_content = '\n'.join(current_section).strip()

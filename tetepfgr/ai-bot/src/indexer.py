@@ -185,27 +185,5 @@ class RepositoryScanner:
             except Exception as e:
                 logger.error(f"Error indexing {md_file}: {e}")
         
-        # Индексируем data.json из tetepfgr
-        data_json_path = Path("/data/repo/tetepfgr/data.json")
-        if data_json_path.exists():
-            try:
-                import json
-                content = data_json_path.read_text(encoding='utf-8')
-                rel_path = "tetepfgr/data.json"
-                
-                # Разбиваем JSON на чанки
-                file_chunks = CodeChunker.chunk_json(content, rel_path)
-                
-                for chunk in file_chunks:
-                    chunk['source'] = rel_path
-                    chunk['file'] = rel_path  # Для совместимости с hybrid_search
-                    chunk['file_type'] = 'json'
-                
-                chunks.extend(file_chunks)
-                logger.info(f"Indexed data.json: {len(file_chunks)} chunks")
-                
-            except Exception as e:
-                logger.error(f"Error indexing data.json: {e}")
-        
         logger.info(f"Total documentation chunks: {len(chunks)}")
         return chunks

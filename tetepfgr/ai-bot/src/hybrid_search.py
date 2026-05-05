@@ -33,8 +33,8 @@ def remove_duplicates(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def merge_results(
     vector_results: Dict[str, Any],
     keyword_results: Dict[str, Any],
-    vector_weight: float = 0.7,
-    keyword_weight: float = 0.3
+    vector_weight: float = 0.5,
+    keyword_weight: float = 0.5
 ) -> List[Dict[str, Any]]:
     """
     Объединение результатов векторного и keyword поиска с весами
