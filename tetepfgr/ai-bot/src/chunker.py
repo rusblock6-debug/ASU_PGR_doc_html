@@ -237,7 +237,12 @@ Return ONLY JSON array, no other text!"""
     
     @staticmethod
     def chunk_markdown_by_sections(content: str, file_path: str) -> List[Dict]:
-        """Разбиение Markdown по заголовкам (секциям)"""
+        """
+        Разбиение Markdown по заголовкам с #
+        
+        Разбивает только по заголовкам с # (любого уровня).
+        Подзаголовки без # остаются внутри секции.
+        """
         chunks = []
         lines = content.split('\n')
         
@@ -246,22 +251,23 @@ Return ONLY JSON array, no other text!"""
         current_line = 1
         
         for line in lines:
-            # Проверяем, является ли строка заголовком (# Заголовок)
+            # Проверяем заголовок с #
             if line.strip().startswith('#'):
                 # Сохраняем предыдущую секцию
                 if current_section:
                     section_content = '\n'.join(current_section).strip()
-                    if section_content:  # Только непустые секции
+                    if section_content and len(section_content) > 20:  # Только непустые секции
                         chunks.append({
                             'content': section_content,
                             'type': 'markdown_section',
                             'file': file_path,
-                            'line_start': section_start_line
+                            'line_start': section_start_line,
+                            'section': section_content.split('\n')[0][:100]  # Первая строка как название
                         })
                 
-                # Начинаем новую секцию с текущей строки
+                # Начинаем новую секцию
                 current_section = [line]
-                section_start_line = current_line  # Запоминаем номер строки начала секции
+                section_start_line = current_line
             else:
                 current_section.append(line)
             
@@ -270,14 +276,16 @@ Return ONLY JSON array, no other text!"""
         # Сохраняем последнюю секцию
         if current_section:
             section_content = '\n'.join(current_section).strip()
-            if section_content:
+            if section_content and len(section_content) > 20:
                 chunks.append({
                     'content': section_content,
                     'type': 'markdown_section',
                     'file': file_path,
-                    'line_start': section_start_line
+                    'line_start': section_start_line,
+                    'section': section_content.split('\n')[0][:100]
                 })
         
+        logger.info(f"Markdown chunked: {file_path} → {len(chunks)} chunks")
         return chunks
     
     @staticmethod
