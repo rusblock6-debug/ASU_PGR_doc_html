@@ -174,7 +174,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // Статика
-    let filePath = url.pathname === '/' ? path.join(__dirname, 'user.html') : path.join(__dirname, url.pathname);
+    let filePath = url.pathname === '/' ? path.join(__dirname, 'admin.html') : path.join(__dirname, url.pathname);
     
     // Редирект docs/screenshots/ -> screenshots/ для совместимости
     if (url.pathname.startsWith('/docs/screenshots/')) {

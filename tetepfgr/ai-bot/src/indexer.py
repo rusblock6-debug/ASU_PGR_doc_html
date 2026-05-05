@@ -146,11 +146,66 @@ class RepositoryScanner:
     def get_documentation_chunks(self) -> List[Dict]:
         """
         Parse markdown files from documentation directory into chunks.
-        JSON parsing is disabled - knowledge is extracted from code directly.
         
         Returns:
             List of chunk dictionaries from documentation/*.md files
         """
-        # Парсер документации отключен - знания извлекаются из кода
-        logger.info("Documentation parser disabled - knowledge extracted from code")
-        return []
+        import asyncio
+        from src.chunker import CodeChunker
+        
+        logger.info("Starting documentation indexing...")
+        chunks = []
+        
+        # Индексируем файлы из /data/documentation
+        doc_dir = Path("/data/documentation")
+        if not doc_dir.exists():
+            logger.warning(f"Documentation directory not found: {doc_dir}")
+            return []
+        
+        md_files = list(doc_dir.glob("*.md"))
+        logger.info(f"Found {len(md_files)} markdown files")
+        
+        for md_file in md_files:
+            try:
+                content = md_file.read_text(encoding='utf-8')
+                rel_path = str(md_file.relative_to(Path("/data")))
+                
+                # Разбиваем на чанки по секциям
+                file_chunks = CodeChunker.chunk_markdown_by_sections(content, rel_path)
+                
+                # Добавляем метаданные к каждому чанку
+                for chunk in file_chunks:
+                    chunk['source'] = rel_path
+                    chunk['file'] = rel_path  # Для совместимости с hybrid_search
+                    chunk['file_type'] = 'markdown'
+                
+                chunks.extend(file_chunks)
+                logger.info(f"Indexed {md_file.name}: {len(file_chunks)} chunks")
+                
+            except Exception as e:
+                logger.error(f"Error indexing {md_file}: {e}")
+        
+        # Индексируем data.json из tetepfgr
+        data_json_path = Path("/data/repo/tetepfgr/data.json")
+        if data_json_path.exists():
+            try:
+                import json
+                content = data_json_path.read_text(encoding='utf-8')
+                rel_path = "tetepfgr/data.json"
+                
+                # Разбиваем JSON на чанки
+                file_chunks = CodeChunker.chunk_json(content, rel_path)
+                
+                for chunk in file_chunks:
+                    chunk['source'] = rel_path
+                    chunk['file'] = rel_path  # Для совместимости с hybrid_search
+                    chunk['file_type'] = 'json'
+                
+                chunks.extend(file_chunks)
+                logger.info(f"Indexed data.json: {len(file_chunks)} chunks")
+                
+            except Exception as e:
+                logger.error(f"Error indexing data.json: {e}")
+        
+        logger.info(f"Total documentation chunks: {len(chunks)}")
+        return chunks

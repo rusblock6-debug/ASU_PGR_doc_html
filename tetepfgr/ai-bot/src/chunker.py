@@ -259,9 +259,9 @@ Return ONLY JSON array, no other text!"""
                             'line_start': section_start_line
                         })
                 
-                # Начинаем новую секцию
+                # Начинаем новую секцию с текущей строки
                 current_section = [line]
-                section_start_line = current_line
+                section_start_line = current_line  # Запоминаем номер строки начала секции
             else:
                 current_section.append(line)
             

@@ -194,32 +194,6 @@ MARKDOWN ФОРМАТИРОВАНИЕ (ОБЯЗАТЕЛЬНО):
 
 Ответ:"""
 
-Пример ОТКАЗА (для нерелевантных вопросов):
-
-Я отвечаю только на вопросы по работе с системой АСУ ПГР. Пожалуйста, задайте вопрос о функциях системы (управление техникой, карты, диспетчер, наряд-задания, отчеты).
-Шаг 2: Перейдите на вкладку "Управление ролями" в левой панели.
-Шаг 3: Нажмите кнопку "Добавить роль" в верхней части экрана.
-Шаг 4: Введите название новой роли в поле "Название".
-Шаг 5: Отметьте галочками необходимые права доступа из списка.
-Шаг 6: Нажмите кнопку "Сохранить" чтобы создать роль.
-
-УВЕРЕННОСТЬ: 95%
-
-Пример НЕПРАВИЛЬНОГО ответа (НИКОГДА так не делай):
-Для создания ролей используйте файл config/roles-config.json и контроллер access-controller.ts.
-Или:
-Чтобы создать роль, нужно зайти в админку и там всё настроить.
-
-Контекст из документации:
-{context}
-
-История диалога:
-{history}
-
-Вопрос: {question}
-
-Ответ:"""
-
 # Модели
 class QuestionRequest(BaseModel):
     question: str
@@ -547,14 +521,17 @@ async def index_repository(
                     phi4_chunked_count += 1
                 
                 # Добавляем в ChromaDB
-                for chunk in chunks:
-                    chunk_id = f"{file_info['path']}_{chunk_count}"
+                for chunk_idx, chunk in enumerate(chunks):
+                    # Создаём уникальный ID на основе файла, строки и индекса
+                    line_start = chunk.get('line_start', 0)
+                    chunk_id = f"{file_info['path']}_line{line_start}_idx{chunk_idx}"
+                    
                     collection.add(
                         documents=[chunk['content']],
                         metadatas=[{
                             'file': file_info['path'],
                             'type': chunk.get('type', 'text'),
-                            'line': chunk.get('line_start', 0),
+                            'line': line_start,
                             'chunked_by': chunk.get('chunked_by', 'tree-sitter')
                         }],
                         ids=[chunk_id]
@@ -601,20 +578,82 @@ async def index_repository(
 
 @app.post("/api/reindex")
 async def reindex_repository(
-    mode: str = "incremental",
+    mode: str = "full",
     x_api_key: Optional[str] = Header(None)
 ):
-    """Переиндексация (инкрементальная или полная)"""
+    """Переиндексация документации (полная или инкрементальная)"""
     verify_api_key(x_api_key)
     
     logger.info(f"Запуск переиндексации: mode={mode}")
     
-    # TODO: Реализация инкрементальной индексации
-    # 1. Вычисление MD5-хешей файлов
-    # 2. Сравнение с хешами в ChromaDB
-    # 3. Обновление только изменённых файлов
-    
-    return {"status": "reindexing_started", "mode": mode}
+    try:
+        from src.indexer import RepositoryScanner
+        from src.chunker import CodeChunker
+        
+        # Очищаем старую коллекцию
+        try:
+            chroma_client.delete_collection(name="pgr_docs")
+            logger.info("Old collection deleted")
+        except:
+            pass
+        
+        # Создаём новую коллекцию
+        collection = chroma_client.get_or_create_collection(name="pgr_docs")
+        
+        # Сканируем документацию
+        scanner = RepositoryScanner(repo_path="/data/documentation")
+        chunks = scanner.get_documentation_chunks()
+        
+        if not chunks:
+            return {"status": "error", "message": "No documentation chunks found"}
+        
+        # Индексируем чанки в ChromaDB
+        indexed_count = 0
+        for i, chunk in enumerate(chunks):
+            try:
+                content = chunk.get('content', '')
+                if not content or len(content.strip()) < 10:
+                    continue
+                
+                # Генерируем ID
+                chunk_id = hashlib.md5(
+                    f"{chunk.get('source', 'unknown')}_{i}".encode()
+                ).hexdigest()
+                
+                # Метаданные
+                metadata = {
+                    'source': chunk.get('source', 'unknown'),
+                    'file': chunk.get('file', chunk.get('source', 'unknown')),  # Для совместимости с hybrid_search
+                    'file_type': chunk.get('file_type', 'text'),
+                    'chunk_index': i,
+                    'type': chunk.get('type', 'section')
+                }
+                
+                # Добавляем в ChromaDB
+                collection.add(
+                    ids=[chunk_id],
+                    documents=[content],
+                    metadatas=[metadata]
+                )
+                
+                indexed_count += 1
+                
+            except Exception as e:
+                logger.error(f"Error indexing chunk {i}: {e}")
+                continue
+        
+        logger.info(f"Indexing complete: {indexed_count} chunks indexed")
+        
+        return {
+            "status": "success",
+            "chunks_indexed": indexed_count,
+            "total_chunks": len(chunks),
+            "mode": mode
+        }
+        
+    except Exception as e:
+        logger.error(f"Ошибка переиндексации: {e}")
+        raise HTTPException(500, f"Ошибка переиндексации: {str(e)}")
 
 @app.get("/api/stats")
 async def get_stats():
