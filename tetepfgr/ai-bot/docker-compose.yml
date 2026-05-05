@@ -54,6 +54,7 @@ services:
       - ./logs:/app/logs
       - ./chroma_data:/app/chroma_data
       - ./snapshots:/app/snapshots
+      - chroma_cache:/root/.cache
     depends_on:
       ollama:
         condition: service_healthy
@@ -93,3 +94,4 @@ networks:
 volumes:
   ollama_data:
   redis_data:
+  chroma_cache:

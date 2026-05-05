@@ -119,7 +119,7 @@ def fix_typos(text: str) -> str:
 
 def expand_with_synonyms(text: str, max_synonyms: int = 3) -> str:
     """
-    Расширение запроса синонимами
+    Расширение запроса синонимами (поддержка фраз и отдельных слов)
     
     Args:
         text: Исходный текст запроса
@@ -131,6 +131,23 @@ def expand_with_synonyms(text: str, max_synonyms: int = 3) -> str:
     words = text.lower().split()
     expanded_words: Set[str] = set()
     
+    # Сначала проверяем наличие фраз из синонимов (2-3 слова)
+    for i in range(len(words)):
+        for phrase_len in [3, 2]:  # Сначала длинные фразы, потом короткие
+            if i + phrase_len <= len(words):
+                phrase = ' '.join(words[i:i+phrase_len])
+                main_term = REVERSE_SYNONYMS.get(phrase)
+                
+                if main_term:
+                    # Добавляем основную фразу
+                    expanded_words.add(main_term)
+                    
+                    # Добавляем синонимы фразы
+                    synonyms = SYNONYMS.get(main_term, [])
+                    for synonym in synonyms[:max_synonyms]:
+                        expanded_words.add(synonym.lower())
+    
+    # Затем обрабатываем отдельные слова
     for word in words:
         # Добавляем само слово
         expanded_words.add(word)
