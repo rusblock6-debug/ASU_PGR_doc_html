@@ -176,7 +176,7 @@ class RepositoryScanner:
                 # Добавляем метаданные к каждому чанку
                 for chunk in file_chunks:
                     chunk['source'] = rel_path
-                    chunk['file'] = rel_path  # Для совместимости с hybrid_search
+                    chunk['file'] = rel_path
                     chunk['file_type'] = 'markdown'
                 
                 chunks.extend(file_chunks)

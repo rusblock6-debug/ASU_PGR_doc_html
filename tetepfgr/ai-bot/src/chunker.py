@@ -1,5 +1,5 @@
 """
-Модуль разбиения файлов на чанки (гибридный подход)
+Модуль разбиения файлов на чанки
 """
 import ast
 import re
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
 
 class CodeChunker:
-    """Разбиение кода на смысловые чанки (гибридный подход)"""
+    """Разбиение кода на смысловые чанки"""
     
     @staticmethod
     async def chunk_with_phi4(content: str, file_path: str, file_type: str) -> Optional[List[Dict]]:
@@ -329,7 +329,7 @@ Return ONLY JSON array, no other text!"""
     @staticmethod
     async def chunk_file_async(file_path: str, content: str, use_phi4: bool = True) -> List[Dict]:
         """
-        Разбиение файла на чанки (гибридный подход)
+        Разбиение файла на чанки
         
         Args:
             file_path: Путь к файлу
