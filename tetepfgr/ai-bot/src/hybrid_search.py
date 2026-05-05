@@ -53,24 +53,31 @@ def merge_results(
     # Обрабатываем векторные результаты
     if vector_results.get('documents') and vector_results['documents'][0]:
         for i, doc in enumerate(vector_results['documents'][0]):
+            distance = vector_results['distances'][0][i] if vector_results.get('distances') else 1.0
+            # Cosine similarity: 1 - distance (distance ranges from 0 to 2 for cosine)
+            # Convert to 0-1 range: max(0, 1 - distance/2)
+            similarity = max(0.0, 1.0 - distance / 2.0)
             merged.append({
                 'id': vector_results['ids'][0][i] if vector_results.get('ids') else f"vec_{i}",
                 'document': doc,
                 'metadata': vector_results['metadatas'][0][i] if vector_results.get('metadatas') else {},
-                'distance': vector_results['distances'][0][i] if vector_results.get('distances') else 1.0,
-                'score': (1.0 - vector_results['distances'][0][i]) * vector_weight if vector_results.get('distances') else 0.5,
+                'distance': distance,
+                'score': similarity * vector_weight,
                 'source': 'vector'
             })
     
     # Обрабатываем keyword результаты
     if keyword_results.get('documents') and keyword_results['documents'][0]:
         for i, doc in enumerate(keyword_results['documents'][0]):
+            distance = keyword_results['distances'][0][i] if keyword_results.get('distances') else 1.0
+            # Cosine similarity: convert to 0-1 range
+            similarity = max(0.0, 1.0 - distance / 2.0)
             merged.append({
                 'id': keyword_results['ids'][0][i] if keyword_results.get('ids') else f"kw_{i}",
                 'document': doc,
                 'metadata': keyword_results['metadatas'][0][i] if keyword_results.get('metadatas') else {},
-                'distance': keyword_results['distances'][0][i] if keyword_results.get('distances') else 1.0,
-                'score': (1.0 - keyword_results['distances'][0][i]) * keyword_weight if keyword_results.get('distances') else 0.3,
+                'distance': distance,
+                'score': similarity * keyword_weight,
                 'source': 'keyword'
             })
     

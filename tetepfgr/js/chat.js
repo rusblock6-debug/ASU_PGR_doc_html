@@ -479,9 +479,10 @@ function deleteChat(chatId) {
 }
 
 // Очистка всей истории
-function clearAllHistory() {
-    if (!confirm('Удалить ВСЕ чаты? Это действие нельзя отменить.')) return;
+async function clearAllHistory() {
+    if (!confirm('Удалить ВСЕ чаты и очистить кэш? Это действие нельзя отменить.')) return;
     
+    // Очищаем локальную историю
     chatHistory = [];
     currentChatId = null;
     saveChatsToStorage();
@@ -492,6 +493,26 @@ function clearAllHistory() {
     }
     
     renderChatHistory();
+    
+    // Очищаем кэш на сервере
+    try {
+        const response = await fetch(`${API_URL}/api/cache/clear`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': API_KEY
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log(`Кэш очищен: удалено ${result.deleted_entries} записей`);
+        } else {
+            console.error('Ошибка очистки кэша:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Не удалось очистить кэш:', error);
+    }
 }
 
 // Сохранение чатов в LocalStorage
