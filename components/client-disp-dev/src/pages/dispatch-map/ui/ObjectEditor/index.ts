@@ -1,1 +1,0 @@
-export { ObjectEditor } from './ObjectEditor';

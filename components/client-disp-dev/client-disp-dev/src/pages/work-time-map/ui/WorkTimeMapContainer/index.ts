@@ -1,1 +1,0 @@
-export { WorkTimeMapContainer } from './WorkTimeMapContainer';

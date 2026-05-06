@@ -235,7 +235,7 @@ async def ask_question(req: QuestionRequest):
                 history_messages.append(f"{role}: {content}")
             history_context = "\n".join(history_messages) + "\n\n"
         
-        # Генерация ответа через Ollama (Phi-4-mini)
+        # Генерация ответа через Ollama (qwen3:8b)
         prompt = SYSTEM_PROMPT.format(
             context=context,
             question=req.question,
@@ -251,7 +251,7 @@ async def ask_question(req: QuestionRequest):
             response = await client.post(
                 f"{OLLAMA_URL}/api/generate",
                 json={
-                    "model": "phi4-mini",
+                    "model": "qwen3:8b",
                     "prompt": prompt,
                     "stream": False,
                     "options": {

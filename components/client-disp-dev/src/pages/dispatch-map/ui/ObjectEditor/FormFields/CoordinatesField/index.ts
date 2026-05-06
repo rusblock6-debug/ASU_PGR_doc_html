@@ -1,1 +1,0 @@
-export { CoordinatesField } from './CoordinatesField';

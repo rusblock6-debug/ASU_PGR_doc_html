@@ -46,7 +46,7 @@ Return ONLY JSON array, no other text!"""
                 response = await client.post(
                     f"{OLLAMA_URL}/api/generate",
                     json={
-                        "model": "phi4-mini",
+                        "model": "qwen3:8b",
                         "prompt": prompt,
                         "stream": False,
                         "options": {

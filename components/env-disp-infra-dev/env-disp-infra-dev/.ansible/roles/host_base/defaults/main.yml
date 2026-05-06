@@ -1,7 +1,0 @@
----
-host_base_cache_valid_time: 3600
-host_base_packages:
-  - ca-certificates
-  - curl
-  - gnupg
-

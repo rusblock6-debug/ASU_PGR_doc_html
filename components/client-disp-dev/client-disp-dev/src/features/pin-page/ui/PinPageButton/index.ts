@@ -1,1 +1,0 @@
-export { PinPageButton } from './PinPageButton';

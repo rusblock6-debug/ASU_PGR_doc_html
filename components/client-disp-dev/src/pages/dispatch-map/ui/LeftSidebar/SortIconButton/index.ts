@@ -1,1 +1,0 @@
-export { SortIconButton } from './SortIconButton';

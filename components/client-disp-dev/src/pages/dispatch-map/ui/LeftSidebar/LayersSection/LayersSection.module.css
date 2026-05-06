@@ -1,9 +1,0 @@
-.collapsible_layers {
-  --header-margin: 7px 0 8px 0;
-}
-
-.layers {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}

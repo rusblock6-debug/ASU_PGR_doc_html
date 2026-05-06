@@ -1,3 +1,0 @@
-from src.core.db.base import Base
-
-__all__ = ["Base"]

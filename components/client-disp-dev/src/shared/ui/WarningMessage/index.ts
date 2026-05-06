@@ -1,1 +1,0 @@
-export { WarningMessage } from './WarningMessage';

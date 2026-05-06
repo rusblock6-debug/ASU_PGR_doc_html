@@ -1,1 +1,0 @@
-export { WorkOrderDetailPage } from './WorkOrderDetailPage';

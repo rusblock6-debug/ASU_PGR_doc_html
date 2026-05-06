@@ -1,6 +1,0 @@
-.env
-.idea
-bin
-coverage.out
-test-report.json
-coverage.xml

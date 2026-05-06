@@ -1,9 +1,0 @@
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.shift_filter_container {
-  width: 280px;
-}

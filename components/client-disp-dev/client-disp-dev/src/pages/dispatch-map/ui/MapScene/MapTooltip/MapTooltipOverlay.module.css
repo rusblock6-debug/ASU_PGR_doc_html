@@ -1,4 +1,0 @@
-.floating {
-  z-index: var(--z-popover);
-  pointer-events: none;
-}

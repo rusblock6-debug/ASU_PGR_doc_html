@@ -1,1 +1,0 @@
-export { ObjectsPanel } from './ObjectsPanel';

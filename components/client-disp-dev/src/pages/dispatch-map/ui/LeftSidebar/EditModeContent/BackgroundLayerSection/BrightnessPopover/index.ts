@@ -1,1 +1,0 @@
-export { BrightnessPopover } from './BrightnessPopover';

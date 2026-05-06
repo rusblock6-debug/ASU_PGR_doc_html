@@ -1,7 +1,0 @@
-.sidebar_trigger {
-  color: var(--primary);
-
-  &:hover {
-    color: var(--primary);
-  }
-}

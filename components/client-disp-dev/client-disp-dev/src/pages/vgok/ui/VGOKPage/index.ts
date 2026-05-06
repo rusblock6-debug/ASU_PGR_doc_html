@@ -1,1 +1,0 @@
-export { VGOKPage } from './VGOKPage';

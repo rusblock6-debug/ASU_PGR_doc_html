@@ -1,1 +1,0 @@
-export { KioskBackButton } from './KioskBackButton';

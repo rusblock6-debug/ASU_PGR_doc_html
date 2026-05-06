@@ -1,1 +1,0 @@
-export { ResultsByCargoType } from './ResultsByCargoType';

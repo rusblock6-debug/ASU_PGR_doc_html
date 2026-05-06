@@ -1,8 +1,0 @@
-[servers]
-
-10.109.51.16 #nir-msc-emu1 [Борт staging 3]
-10.109.51.17 #nir-msc-emu2 [Борт staging 4]
-10.109.51.18 #nir-msc-emu3 [Борт staging 5]
-10.109.51.19 #nir-msc-emu4 [Борт staging 6]
-10.109.51.20 #nir-msc-emu5 [Борт staging 7]
-10.109.51.21 #nir-msc-emu6 [Борт staging 8]

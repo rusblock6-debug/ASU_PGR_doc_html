@@ -1,1 +1,0 @@
-export { PlaceTypeIcon } from './PlaceTypeIcon';

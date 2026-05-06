@@ -1,7 +1,0 @@
----
-docker_compose_package: docker-compose
-docker_compose_plugin_dir: /usr/local/lib/docker/cli-plugins
-docker_compose_plugin_path: "{{ docker_compose_plugin_dir }}/docker-compose"
-docker_compose_wrapper_path: /usr/local/bin/docker-compose
-docker_compose_download_url: >-
-  https://github.com/docker/compose/releases/download/v{{ docker_compose_version }}/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}

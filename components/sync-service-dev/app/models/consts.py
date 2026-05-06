@@ -1,2 +1,0 @@
-SERVER_INSTANCE_ID = "server"
-BORT_INSTANCE_ID_PREFIX = "bort_"
