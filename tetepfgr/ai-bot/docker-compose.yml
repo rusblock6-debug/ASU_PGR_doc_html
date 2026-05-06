@@ -41,6 +41,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: pgr-ai-bot
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     environment:
@@ -53,6 +55,7 @@ services:
       - ./logs:/app/logs
       - ./chroma_data:/app/chroma_data
       - ./snapshots:/app/snapshots
+      - pip_cache:/root/.cache/pip
     depends_on:
       ollama:
         condition: service_healthy
@@ -92,3 +95,4 @@ networks:
 volumes:
   ollama_data:
   redis_data:
+  pip_cache:

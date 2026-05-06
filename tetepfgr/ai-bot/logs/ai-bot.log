@@ -1,0 +1,92 @@
+2026-05-06 14:53:58,008 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-05-06 14:54:00,143 - ERROR - Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:02:44,050 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-05-06 15:02:44,345 - ERROR - Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:03:55,809 - INFO - Получен вопрос: как сделать карту?
+2026-05-06 15:03:55,991 - ERROR - Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:03:55,998 - INFO - 📊 Документов в базе: 0
+2026-05-06 15:05:24,784 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-05-06 15:05:24,969 - ERROR - Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:06:16,027 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-05-06 15:06:16,215 - ERROR - Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:06:22,991 - INFO - Запуск индексации: mode=full, snapshot=None
+2026-05-06 15:06:23,075 - INFO - Начало сканирования: /data/repo
+2026-05-06 15:06:23,205 - INFO - Найдено файлов: 18
+2026-05-06 15:06:23,205 - INFO - Найдено файлов для индексации: 18
+2026-05-06 15:06:23,206 - INFO - Parsing JSON documentation files...
+2026-05-06 15:06:23,207 - INFO - Parsing data.json: /data/repo/data.json
+2026-05-06 15:06:23,211 - INFO -   Quickstart: 1 chunks
+2026-05-06 15:06:23,212 - INFO -   Descriptive: 5 chunks
+2026-05-06 15:06:23,212 - INFO -   Instructions: 1 chunks
+2026-05-06 15:06:23,213 - INFO -   Admin instructions: 6 chunks
+2026-05-06 15:06:23,213 - INFO - Total chunks from data.json: 13
+2026-05-06 15:06:23,214 - INFO - Parsing directory_data.json: /data/repo/directory_data.json
+2026-05-06 15:06:23,216 - INFO - Total chunks from directory_data.json: 14
+2026-05-06 15:06:23,219 - INFO - Total documentation chunks: 27
+2026-05-06 15:06:23,220 - INFO - Parsed 27 JSON documentation chunks
+2026-05-06 15:06:23,220 - INFO - Total documentation chunks: 27
+2026-05-06 15:06:23,220 - INFO - 📚 Documentation chunks: 27
+2026-05-06 15:06:23,358 - INFO - Старая коллекция удалена
+2026-05-06 15:06:23,579 - ERROR - Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:06:23,580 - INFO - Новая коллекция создана для полной индексации
+2026-05-06 15:07:02,690 - ERROR - Failed to send telemetry event CollectionAddEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:07:15,786 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-05-06 15:07:15,997 - ERROR - Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:07:34,401 - INFO - Запуск индексации: mode=full, snapshot=None
+2026-05-06 15:07:34,490 - INFO - Начало сканирования: /data/repo
+2026-05-06 15:07:34,562 - INFO - Найдено файлов: 18
+2026-05-06 15:07:34,562 - INFO - Найдено файлов для индексации: 18
+2026-05-06 15:07:34,564 - INFO - Parsing JSON documentation files...
+2026-05-06 15:07:34,564 - INFO - Parsing data.json: /data/repo/data.json
+2026-05-06 15:07:34,569 - INFO -   Quickstart: 1 chunks
+2026-05-06 15:07:34,570 - INFO -   Descriptive: 5 chunks
+2026-05-06 15:07:34,570 - INFO -   Instructions: 1 chunks
+2026-05-06 15:07:34,571 - INFO -   Admin instructions: 6 chunks
+2026-05-06 15:07:34,571 - INFO - Total chunks from data.json: 13
+2026-05-06 15:07:34,572 - INFO - Parsing directory_data.json: /data/repo/directory_data.json
+2026-05-06 15:07:34,574 - INFO - Total chunks from directory_data.json: 14
+2026-05-06 15:07:34,575 - INFO - Total documentation chunks: 27
+2026-05-06 15:07:34,575 - INFO - Parsed 27 JSON documentation chunks
+2026-05-06 15:07:34,576 - INFO - Total documentation chunks: 27
+2026-05-06 15:07:34,576 - INFO - 📚 Documentation chunks: 27
+2026-05-06 15:07:34,927 - INFO - Старая коллекция удалена
+2026-05-06 15:07:35,153 - ERROR - Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:07:35,154 - INFO - Новая коллекция создана для полной индексации
+2026-05-06 15:08:07,426 - ERROR - Failed to send telemetry event CollectionAddEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:08:35,238 - INFO - 📊 Прогресс: 5/18 файлов, 153 чанков (Phi-4: 0)
+2026-05-06 15:08:39,795 - INFO - 📊 Прогресс: 10/18 файлов, 175 чанков (Phi-4: 0)
+2026-05-06 15:08:46,914 - INFO - 📊 Прогресс: 14/18 файлов, 213 чанков (Phi-4: 0)
+2026-05-06 15:10:54,429 - ERROR - Failed to send telemetry event CollectionAddEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:11:04,218 - INFO - 📊 Прогресс: 17/18 файлов, 1059 чанков (Phi-4: 0)
+2026-05-06 15:11:04,219 - INFO - Adding 27 documentation chunks...
+2026-05-06 15:11:10,893 - INFO - ✅ Documentation chunks added: 27
+2026-05-06 15:11:10,893 - INFO - ✅ Индексация завершена: 17 файлов, 1086 чанков (вкл. 27 docs)
+2026-05-06 15:11:10,894 - INFO - ✨ Phi-4 обработал: 0 файлов
+2026-05-06 15:19:23,121 - INFO - Получен вопрос: как сделать карту?
+2026-05-06 15:19:23,128 - INFO - 📊 Документов в базе: 1086
+2026-05-06 15:19:23,350 - ERROR - Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+2026-05-06 15:19:23,351 - INFO - 📝 Отправка запроса в Ollama (длина промпта: 4971 символов)
+2026-05-06 15:19:23,351 - INFO - ❓ Вопрос: как сделать карту?
+2026-05-06 15:19:23,352 - INFO - 📄 Контекст (первые 500 символов): [Источник 1]: [ЗАГОЛОВОК] Настройки
+
+[ОПИСАНИЕ] Раздел для настройки параметров системы и предприятия.
+
+[СОДЕРЖАНИЕ]
+- Настройки предприятия
+- Системные настройки
+
+[Источник 2]: [ЗАГОЛОВОК] Диагностика
+
+[ОПИСАНИЕ] Раздел для мониторинга технического состояния оборудования и системы.
+
+[СОДЕРЖАНИЕ]
+- Диагностика оборудования
+- Диагностика системы
+
+[Источник 3]: [ЗАГОЛОВОК] Оперативная работа
+
+[ОПИСАНИЕ] Раздел для ежедневного планирования и мониторинга. Основное рабочее место диспетчера.
+
+[СОДЕРЖА...
+2026-05-06 15:23:06,327 - INFO - HTTP Request: POST http://ollama:11434/api/generate "HTTP/1.1 200 OK"
+2026-05-06 15:23:06,333 - INFO - Ответ сгенерирован за 223.21с
