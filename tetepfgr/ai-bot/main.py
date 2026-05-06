@@ -10,12 +10,14 @@ import redis
 import hashlib
 import json
 from datetime import datetime
+from sentence_transformers import SentenceTransformer
 
 # Настройка логирования
 os.makedirs("logs", exist_ok=True)
-handler = RotatingFileHandler('logs/ai-bot.log', maxBytes=10_000_000, backupCount=5)
+file_handler = RotatingFileHandler('logs/ai-bot.log', maxBytes=10_000_000, backupCount=5)
+console_handler = logging.StreamHandler()
 logging.basicConfig(
-    handlers=[handler],
+    handlers=[file_handler, console_handler],
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -33,6 +35,20 @@ app.add_middleware(
 )
 
 # Инициализация клиентов
+logger.info("Загрузка embedding модели...")
+embedding_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2', device='cuda' if __import__('torch').cuda.is_available() else 'cpu')
+logger.info(f"Embedding модель загружена на устройстве: {embedding_model.device}")
+
+class CustomEmbeddingFunction:
+    """Custom embedding function compatible with ChromaDB 0.4.18"""
+    def __init__(self):
+        self.model = embedding_model
+    
+    def __call__(self, input):
+        """ChromaDB expects this signature"""
+        embeddings = self.model.encode(input, convert_to_numpy=True)
+        return embeddings.tolist()
+
 chroma_client = chromadb.PersistentClient(path="/app/chroma_data")
 
 redis_client = redis.Redis(
@@ -182,9 +198,9 @@ async def ask_question(req: QuestionRequest):
     try:
         # Получаем коллекцию
         try:
-            collection = chroma_client.get_collection(name="pgr_docs")
+            collection = chroma_client.get_collection(name="pgr_docs", embedding_function=CustomEmbeddingFunction())
         except:
-            collection = chroma_client.get_or_create_collection(name="pgr_docs")
+            collection = chroma_client.get_or_create_collection(name="pgr_docs", embedding_function=CustomEmbeddingFunction())
         
         # Проверяем есть ли документы
         count = collection.count()
@@ -198,10 +214,14 @@ async def ask_question(req: QuestionRequest):
             }
         
         # Поиск похожих документов (уменьшено до 3 для ускорения)
+        logger.info(f"⏱️ Начало поиска в ChromaDB...")
+        search_start = datetime.now()
         results = collection.query(
             query_texts=[req.question],
             n_results=min(3, count)
         )
+        search_time = (datetime.now() - search_start).total_seconds()
+        logger.info(f"⏱️ Поиск завершен за {search_time:.2f} сек")
         
         if not results['documents'] or not results['documents'][0]:
             return {
@@ -247,6 +267,8 @@ async def ask_question(req: QuestionRequest):
         logger.info(f"📄 Контекст (первые 500 символов): {context[:500]}...")
         
         import httpx
+        logger.info(f"⏱️ Начало запроса к Ollama...")
+        ollama_start = datetime.now()
         async with httpx.AsyncClient(timeout=300.0) as client:
             response = await client.post(
                 f"{OLLAMA_URL}/api/generate",
@@ -267,6 +289,9 @@ async def ask_question(req: QuestionRequest):
             
             ollama_response = response.json()
             answer_text = ollama_response.get('response', '').strip()
+        
+        ollama_time = (datetime.now() - ollama_start).total_seconds()
+        logger.info(f"⏱️ Ollama ответила за {ollama_time:.2f} сек")
         
         # Парсим confidence из ответа
         confidence = None
@@ -378,7 +403,8 @@ async def index_repository(
                 # Создаем новую коллекцию
                 collection = chroma_client.create_collection(
                     name=collection_name,
-                    metadata={"description": "АСУ ПГР documentation and code"}
+                    metadata={"description": "АСУ ПГР documentation and code"},
+                    embedding_function=CustomEmbeddingFunction()
                 )
                 logger.info("Новая коллекция создана для полной индексации")
             except Exception as e:
@@ -388,7 +414,8 @@ async def index_repository(
             # Для инкрементальной индексации получаем существующую коллекцию
             collection = chroma_client.get_or_create_collection(
                 name=collection_name,
-                metadata={"description": "АСУ ПГР documentation and code"}
+                metadata={"description": "АСУ ПГР documentation and code"},
+                embedding_function=CustomEmbeddingFunction()
             )
         
         indexed_count = 0

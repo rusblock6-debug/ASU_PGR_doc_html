@@ -9,6 +9,13 @@ services:
       - "11434:11434"
     volumes:
       - ../ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 30s
@@ -52,10 +59,20 @@ services:
       - API_KEY=${API_KEY}
     volumes:
       - ..:/data/repo:ro
+      - ../../documentation:/data/documentation:ro
       - ./logs:/app/logs
       - ./chroma_data:/app/chroma_data
       - ./snapshots:/app/snapshots
       - pip_cache:/root/.cache/pip
+      - chroma_cache:/root/.cache/chroma
+      - hf_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     depends_on:
       ollama:
         condition: service_healthy
@@ -96,3 +113,5 @@ volumes:
   ollama_data:
   redis_data:
   pip_cache:
+  chroma_cache:
+  hf_cache:

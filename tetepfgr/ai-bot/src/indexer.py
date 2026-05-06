@@ -32,8 +32,7 @@ EXCLUDED_DIRS = {
     '.next', '.nuxt', 'coverage', '.pytest_cache',
     'screenshots', '.history', '.cursor', '.husky',
     '.storybook', 'migrations', 'tests', 'test',
-    '.docker', '.bin', 'monitoring', 'telemetry-visualizer',
-    'documentation'  # Временно исключено (docx/xlsx файлы)
+    '.docker', '.bin', 'monitoring', 'telemetry-visualizer'
 }
 
 # Чёрный список расширений
@@ -65,7 +64,7 @@ MAX_FILE_SIZE = 1024 * 1024
 class RepositoryScanner:
     """Сканер репозитория"""
     
-    def __init__(self, repo_path: str = "/data/repo"):
+    def __init__(self, repo_path: str = "/data/documentation"):
         self.repo_path = Path(repo_path)
         
     def should_exclude(self, path: Path) -> bool:

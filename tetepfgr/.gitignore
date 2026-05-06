@@ -1,3 +1,43 @@
 # AI Bot data folders
 ollama_data/
 redis_data/
+
+# ChromaDB data
+ai-bot/chroma_data/
+
+# Logs
+ai-bot/logs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node modules
+node_modules/
+
+# Docker volumes
+pip_cache/
+
+# Snapshots
+ai-bot/snapshots/
