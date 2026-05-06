@@ -37,6 +37,24 @@ app.add_middleware(
 )
 
 # Инициализация клиентов
+from sentence_transformers import SentenceTransformer
+import chromadb.utils.embedding_functions as embedding_functions
+
+# Загрузка русской embedding модели (rubert-tiny2)
+logger.info("🔄 Загрузка embedding модели cointegrated/rubert-tiny2...")
+embedding_model = SentenceTransformer('cointegrated/rubert-tiny2')
+logger.info("✅ Embedding модель загружена")
+
+# Создаём ChromaDB-compatible embedding function
+class RussianEmbeddingFunction:
+    def __call__(self, input: list) -> list:
+        """ChromaDB вызывает эту функцию с списком текстов"""
+        embeddings = embedding_model.encode(input)
+        return embeddings.tolist()
+
+# Создаём экземпляр
+rus_embedding_fn = RussianEmbeddingFunction()
+
 chroma_client = chromadb.PersistentClient(path="/app/chroma_data")
 
 redis_client = redis.Redis(
@@ -241,11 +259,11 @@ async def ask_question(req: QuestionRequest):
         return response
     
     try:
-        # Получаем коллекцию
-        try:
-            collection = chroma_client.get_collection(name="pgr_docs")
-        except:
-            collection = chroma_client.get_or_create_collection(name="pgr_docs")
+        # Получаем коллекцию с правильной embedding function
+        collection = chroma_client.get_or_create_collection(
+            name="pgr_docs",
+            embedding_function=rus_embedding_fn
+        )
         
         # Проверяем есть ли документы
         count = collection.count()
@@ -602,7 +620,8 @@ async def index_repository(
                 # Создаем новую коллекцию
                 collection = chroma_client.create_collection(
                     name=collection_name,
-                    metadata={"description": "АСУ ПГР documentation and code"}
+                    metadata={"description": "АСУ ПГР documentation and code"},
+                    embedding_function=rus_embedding_fn
                 )
                 logger.info("Новая коллекция создана для полной индексации")
             except Exception as e:
@@ -612,7 +631,8 @@ async def index_repository(
             # Для инкрементальной индексации получаем существующую коллекцию
             collection = chroma_client.get_or_create_collection(
                 name=collection_name,
-                metadata={"description": "АСУ ПГР documentation and code"}
+                metadata={"description": "АСУ ПГР documentation and code"},
+                embedding_function=rus_embedding_fn
             )
         
         indexed_count = 0
@@ -746,7 +766,10 @@ async def reindex_repository(
             pass
         
         # Создаём новую коллекцию
-        collection = chroma_client.get_or_create_collection(name="pgr_docs")
+        collection = chroma_client.get_or_create_collection(
+            name="pgr_docs",
+            embedding_function=rus_embedding_fn
+        )
         
         # Сканируем документацию
         scanner = RepositoryScanner(repo_path="/data/documentation")
