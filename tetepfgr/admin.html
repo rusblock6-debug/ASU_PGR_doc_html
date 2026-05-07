@@ -1579,14 +1579,16 @@
                 </div>
                 
                 <div class="chat-input-container">
-                    <textarea 
-                        id="chat-input" 
-                        placeholder="Задайте вопрос по документации..."
-                        rows="1"
-                        oninput="autoResizeTextarea(this)"
-                        onkeydown="handleChatInputKeydown(event)"
-                    ></textarea>
-                    <button id="send-btn" class="send-btn" disabled onclick="sendChatMessage()">→</button>
+                    <div class="chat-input-wrapper">
+                        <textarea 
+                            id="chat-input" 
+                            placeholder="Задайте вопрос по документации..."
+                            rows="1"
+                            oninput="autoResizeTextarea(this)"
+                            onkeydown="handleChatInputKeydown(event)"
+                        ></textarea>
+                        <button id="send-btn" class="send-btn" disabled onclick="sendChatMessage()">→</button>
+                    </div>
                 </div>
             </main>
         </div>

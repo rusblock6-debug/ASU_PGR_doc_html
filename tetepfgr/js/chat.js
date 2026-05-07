@@ -39,9 +39,15 @@ function toggleChatMode() {
         contentWrapper.style.display = 'none';
         chatMode.style.display = 'flex';
         
+        // Скрываем плюсик (кнопку добавления карточек)
+        const addTrigger = document.querySelector('.add-trigger');
+        if (addTrigger) {
+            addTrigger.style.display = 'none';
+        }
+        
         // Меняем содержимое сайдбара на историю чатов
         tocNav.style.display = 'none';
-        sidebarTitle.textContent = 'Чаты';
+        sidebarTitle.style.display = 'none'; // Скрываем заголовок "Чаты"
         
         // Добавляем кнопку "Новый чат" в sidebar
         if (!document.getElementById('new-chat-btn-container')) {
@@ -49,8 +55,7 @@ function toggleChatMode() {
             newChatBtn.id = 'new-chat-btn-container';
             newChatBtn.className = 'new-chat-btn';
             newChatBtn.onclick = createNewChat;
-            newChatBtn.textContent = '🆕 Новый чат';
-            // Убираем inline стили - используем CSS класс
+            newChatBtn.textContent = '+ Новый чат';
             searchContainer.after(newChatBtn);
         }
         
@@ -60,17 +65,16 @@ function toggleChatMode() {
             chatHistoryDiv.id = 'chat-history-list';
             chatHistoryDiv.className = 'chat-history';
             chatHistoryDiv.innerHTML = '<div class="history-group"><h3>Сегодня</h3></div>';
-            tocNav.after(chatHistoryDiv);
+            document.getElementById('new-chat-btn-container').after(chatHistoryDiv);
         }
         
-        // Добавляем кнопку очистки истории
+        // Добавляем кнопку очистки истории (ВНИЗУ, после истории чатов)
         if (!document.getElementById('clear-history-btn')) {
             const clearBtn = document.createElement('button');
             clearBtn.id = 'clear-history-btn';
             clearBtn.className = 'clear-history-btn';
             clearBtn.onclick = clearAllHistory;
-            clearBtn.textContent = '🗑️ Очистить историю';
-            // Убираем inline стили - используем CSS класс
+            clearBtn.textContent = 'Очистить историю';
             document.getElementById('chat-history-list').after(clearBtn);
         }
         
@@ -78,6 +82,9 @@ function toggleChatMode() {
         if (aiBtn) {
             aiBtn.classList.add('active');
         }
+        
+        // Рендерим историю чатов
+        renderChatHistory();
         
         // Рендерим чат если есть активный
         if (currentChatId && chatHistory.find(c => c.id === currentChatId)) {
@@ -97,8 +104,15 @@ function toggleChatMode() {
         contentWrapper.style.display = 'block';
         chatMode.style.display = 'none';
         
+        // Показываем плюсик обратно
+        const addTrigger = document.querySelector('.add-trigger');
+        if (addTrigger) {
+            addTrigger.style.display = 'flex';
+        }
+        
         // Восстанавливаем навигацию
         tocNav.style.display = 'block';
+        sidebarTitle.style.display = 'block'; // Показываем заголовок обратно
         sidebarTitle.textContent = 'Содержание';
         
         // Удаляем кнопку "Новый чат"

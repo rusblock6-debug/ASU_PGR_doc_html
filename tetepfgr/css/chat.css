@@ -32,7 +32,7 @@
 /* Контейнер чат-режима */
 .chat-mode-container {
     display: flex;
-    height: calc(100vh - 64px);
+    height: 100vh;
     width: 100%;
     background-color: #ffffff;
     position: relative;
@@ -46,6 +46,8 @@
     background-color: #ffffff;
     overflow: hidden;
     position: relative;
+    height: 100%;
+    padding-bottom: 120px;
 }
 
 /* История чатов в sidebar */
@@ -186,6 +188,7 @@
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
+    min-height: 0;
 }
 
 /* Сообщения */
@@ -483,7 +486,13 @@
     background-color: #ffffff;
     max-width: 800px;
     margin: 0 auto;
-    width: 100%;
+    width: calc(100% - 320px);
+    flex-shrink: 0;
+    position: fixed;
+    bottom: 0;
+    left: 320px;
+    right: 0;
+    z-index: 10;
 }
 
 .chat-input-wrapper {
