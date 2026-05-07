@@ -181,7 +181,7 @@
 .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 40px 0;
+    padding: 20px 0 40px 0;
     display: flex;
     flex-direction: column;
     gap: 32px;

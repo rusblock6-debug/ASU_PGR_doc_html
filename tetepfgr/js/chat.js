@@ -33,16 +33,28 @@ function toggleChatMode() {
     const searchContainer = document.querySelector('.search-container');
     const sidebarTitle = document.querySelector('.sidebar-title');
     const aiBtn = document.querySelector('.ai-toggle-btn');
+    const sidebar = document.getElementById('sidebar');
     
     if (isAIMode) {
         // Включаем режим чата
         contentWrapper.style.display = 'none';
         chatMode.style.display = 'flex';
         
+        // Фиксируем сайдбар
+        if (sidebar) {
+            sidebar.classList.add('chat-mode');
+        }
+        
         // Скрываем плюсик (кнопку добавления карточек)
         const addTrigger = document.querySelector('.add-trigger');
         if (addTrigger) {
             addTrigger.style.display = 'none';
+        }
+        
+        // Скрываем sidebar-header (где была надпись "Содержание")
+        const sidebarHeader = document.querySelector('.sidebar-header');
+        if (sidebarHeader) {
+            sidebarHeader.style.display = 'none';
         }
         
         // Меняем содержимое сайдбара на историю чатов
@@ -104,10 +116,21 @@ function toggleChatMode() {
         contentWrapper.style.display = 'block';
         chatMode.style.display = 'none';
         
+        // Убираем фиксацию сайдбара
+        if (sidebar) {
+            sidebar.classList.remove('chat-mode');
+        }
+        
         // Показываем плюсик обратно
         const addTrigger = document.querySelector('.add-trigger');
         if (addTrigger) {
             addTrigger.style.display = 'flex';
+        }
+        
+        // Показываем sidebar-header обратно
+        const sidebarHeader = document.querySelector('.sidebar-header');
+        if (sidebarHeader) {
+            sidebarHeader.style.display = 'block';
         }
         
         // Восстанавливаем навигацию
