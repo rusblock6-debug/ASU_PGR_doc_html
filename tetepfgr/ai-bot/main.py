@@ -12,6 +12,68 @@ import json
 from datetime import datetime
 from sentence_transformers import SentenceTransformer
 
+# Вставь этот код после импортов в main.py
+BLUEPRINT_ARCHITECTURE = """# СИСТЕМНАЯ АРХИТЕКТУРА АСУ ПГР (STATIC BRAIN)
+Используй эти знания, если в пользовательской документации нет прямого ответа.
+
+## 1. Auth Service (auth-service-backend-dev)
+**Назначение:** Пользователи, Роли, Разрешения.
+**Ключевые API:**
+- POST /api/signup (Регистрация), POST /api/login (Вход)
+- GET /api/users, POST /api/users (CRUD Пользователей)
+- GET /api/roles, POST /api/roles (CRUD Ролей и Прав доступа)
+- GET /api/permissions (Список разрешений)
+**Интерфейс:** Скорее всего находится в разделе "Администрирование" или "Настройки" -> "Пользователи".
+
+## 2. Enterprise Service (enterprise-service-dev)
+**Назначение:** Справочники и Наряд-задания.
+**Ключевые API:**
+- GET /api/vehicles, POST /api/vehicles (Техника/Самосвалы)
+- GET /api/shift-tasks, POST /api/shift-tasks (Наряд-задания/Рейсы)
+- GET /api/work-regimes (Смены/Режимы работы)
+- GET /api/load-unload-points (Точки погрузки/разгрузки)
+- GET /api/statuses (Справочник статусов: ремонт, обед, работа)
+**Интерфейс:** Разделы "Оперативная работа" (Наряд-задания), "Справочники", "Управление парком".
+
+## 3. Graph Service (graph-service-backend-dev)
+**Назначение:** Карта, Дороги, 3D/2D визуализация.
+**Ключевые API:**
+- GET /api/levels (Горизонты карьера)
+- GET /api/nodes, GET /api/edges (Узлы и Дороги - схема)
+- POST /api/location/find (Поиск по GPS координатам)
+- GET /api/route/{start}/{end} (Построение маршрута)
+**Интерфейс:** Раздел "Карта", "Визуализация". Поддержка 2D (плоская карта) и 3D (рельеф).
+
+## 4. Analytics Service (analytics-service-dev)
+**Назначение:** Аналитика, Отчеты, КРВ (Коэффициент использования).
+**Ключевые API:**
+- POST /api/vehicle-telemetry (Данные телеметрии)
+- ETL процессы для отчетов.
+**Интерфейс:** Раздел "Отчеты", "Аналитика", "Мониторинг производительности".
+
+## 5. Trip Service (dispa-backend-dev)
+**Назначение:** Бортовое управление рейсами, State Machine (состояние техники).
+**Ключевые API:**
+- GET /api/tasks (Задания на смену)
+- POST /api/trips/{id}/start (Начать рейс)
+**Интерфейс:** Бортовой терминал (Bort Client) и панель диспетчера.
+
+## ФРОНТЕНД СТРУКТУРА (client-disp-dev)
+**Основные страницы:**
+- dispatch-map (Карта диспетчера)
+- work-order (Наряд-задания)
+- fleet-control (Управление техникой)
+- trip-editor (Редактор рейсов)
+- settings (Настройки)
+- staff (Персонал)
+- cargo (Виды груза)
+
+## ПРИНЦИП ВЫВОДА (INFERENCE)
+Если пользователь спрашивает "Как создать роль?", а инструкции нет:
+1. Видим в Auth Service есть POST /api/roles.
+2. Догадываемся: Значит, интерфейс должен иметь форму создания роли в разделе Администрирования.
+3. Отвечаем с предположением, указывая низкую уверенность."""
+
 # Настройка логирования
 os.makedirs("logs", exist_ok=True)
 file_handler = RotatingFileHandler('logs/ai-bot.log', maxBytes=10_000_000, backupCount=5)
@@ -61,88 +123,54 @@ API_KEY = os.getenv("API_KEY")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
 
 # Системный промпт для AI
-SYSTEM_PROMPT = """# РОЛЬ И ЦЕЛЬ
-Ты — технический писатель и инструктор для пользователей промышленной системы "АСУ ПГР".
-Твоя задача: преобразовать техническую информацию из документации в понятную пошаговую инструкцию для обычного рабочего (не программиста).
+SYSTEM_PROMPT = """# РОЛЬ
+Ты — Технический Эксперт АСУ ПГР. Твоя главная задача — давать точные ответы, основываясь на качестве найденных данных.
 
-# ОГРАНИЧЕНИЯ (STRICT CONSTRAINTS)
-- ФОКУС: Только пользовательский интерфейс (кнопки, поля, меню).
-- ЗАПРЕТЫ: Никаких упоминаний кода, API, файлов, баз данных, JSON, TS, JS, Python.
-- ТОЧНОСТЬ: Не выдумывай функции, которых нет в контексте. Если информации нет — так и скажи.
+# ДАННЫЕ
+1. **Архитектура (База):**
+{blueprint}
 
-# ДОКУМЕНТАЦИЯ (CONTEXT)
-Используй только текст ниже для ответа. Не используй свои внешние знания.
-
+2. **Документация (Результаты поиска):**
+Качество поиска: {search_quality} (Средняя дистанция: {avg_distance})
 {context}
 
-# АЛГОРИТМ РАБОТЫ (THINKING PROCESS)
-Перед тем как дать ответ, выполни следующие шаги (это внутренний монолог, не выводи его):
-1. Анализ: Найди в контексте упоминания нужного раздела меню или формы.
-2. Фильтрация: Отбрось всю техническую информацию (классы, ID, пути файлов).
-3. Структурирование: Выстрой действия в хронологическом порядке (как это делает пользователь).
-4. Проверка: Убедись, что все поля из формы перечислены.
+# ЛОГИКА УВЕРЕННОСТИ И ИСПОЛЬЗОВАНИЯ КОНТЕКСТА
 
-# ФОРМАТ ВЫВОДА (OUTPUT FORMAT)
-Строго следуй этой структуре. Не добавляй приветствий в начале и конца.
+## Если search_quality == "HIGH" (Дистанция < 0.3)
+Найденные документы СОВЕРШЕННО совпадают с вопросом.
+- **Действие:** Используй документы для точного ответа.
+- **Уверенность:** Ставь 90-100%.
+- **Источник:** "Документация".
 
+## Если search_quality == "MEDIUM" (Дистанция 0.3 - 0.5)
+Документы частично подходят, но могут содержать лишнюю информацию.
+- **Действие:** Используй документы, но фильтруй лишнее. Если точных шагов нет, используй Архитектуру для дополнения.
+- **Уверенность:** Ставь 60-80%.
+- **Источник:** "Документация + Дополнение".
+
+## Если search_quality == "LOW" (Дистанция > 0.5)
+**ВНИМАНИЕ:** Поиск вернул МУСОР (нерелевантные чанки). Вопрос пользователя содержал сленг или нечеткие формулировки, которые исказили семантический поиск.
+- **СТРОГОЕ ЗАПРЕЩЕНИЕ:** НЕ ИСПОЛЬЗУЙ блок "Документация (Результаты поиска)". Это приведет к галлюцинациям.
+- **Действие:** 
+  1. Игнорируй найденные чанки.
+  2. Попробуй найти ответ в **Архитектуре (Blueprint)**.
+  3. Если и там нет — вежливо откажись.
+- **Уверенность:** Ставь 0-30% (если отвечаешь по архитектуре) или 0% (если отказ).
+
+# ШАБЛОН ОТВЕТА
 ---
-**Инструкция:**
+**Ответ:**
+[Сформулируй ответ согласно логике выше]
 
-Шаг 1: [Действие]
-Шаг 2: [Действие]
-...
+**Анализ данных:**
+- Качество поиска: {search_quality}
+- Используемый источник: [Документы / Архитектура / Отказ]
 
-**Обязательные поля:**
-* `[Поле]`: [Тип] - [Описание/Особенности]
-
-**Важные нюансы:**
-* [Нюанс 1]
-* [Нюанс 2]
-
-**УВЕРЕННОСТЬ:** [0-100]%
----
-
-# ПРИМЕРЫ (FEW-SHOT EXAMPLES)
-
-Пример 1:
-Вопрос: Как добавить нового сотрудника?
-
-Ответ:
-**Инструкция:**
-
-Шаг 1: Перейдите в раздел "Управление персоналом" через боковую панель.
-Шаг 2: Нажмите на кнопку "Новый сотрудник" (иконка плюса) в правом верхнем углу таблицы.
-Шаг 3: Заполните открывшуюся форму.
-
-**Обязательные поля:**
-* `ФИО`: Текст - Вводится в формате "Фамилия Имя Отчество".
-* `Должность`: Выпадающий список - Выберите из справочника должностей.
-
-**Важные нюансы:**
-* При вводе ФИО дубликаты автоматически подсвечиваются красным.
-
-**УВЕРЕННОСТЬ:** 98%
-
+**Уверенность:** [Число]% (Ставь честно, опираясь на search_quality)
 ---
 
-Пример 2:
-Вопрос: Как настроить backup базы данных?
-
-Ответ:
-В предоставленной документации отсутствуют инструкции по настройке резервного копирования базы данных. Обратитесь к администратору системы.
-
-**УВЕРЕННОСТЬ:** 100%
-
----
-
-# ТЕКУЩИЙ ЗАПРОС
-
-История переписки:
-{history}
-
-Вопрос пользователя: {question}
-
-Сформулируй ответ согласно ФОРМАТУ ВЫВОДА, используя данные из ДОКУМЕНТАЦИИ."""
+# ВОПРОС
+{question}"""
 
 # Модели
 class QuestionRequest(BaseModel):
@@ -157,6 +185,8 @@ class AnswerResponse(BaseModel):
     cached: bool = False
     response_time: float
     confidence: Optional[int] = None
+    search_quality: Optional[str] = None  # HIGH / MEDIUM / LOW
+    avg_distance: Optional[float] = None  # Средняя дистанция поиска
 
 # Вспомогательные функции
 def verify_api_key(x_api_key: Optional[str] = Header(None)):
@@ -181,11 +211,14 @@ async def ask_question(req: QuestionRequest):
     start_time = datetime.now()
     logger.info(f"Получен вопрос: {req.question}")
     
-    # Проверка на нерелевантные вопросы
-    irrelevant_keywords = ['жизнь', 'любовь', 'счастье', 'золото', 'цена', 'погода', 'курс', 'политика']
-    if any(keyword in req.question.lower() for keyword in irrelevant_keywords):
+    # Базовая проверка на явный оффтоп (быстрая, без тормозов)
+    question_lower = req.question.lower()
+    
+    # Только самые явные стоп-слова
+    if any(word in question_lower for word in ['украина', 'россия', 'война', 'политика', 'выборы']):
+        logger.warning(f"⛔ Заблокирован политический вопрос: {req.question}")
         return {
-            "answer": "Я отвечаю только на технические вопросы по проекту АСУ ПГР. Пожалуйста, задайте вопрос о коде, архитектуре, микросервисах или документации проекта.",
+            "answer": "Я отвечаю только на вопросы по системе АСУ ПГР.",
             "sources": [],
             "cached": False,
             "response_time": (datetime.now() - start_time).total_seconds()
@@ -203,71 +236,94 @@ async def ask_question(req: QuestionRequest):
         return response
     
     try:
+        # --- НАЧАЛО ИЗМЕНЕНИЙ В /api/ask ---
         # Получаем коллекцию
         try:
             collection = chroma_client.get_collection(name="pgr_docs", embedding_function=CustomEmbeddingFunction())
         except:
             collection = chroma_client.get_or_create_collection(name="pgr_docs", embedding_function=CustomEmbeddingFunction())
         
-        # Проверяем есть ли документы
         count = collection.count()
-        logger.info(f"📊 Документов в базе: {count}")
         if count == 0:
             return {
-                "answer": "База знаний пуста. Необходимо запустить индексацию репозитория через API: POST /api/index?mode=full",
+                "answer": "База знаний пуста.",
                 "sources": [],
                 "cached": False,
                 "response_time": (datetime.now() - start_time).total_seconds()
             }
         
-        # Поиск похожих документов (уменьшено до 3 для ускорения)
+        # 1. ИЗМЕНЯЕМ ЗАПРОС К CHROMADB
+        # Добавляем include=['distances'], чтобы получить оценки сходства
+        # Увеличиваем n_results до 15, чтобы больше шансов найти что-то стоящее
         logger.info(f"⏱️ Начало поиска в ChromaDB...")
-        search_start = datetime.now()
         results = collection.query(
             query_texts=[req.question],
-            n_results=min(3, count)
+            n_results=min(15, count),
+            include=['documents', 'metadatas', 'distances']  # <--- ВАЖНО: Добавь distances
         )
-        search_time = (datetime.now() - search_start).total_seconds()
-        logger.info(f"⏱️ Поиск завершен за {search_time:.2f} сек")
+        logger.info(f"⏱️ Поиск завершен")
         
+        # 2. РАСЧЕТ КАЧЕСТВА ПОИСКА (MATH LOGIC)
         if not results['documents'] or not results['documents'][0]:
-            return {
-                "answer": "По вашему вопросу не найдено релевантной информации в документации. Попробуйте переформулировать вопрос или задать более конкретный.",
-                "sources": [],
-                "cached": False,
-                "response_time": (datetime.now() - start_time).total_seconds()
-            }
+            context_text = "Поиск в документации не дал результатов."
+            sources = []
+            avg_distance = 1.0  # Максимум (худший случай)
+        else:
+            # Берем дистанции (scores) для топ-3 результатов
+            distances = results['distances'][0]
+            top_distances = distances[:3]
+            
+            # Считаем среднюю дистанцию (чем меньше, тем лучше)
+            avg_distance = sum(top_distances) / len(top_distances)
+            
+            # Формируем текст контекста
+            context_parts = []
+            sources = []
+            for i, doc in enumerate(results['documents'][0]):
+                metadata = results['metadatas'][0][i]
+                dist = results['distances'][0][i]
+                
+                # Добавляем Score в текст, чтобы модель видела точность совпадения
+                context_parts.append(f"[Source {i+1} (Score: {dist:.4f})]: {doc}")
+                sources.append({
+                    "file": metadata.get('file'),
+                    "score": round(dist, 4),  # Возвращаем score в ответ API
+                    "type": metadata.get('type')
+                })
+            
+            context_text = "\n\n".join(context_parts)
         
-        # Формируем контекст
-        context_parts = []
-        sources = []
-        for i, doc in enumerate(results['documents'][0]):
-            metadata = results['metadatas'][0][i] if results['metadatas'] else {}
-            context_parts.append(f"[Источник {i+1}]: {doc}")
-            sources.append({
-                "file": metadata.get('file', 'unknown'),
-                "line": metadata.get('line', None),
-                "type": metadata.get('type', 'text')
-            })
+        # 3. ОПРЕДЕЛЯЕМ КАТЕГОРИЮ КАЧЕСТВА (HIGH / MEDIUM / LOW)
+        # Cosine Distance: 0 = идеально, >0.5 = плохо
+        if avg_distance < 0.3:
+            search_quality = "HIGH"
+        elif avg_distance < 0.5:
+            search_quality = "MEDIUM"
+        else:
+            search_quality = "LOW"
         
-        context = "\n\n".join(context_parts)
+        logger.info(f"📊 Качество поиска: {search_quality} (Avg Dist: {avg_distance:.4f})")
         
-        # Формируем историю диалога если есть
+        # Формируем историю диалога
         history_context = ""
         if req.history and len(req.history) > 0:
             history_messages = []
-            for msg in req.history[-6:]:  # Берём последние 6 сообщений (3 пары вопрос-ответ)
+            for msg in req.history[-6:]:
                 role = "Пользователь" if msg.get('role') == 'user' else "Ассистент"
                 content = msg.get('content', '')
                 history_messages.append(f"{role}: {content}")
             history_context = "\n".join(history_messages) + "\n\n"
         
-        # Генерация ответа через Ollama (qwen3:8b)
+        # 4. ФОРМИРУЕМ ПРОМПТ С НОВЫМИ ПЕРЕМЕННЫМИ
         prompt = SYSTEM_PROMPT.format(
-            context=context,
+            blueprint=BLUEPRINT_ARCHITECTURE,  # Передаем архитектуру
+            context=context_text,              # Передаем чанки с score
             question=req.question,
-            history=history_context
+            history=history_context,
+            search_quality=search_quality,     # Передаем качество
+            avg_distance=f"{avg_distance:.4f}" # Передаем число
         )
+        # --- КОНЕЦ ИЗМЕНЕНИЙ В /api/ask ---
         
         logger.info(f"📝 Отправка запроса в Ollama (длина промпта: {len(prompt)} символов)")
         logger.info(f"❓ Вопрос: {req.question}")
@@ -284,9 +340,10 @@ async def ask_question(req: QuestionRequest):
                     "prompt": prompt,
                     "stream": False,
                     "options": {
-                        "temperature": 0.3,
+                        "temperature": 0.1,  # <--- ОБЯЗАТЕЛЬНО 0.1 (Снижает фантазии)
                         "top_p": 0.9,
-                        "num_predict": 2000  # Увеличено для полных пошаговых инструкций
+                        "num_predict": 2000,
+                        "repeat_penalty": 1.1
                     }
                 }
             )
@@ -304,23 +361,40 @@ async def ask_question(req: QuestionRequest):
         confidence = None
         clean_answer = answer_text
         
-        # Ищем секцию УВЕРЕННОСТЬ
+        # Логируем сырой ответ для отладки
+        logger.info(f"📝 Сырой ответ модели (первые 500 символов): {answer_text[:500]}")
+        
+        # Ищем секцию УВЕРЕННОСТЬ (поддерживаем разные форматы)
         import re
-        confidence_match = re.search(r'УВЕРЕННОСТЬ:\s*(\d+)%', answer_text, re.IGNORECASE)
+        # Формат 1: **Уверенность:** 90%
+        confidence_match = re.search(r'\*\*Уверенность:\*\*\s*(\d+)%', answer_text, re.IGNORECASE)
+        if not confidence_match:
+            # Формат 2: УВЕРЕННОСТЬ: 90%
+            confidence_match = re.search(r'УВЕРЕННОСТЬ:\s*(\d+)%', answer_text, re.IGNORECASE)
+        if not confidence_match:
+            # Формат 3: Уверенность: 90%
+            confidence_match = re.search(r'Уверенность:\s*(\d+)%', answer_text, re.IGNORECASE)
+        
         if confidence_match:
             confidence = int(confidence_match.group(1))
+            logger.info(f"✅ Найдена уверенность: {confidence}%")
             # Удаляем секции метаданных из ответа
-            clean_answer = re.sub(r'\n*УВЕРЕННОСТЬ:.*', '', answer_text, flags=re.IGNORECASE)
+            clean_answer = re.sub(r'\n*\*\*Уверенность:\*\*.*', '', answer_text, flags=re.IGNORECASE)
+            clean_answer = re.sub(r'\n*УВЕРЕННОСТЬ:.*', '', clean_answer, flags=re.IGNORECASE)
+            clean_answer = re.sub(r'\n*\*\*Анализ данных:\*\*.*', '', clean_answer, flags=re.IGNORECASE | re.DOTALL)
             clean_answer = re.sub(r'\n*ИСПОЛЬЗОВАННЫЕ ИСТОЧНИКИ:.*', '', clean_answer, flags=re.IGNORECASE | re.DOTALL)
-            clean_answer = re.sub(r'\n*ПРИЧИНА НЕУВЕРЕННОСТИ:.*', '', clean_answer, flags=re.IGNORECASE | re.DOTALL)
             clean_answer = clean_answer.strip()
+        else:
+            logger.warning(f"⚠️ Уверенность не найдена в ответе модели")
         
         answer = {
             "answer": clean_answer if clean_answer else "Не удалось сгенерировать ответ. Попробуйте переформулировать вопрос.",
             "sources": sources[:3],  # Топ-3 источника
             "cached": False,
             "response_time": (datetime.now() - start_time).total_seconds(),
-            "confidence": confidence
+            "confidence": confidence,
+            "search_quality": search_quality,  # Добавляем качество поиска в ответ
+            "avg_distance": round(avg_distance, 4)  # Добавляем среднюю дистанцию
         }
         
         # Кэширование

@@ -498,7 +498,7 @@ function deleteChat(chatId) {
     saveChatsToStorage();
     
     if (currentChatId === chatId) {
-        // Если удалили текущий чат - переключаемся на последний или очищаем
+        // Если удалили текущий чат - переключаемся на последний или показываем приветствие
         if (chatHistory.length > 0) {
             currentChatId = chatHistory[chatHistory.length - 1].id;
             renderCurrentChat();
@@ -506,7 +506,12 @@ function deleteChat(chatId) {
             currentChatId = null;
             const messagesContainer = document.getElementById('messages-container');
             if (messagesContainer) {
-                messagesContainer.innerHTML = '';
+                messagesContainer.innerHTML = `
+                    <div class="welcome-message">
+                        <h2 class="welcome-title">НАВИГАТОР.ПГР</h2>
+                        <p class="welcome-subtitle">Справочная система АСУ ПГР</p>
+                    </div>
+                `;
             }
         }
         renderChatHistory();
