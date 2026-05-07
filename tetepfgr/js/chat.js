@@ -331,8 +331,8 @@ async function sendChatMessage() {
         // Получаем историю чата (последние 5 сообщений)
         const history = getCurrentChatHistory(5);
         
-        // Отправляем запрос к API
-        const response = await fetch('http://localhost:8000/api/ask', {
+        // Отправляем запрос к API (через прокси server.js)
+        const response = await fetch('/api/ask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -538,11 +538,11 @@ async function clearAllHistory() {
     
     // Очищаем кэш на сервере
     try {
-        const response = await fetch(`${API_URL}/api/cache/clear`, {
+        const response = await fetch('/api/cache/clear', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': API_KEY
+                'X-API-Key': 'change-me-in-production'
             }
         });
         

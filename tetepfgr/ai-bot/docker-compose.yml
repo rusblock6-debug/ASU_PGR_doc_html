@@ -105,9 +105,9 @@ services:
     networks:
       - pgr-rag-network
 
-networks:
-  pgr-rag-network:
-    driver: bridge
+  # Ngrok - туннель для показа через интернет
+  ngrok:
+    image: ngrok/ngrok:
 
 volumes:
   ollama_data:

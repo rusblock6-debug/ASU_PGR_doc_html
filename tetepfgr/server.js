@@ -51,12 +51,53 @@ const server = http.createServer(async (req, res) => {
     
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-API-Key');
     
     if (req.method === 'OPTIONS') {
         res.writeHead(200);
         res.end();
         return;
+    }
+
+    // Прокси для AI-бота (перенаправляем /api/* на ai-bot:8000)
+    if (url.pathname.startsWith('/api/')) {
+        const AI_BOT_HOST = process.env.AI_BOT_URL || 'http://localhost:8000';
+        const targetUrl = `${AI_BOT_HOST}${url.pathname}${url.search}`;
+        
+        try {
+            const body = req.method !== 'GET' ? await parseBody(req) : null;
+            
+            const options = {
+                method: req.method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': req.headers['x-api-key'] || 'change-me-in-production'
+                }
+            };
+            
+            const proxyReq = http.request(targetUrl, options, (proxyRes) => {
+                res.writeHead(proxyRes.statusCode, proxyRes.headers);
+                proxyRes.pipe(res);
+            });
+            
+            proxyReq.on('error', (err) => {
+                console.error('Proxy error:', err);
+                res.writeHead(502, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'AI-бот недоступен' }));
+            });
+            
+            if (body) {
+                proxyReq.write(typeof body === 'string' ? body : JSON.stringify(body));
+            }
+            
+            proxyReq.end();
+            return;
+        } catch (err) {
+            console.error('Proxy error:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: err.message }));
+            return;
+        }
     }
 
     // API: Получить данные
