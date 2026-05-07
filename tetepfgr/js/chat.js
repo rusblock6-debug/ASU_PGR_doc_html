@@ -33,17 +33,11 @@ function toggleChatMode() {
     const searchContainer = document.querySelector('.search-container');
     const sidebarTitle = document.querySelector('.sidebar-title');
     const aiBtn = document.querySelector('.ai-toggle-btn');
-    const sidebar = document.getElementById('sidebar');
     
     if (isAIMode) {
         // Включаем режим чата
         contentWrapper.style.display = 'none';
         chatMode.style.display = 'flex';
-        
-        // Фиксируем сайдбар
-        if (sidebar) {
-            sidebar.classList.add('chat-mode');
-        }
         
         // Скрываем плюсик (кнопку добавления карточек)
         const addTrigger = document.querySelector('.add-trigger');
@@ -98,9 +92,20 @@ function toggleChatMode() {
         // Рендерим историю чатов
         renderChatHistory();
         
-        // Рендерим чат если есть активный
+        // Рендерим чат если есть активный, иначе показываем welcome
         if (currentChatId && chatHistory.find(c => c.id === currentChatId)) {
             renderCurrentChat();
+        } else {
+            // Показываем приветствие если нет активного чата
+            const messagesContainer = document.getElementById('messages-container');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = `
+                    <div class="welcome-message">
+                        <h2 class="welcome-title">НАВИГАТОР.ПГР</h2>
+                        <p class="welcome-subtitle">Справочная система АСУ ПГР</p>
+                    </div>
+                `;
+            }
         }
         
         // Фокус на поле ввода
@@ -115,11 +120,6 @@ function toggleChatMode() {
         // Возвращаемся к документации
         contentWrapper.style.display = 'block';
         chatMode.style.display = 'none';
-        
-        // Убираем фиксацию сайдбара
-        if (sidebar) {
-            sidebar.classList.remove('chat-mode');
-        }
         
         // Показываем плюсик обратно
         const addTrigger = document.querySelector('.add-trigger');

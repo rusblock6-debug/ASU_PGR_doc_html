@@ -142,15 +142,17 @@
             display: flex;
             flex: 1;
             flex-direction: column;
+            margin-left: 320px;
         }
 
         .sidebar {
             width: 320px;
             background: linear-gradient(180deg, var(--sidebar-bg) 0%, #243342 100%);
             padding: 0;
-            position: sticky;
-            top: 0;
-            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 64px;
+            height: calc(100vh - 64px);
             overflow-y: auto;
             flex-shrink: 0;
             transition: width 0.3s ease;
@@ -158,11 +160,6 @@
             flex-direction: column;
             border-right: none;
             box-shadow: 2px 0 12px rgba(0,0,0,0.1);
-        }
-        .sidebar.chat-mode {
-            position: fixed;
-            left: 0;
-            top: 0;
             z-index: 100;
         }
         .sidebar.collapsed {
@@ -246,6 +243,8 @@
             gap: 12px;
             width: 100%;
             box-sizing: border-box;
+            z-index: 10;
+            background: linear-gradient(180deg, var(--sidebar-bg) 0%, #243342 100%);
         }
         .search-input-wrapper {
             position: relative;
