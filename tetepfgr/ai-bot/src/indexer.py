@@ -153,62 +153,44 @@ class RepositoryScanner:
     
     def get_documentation_chunks(self) -> List[Dict]:
         """
-        Parse documentation JSON files and markdown files into chunks.
+        Parse ONLY documentation directory files (markdown, txt).
+        NO data.json, NO directory_data.json - ONLY from documentation/ folder.
         
         Returns:
-            List of chunk dictionaries from data.json, directory_data.json and documentation/*.md
+            List of chunk dictionaries from documentation/ directory ONLY
         """
         if not PARSER_AVAILABLE:
             logger.warning("Documentation parser not available, skipping documentation parsing")
             return []
         
-        # Paths to documentation files
-        # repo_path is /data/repo which maps to tetepfgr/ folder on host
-        data_json = self.repo_path / 'data.json'
-        directory_data = self.repo_path / 'directory_data.json'
-        
-        # Path to documentation directory (markdown files)
+        # Path to documentation directory - ONLY source of truth
         # documentation/ is at same level as tetepfgr/, so go up one level from repo
         documentation_dir = self.repo_path.parent / 'documentation'
         
         all_chunks = []
         
-        # Parse JSON files if they exist
-        if data_json.exists() and directory_data.exists():
-            try:
-                logger.info("Parsing JSON documentation files...")
-                json_chunks = parse_documentation_files(
-                    str(data_json), 
-                    str(directory_data),
-                    None  # Don't pass documentation_dir here, we'll handle it separately
-                )
-                all_chunks.extend(json_chunks)
-                logger.info(f"Parsed {len(json_chunks)} JSON documentation chunks")
-            except Exception as e:
-                logger.error(f"Error parsing JSON files: {e}")
-        else:
-            if not data_json.exists():
-                logger.warning(f"data.json not found: {data_json}")
-            if not directory_data.exists():
-                logger.warning(f"directory_data.json not found: {directory_data}")
-        
-        # Parse markdown files from documentation directory
+        # Parse ONLY markdown and text files from documentation directory
         if documentation_dir.exists() and documentation_dir.is_dir():
             try:
-                logger.info(f"Scanning documentation directory: {documentation_dir}")
-                md_files = list(documentation_dir.glob('*.md'))
-                logger.info(f"Found {len(md_files)} markdown files")
+                logger.info(f"📚 Parsing documentation directory: {documentation_dir}")
+                logger.info("⚠️  Using ONLY documentation/ folder - NO data.json or directory_data.json!")
                 
-                for md_file in md_files:
+                # Find all markdown and text files
+                doc_files = list(documentation_dir.glob('*.md')) + list(documentation_dir.glob('*.txt'))
+                logger.info(f"Found {len(doc_files)} documentation files")
+                
+                for doc_file in doc_files:
                     try:
                         from parsers.documentation_parser import parse_markdown_file
-                        md_chunks = parse_markdown_file(str(md_file))
-                        all_chunks.extend(md_chunks)
-                        logger.info(f"✅ {md_file.name}: {len(md_chunks)} chunks")
+                        doc_chunks = parse_markdown_file(str(doc_file))
+                        all_chunks.extend(doc_chunks)
+                        logger.info(f"✅ {doc_file.name}: {len(doc_chunks)} chunks")
                     except Exception as e:
-                        logger.error(f"Error parsing {md_file.name}: {e}")
+                        logger.error(f"Error parsing {doc_file.name}: {e}")
             except Exception as e:
                 logger.error(f"Error scanning documentation directory: {e}")
+        else:
+            logger.error(f"❌ Documentation directory NOT found: {documentation_dir}")
         
-        logger.info(f"Total documentation chunks: {len(all_chunks)}")
+        logger.info(f" Total documentation chunks: {len(all_chunks)}")
         return all_chunks

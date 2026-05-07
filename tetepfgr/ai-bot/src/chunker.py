@@ -18,9 +18,9 @@ class CodeChunker:
     """Разбиение кода на смысловые чанки (гибридный подход)"""
     
     @staticmethod
-    async def chunk_with_phi4(content: str, file_path: str, file_type: str) -> Optional[List[Dict]]:
+    async def chunk_with_qwen(content: str, file_path: str, file_type: str) -> Optional[List[Dict]]:
         """
-        Умное чанкование через Phi-4-mini для сложных файлов
+        Умное чанкование через Qwen3 для сложных файлов
         
         Args:
             content: Содержимое файла
@@ -58,7 +58,7 @@ Return ONLY JSON array, no other text!"""
                 )
                 
                 if response.status_code != 200:
-                    logger.warning(f"Phi-4 chunking failed for {file_path}: {response.status_code}")
+                    logger.warning(f"Qwen3 chunking failed for {file_path}: {response.status_code}")
                     return None
                 
                 result = response.json()
@@ -67,7 +67,7 @@ Return ONLY JSON array, no other text!"""
                 # Извлекаем JSON из ответа
                 json_match = re.search(r'\[.*\]', answer, re.DOTALL)
                 if not json_match:
-                    logger.warning(f"No JSON found in Phi-4 response for {file_path}")
+                    logger.warning(f"No JSON found in Qwen3 response for {file_path}")
                     return None
                 
                 chunks_data = json.loads(json_match.group(0))
@@ -77,18 +77,18 @@ Return ONLY JSON array, no other text!"""
                 for i, chunk_data in enumerate(chunks_data):
                     chunks.append({
                         'content': chunk_data.get('content', ''),
-                        'type': chunk_data.get('type', 'phi4_chunk'),
+                        'type': chunk_data.get('type', 'qwen_chunk'),
                         'name': chunk_data.get('title', f'chunk_{i}'),
                         'file': file_path,
-                        'line_start': 1,  # Phi-4 не знает точных строк
-                        'chunked_by': 'phi4-mini'
+                        'line_start': 1,  # Qwen3 не знает точных строк
+                        'chunked_by': 'qwen3'
                     })
                 
-                logger.info(f"✨ Phi-4 chunked {file_path}: {len(chunks)} chunks")
+                logger.info(f"✨ Qwen3 chunked {file_path}: {len(chunks)} chunks")
                 return chunks
                 
         except Exception as e:
-            logger.warning(f"Phi-4 chunking error for {file_path}: {e}")
+            logger.warning(f"Qwen3 chunking error for {file_path}: {e}")
             return None
     
     @staticmethod
@@ -268,14 +268,14 @@ Return ONLY JSON array, no other text!"""
         return chunks
     
     @staticmethod
-    async def chunk_file_async(file_path: str, content: str, use_phi4: bool = True) -> List[Dict]:
+    async def chunk_file_async(file_path: str, content: str, use_qwen: bool = True) -> List[Dict]:
         """
         Разбиение файла на чанки (гибридный подход)
         
         Args:
             file_path: Путь к файлу
             content: Содержимое файла
-            use_phi4: Использовать ли Phi-4 для сложных файлов
+            use_qwen: Использовать ли Qwen3 для сложных файлов
         
         Returns:
             Список чанков
@@ -290,8 +290,8 @@ Return ONLY JSON array, no other text!"""
         elif ext == '.sql':
             return CodeChunker.chunk_sql(content, file_path)
         
-        # Умное чанкование для документации и конфигов (Phi-4)
-        if use_phi4 and ext in ['.md', '.yaml', '.yml', '.json', '.html', '.txt']:
+        # Умное чанкование для документации и конфигов (Qwen3)
+        if use_qwen and ext in ['.md', '.yaml', '.yml', '.json', '.html', '.txt']:
             file_type_map = {
                 '.md': 'Markdown документация',
                 '.yaml': 'YAML конфигурация',
@@ -302,12 +302,12 @@ Return ONLY JSON array, no other text!"""
             }
             file_type = file_type_map.get(ext, 'файл')
             
-            # Пробуем Phi-4
-            phi4_chunks = await CodeChunker.chunk_with_phi4(content, file_path, file_type)
-            if phi4_chunks:
-                return phi4_chunks
+            # Пробуем Qwen3
+            qwen_chunks = await CodeChunker.chunk_with_qwen(content, file_path, file_type)
+            if qwen_chunks:
+                return qwen_chunks
             
-            # Fallback: если Phi-4 не справился
+            # Fallback: если Qwen3 не справился
             logger.info(f"Fallback to simple chunking for {file_path}")
         
         # Простое чанкование для остальных
@@ -336,5 +336,5 @@ Return ONLY JSON array, no other text!"""
             asyncio.set_event_loop(loop)
         
         return loop.run_until_complete(
-            CodeChunker.chunk_file_async(file_path, content, use_phi4=True)
+            CodeChunker.chunk_file_async(file_path, content, use_qwen=True)
         )

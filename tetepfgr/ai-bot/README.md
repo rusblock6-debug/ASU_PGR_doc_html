@@ -37,7 +37,7 @@ docker-compose up -d --build
 ```
 
 Система автоматически:
-- Загрузит модель Phi-4-mini в Ollama
+- Загрузит модель Qwen3:8b в Ollama
 - Запустит Redis для кэширования
 - Запустит AI бот на порту 8000
 - Запустит сервер документации на порту 3000
@@ -99,7 +99,7 @@ curl http://localhost:8000/api/index/status \
 ## Архитектура
 
 ### Сервисы
-1. **pgr-ollama** - Локальная LLM (Phi-4-mini)
+1. **pgr-ollama** - Локальная LLM (Qwen3:8b)
 2. **pgr-redis** - Кэш ответов для ускорения
 3. **pgr-ai-bot** - FastAPI приложение с RAG логикой
 4. **pgr-docs-server** - Сервер документации
