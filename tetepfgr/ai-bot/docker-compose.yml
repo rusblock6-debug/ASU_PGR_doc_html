@@ -9,13 +9,6 @@ services:
       - "11434:11434"
     volumes:
       - ../ollama_data:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 30s
@@ -58,6 +51,7 @@ services:
       - OLLAMA_URL=http://ollama:11434
       - API_KEY=${API_KEY}
     volumes:
+      - .:/app                          # Код — живьем, правишь и сразу работает
       - ..:/data/repo:ro
       - ../../documentation:/data/documentation:ro
       - ./logs:/app/logs
@@ -66,20 +60,14 @@ services:
       - pip_cache:/root/.cache/pip
       - chroma_cache:/root/.cache/chroma
       - hf_cache:/root/.cache/huggingface
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     depends_on:
       ollama:
         condition: service_healthy
       redis:
         condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -87,27 +75,27 @@ services:
     networks:
       - pgr-rag-network
 
-  # Docs-server (интерфейс документации)
-  docs-server:
-    build:
-      context: ..
-      dockerfile: Dockerfile
-    container_name: pgr-docs-server
-    ports:
-      - "3000:3000"
-    volumes:
-      - ..:/app
-    environment:
-      - AI_BOT_URL=http://ai-bot:8000
-    depends_on:
-      - ai-bot
-    restart: unless-stopped
-    networks:
-      - pgr-rag-network
+  # Docs-server (интерфейс документации) - отключен для теста
+  # docs-server:
+  #   build:
+  #     context: ..
+  #     dockerfile: Dockerfile
+  #   container_name: pgr-docs-server
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ..:/app
+  #   environment:
+  #     - AI_BOT_URL=http://ai-bot:8000
+  #   depends_on:
+  #     - ai-bot
+  #   restart: unless-stopped
+  #   networks:
+  #     - pgr-rag-network
 
-  # Ngrok - туннель для показа через интернет
-  ngrok:
-    image: ngrok/ngrok:
+  # Ngrok - туннель для показа через интернет - отключен для теста
+  # ngrok:
+  #   image: ngrok/ngrok:latest
 
 volumes:
   ollama_data:

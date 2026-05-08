@@ -98,7 +98,7 @@ app.add_middleware(
 
 # Инициализация клиентов
 logger.info("Загрузка embedding модели...")
-embedding_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2', device='cuda' if __import__('torch').cuda.is_available() else 'cpu')
+embedding_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2', device='cpu')
 logger.info(f"Embedding модель загружена на устройстве: {embedding_model.device}")
 
 class CustomEmbeddingFunction:
@@ -327,7 +327,7 @@ async def ask_question(req: QuestionRequest):
         
         logger.info(f"📝 Отправка запроса в Ollama (длина промпта: {len(prompt)} символов)")
         logger.info(f"❓ Вопрос: {req.question}")
-        logger.info(f"📄 Контекст (первые 500 символов): {context[:500]}...")
+        logger.info(f"📄 Контекст (первые 500 символов): {context_text[:500]}...")
         
         import httpx
         logger.info(f"⏱️ Начало запроса к Ollama...")
@@ -336,7 +336,7 @@ async def ask_question(req: QuestionRequest):
             response = await client.post(
                 f"{OLLAMA_URL}/api/generate",
                 json={
-                    "model": "qwen3:8b",
+                    "model": "phi4-mini",
                     "prompt": prompt,
                     "stream": False,
                     "options": {
@@ -501,7 +501,7 @@ async def index_repository(
         
         indexed_count = 0
         chunk_count = 0
-        qwen_chunked_count = 0
+        phi4_chunked_count = 0
         
         # Функция обработки одного файла
         async def process_file(file_info):
@@ -510,23 +510,23 @@ async def index_repository(
                 with open(file_info['full_path'], 'r', encoding='utf-8-sig', errors='ignore') as f:
                     content = f.read()
                 
-                # Разбиваем на чанки (БЕЗ Qwen3 для быстрой индексации)
-                chunks = await CodeChunker.chunk_file_async(file_info['path'], content, use_qwen=False)
+                # Разбиваем на чанки (БЕЗ Phi-4 для быстрой индексации)
+                chunks = await CodeChunker.chunk_file_async(file_info['path'], content, use_phi4=False)
                 
                 if not chunks:
                     return None
                 
-                # Считаем Qwen3 чанки
-                qwen_chunks = [c for c in chunks if c.get('chunked_by') == 'qwen3']
-                used_qwen = len(qwen_chunks) > 0
+                # Считаем Phi-4 чанки
+                phi4_chunks = [c for c in chunks if c.get('chunked_by') == 'phi4-mini']
+                used_phi4 = len(phi4_chunks) > 0
                 
-                if used_qwen:
-                    logger.info(f"✨ Qwen3 обработал: {file_info['path']} ({len(qwen_chunks)} чанков)")
+                if used_phi4:
+                    logger.info(f"✨ Phi-4 обработал: {file_info['path']} ({len(phi4_chunks)} чанков)")
                 
                 return {
                     'file_info': file_info,
                     'chunks': chunks,
-                    'used_qwen': used_qwen
+                    'used_phi4': used_phi4
                 }
                     
             except Exception as e:
@@ -549,8 +549,8 @@ async def index_repository(
                 file_info = result['file_info']
                 chunks = result['chunks']
                 
-                if result['used_qwen']:
-                    qwen_chunked_count += 1
+                if result['used_phi4']:
+                    phi4_chunked_count += 1
                 
                 # Добавляем в ChromaDB
                 for chunk in chunks:
@@ -570,7 +570,7 @@ async def index_repository(
                 indexed_count += 1
             
             # Логируем прогресс
-            logger.info(f"📊 Прогресс: {indexed_count}/{len(files)} файлов, {chunk_count} чанков (Qwen3: {qwen_chunked_count})")
+            logger.info(f"📊 Прогресс: {indexed_count}/{len(files)} файлов, {chunk_count} чанков (Phi-4: {phi4_chunked_count})")
         
         # Add documentation chunks to ChromaDB
         if doc_chunks:
@@ -591,14 +591,14 @@ async def index_repository(
             logger.info(f"✅ Documentation chunks added: {len(doc_chunks)}")
         
         logger.info(f"✅ Индексация завершена: {indexed_count} файлов, {chunk_count} чанков (вкл. {len(doc_chunks)} docs)")
-        logger.info(f"✨ Qwen3 обработал: {qwen_chunked_count} файлов")
+        logger.info(f"✨ Phi-4 обработал: {phi4_chunked_count} файлов")
         
         return {
             "status": "completed",
             "mode": mode,
             "files_indexed": indexed_count,
             "chunks_created": chunk_count,
-            "qwen_chunked_files": qwen_chunked_count
+            "phi4_chunked_files": phi4_chunked_count
         }
         
     except Exception as e:
