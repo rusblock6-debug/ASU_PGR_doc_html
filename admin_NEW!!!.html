@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация АСУ ПГР</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        pgr: {
+                            orange: '#ed8d48',
+                            dark: '#0b0e14',
+                            sidebar: '#0f1219',
+                            card: '#141820',
+                            border: '#1e2530',
+                            text: '#8b95a5',
+                            muted: '#5c6577'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0e14; }
+        ::-webkit-scrollbar-thumb { background: #1e2530; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ed8d48; }
+        
+        .glass-card {
+            background: rgba(20, 24, 32, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(237, 141, 72, 0.3); 
+            box-shadow: 0 4px 20px rgba(237, 141, 72, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .step-line::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            bottom: -20px;
+            width: 2px;
+            background: linear-gradient(to bottom, #ed8d48, transparent);
+        }
+
+        .role-btn {
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .role-btn.active {
+            background: rgba(237, 141, 72, 0.1);
+            color: #ed8d48;
+            border-color: rgba(237, 141, 72, 0.2);
+            font-weight: 600;
+            box-shadow: none;
+        }
+        
+        .chat-bubble-ai {
+            background: #141820;
+            border: 1px solid #1e2530;
+            border-left: 3px solid #ed8d48;
+        }
+        .chat-bubble-user {
+            background: rgba(237, 141, 72, 0.15);
+            border: 1px solid rgba(237, 141, 72, 0.3);
+        }
+
+        /* Стили для заглушки скриншота */
+        .screenshot-placeholder {
+            background: #0b0e14;
+            border: 2px dashed #1e2530;
+            transition: all 0.2s ease;
+        }
+        .screenshot-placeholder:hover {
+            border-color: #ed8d48;
+            background: rgba(237, 141, 72, 0.03);
+        }
+    </style>
+</head>
+<body class="bg-pgr-dark text-pgr-text font-sans flex h-screen overflow-hidden">
+
+    <!-- Сайдбар -->
+    <aside class="w-72 bg-pgr-sidebar border-r border-pgr-border flex flex-col overflow-y-auto">
+        <div class="p-6 border-b border-pgr-border">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold shadow-lg shadow-orange-500/20 text-xs">ПГР</div>
+                <div>
+                    <h1 class="text-md font-semibold text-white tracking-tight">НАВИГАТОР.ПГР</h1>
+                    <p class="text-xs text-pgr-muted">Документация v1.0</p>
+                </div>
+            </div>
+        </div>
+
+        <nav id="sidebar-nav" class="flex flex-col gap-1 p-4 flex-1"></nav>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <!-- Топ-бар -->
+        <header class="h-16 bg-pgr-sidebar/80 backdrop-blur-md border-b border-pgr-border px-8 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-1.5 bg-pgr-dark p-1 rounded-lg border border-pgr-border">
+                <button class="role-btn active px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('user', this)">Диспетчер</button>
+                <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('bort', this)">Борт</button>
+                <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('admin', this)">Админ</button>
+                <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400 flex items-center gap-1.5" onclick="switchRole('ai', this)">
+                    <span class="w-2 h-2 rounded-full bg-pgr-orange animate-pulse"></span> AI
+                </button>
+            </div>
+            <div class="relative w-72">
+                <input type="text" placeholder="Поиск..." class="w-full bg-pgr-dark border border-pgr-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-pgr-orange focus:ring-1 focus:ring-pgr-orange placeholder-pgr-muted transition-all">
+            </div>
+        </header>
+
+        <!-- Область контента (Дока - ДИНАМИЧЕСКАЯ) -->
+        <div id="content-view" class="flex-1 overflow-y-auto">
+            <div id="dynamic-content" class="max-w-6xl mx-auto px-8 py-10">
+                <!-- Контент генерируется через JS -->
+            </div>
+        </div>
+
+        <!-- Область AI Чата (Скрыта по умолчанию) -->
+        <div id="chat-view" class="flex-1 flex flex-col hidden bg-pgr-sidebar/30">
+            <div class="p-4 border-b border-pgr-border bg-pgr-sidebar/50 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-pgr-orange/10 border border-pgr-orange/30 flex items-center justify-center text-pgr-orange font-bold text-xs">AI</div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white">Ассистент АСУ ПГР</h3>
+                    <p class="text-xs text-pgr-orange flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-pgr-orange animate-pulse"></span> Онлайн</p>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-8 space-y-6">
+                <div class="max-w-3xl mx-auto flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold text-xs shrink-0">AI</div>
+                    <div class="chat-bubble-ai rounded-xl p-4 text-sm text-gray-300 max-w-[85%]">
+                        Привет! Я AI-ассистент АСУ ПГР. Чем могу помочь?
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-pgr-border bg-pgr-sidebar">
+                <div class="max-w-3xl mx-auto relative">
+                    <input type="text" placeholder="Задайте вопрос по системе АСУ ПГР..." class="w-full bg-pgr-card border border-pgr-border rounded-xl pl-4 pr-12 py-4 text-sm focus:outline-none focus:border-pgr-orange focus:ring-1 focus:ring-pgr-orange placeholder-pgr-muted transition-all">
+                    <button class="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-lg text-pgr-muted hover:text-pgr-orange hover:bg-pgr-orange/10 transition-all">
+                        <svg class="w-5 h-5 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- ДАННЫЕ ДЛЯ ГЕНЕРАЦИИ ---
+        const siteData = {
+            user: {
+                title: "Диспетчер",
+                headerTitle: "Инструкция пользователя АСУ ПГР",
+                headerDesc: "Рабочее место диспетчера. Планирование, мониторинг и управление техникой.",
+                steps: [
+                    {
+                        title: "Вход в систему",
+                        desc: "Авторизация",
+                        details: ["Перейдите по адресу системы", "Введите логин и пароль", "Нажмите «Войти»"],
+                        screenshots: ["screenshots/quickstart/1_login/1.1_ecosystem_main.png", "screenshots/quickstart/1_login/1.3_login_form.png"]
+                    },
+                    {
+                        title: "Главное меню",
+                        desc: "Обзор интерфейса",
+                        details: ["Логотип — переход на главную", "Кнопка «Домой» — рабочий стол", "Кнопка «Меню» — открытие навигации", "Статус подключения", "Центральная область с карточками"],
+                        screenshots: ["screenshots/quickstart/2_main_menu/2.1_main_interface.png"]
+                    },
+                    {
+                        title: "Создание заданий",
+                        desc: "Выбор смены и создание маршрута",
+                        details: ["Откройте «Оперативная работа» → «Наряд-задание»", "Выберите смену в фильтре", "Найдите карточку техники и нажмите «+»", "Заполните маршрут (Место погрузки, разгрузки, Объем/масса)", "Нажмите «Отправить»"],
+                        screenshots: ["screenshots/quickstart/4_work_orders/4.4_vehicle_card.png", "screenshots/quickstart/4_work_orders/4.6_task_form.png"]
+                    },
+                    {
+                        title: "Мониторинг",
+                        desc: "Управление рейсами и картами",
+                        details: ["Управление рейсами: Добавление и редактирование", "Карта (2D): Мониторинг техники", "Карта рабочего времени (КРВ): Визуализация статусов", "3D визуализация: 3D мониторинг"],
+                        screenshots: ["screenshots/quickstart/5_monitoring/5.5.3_map_view.png"]
+                    }
+                ],
+                sidebar: [
+                    { name: "Начало работы", items: ["Быстрый старт", "Главное меню", "Проверка готовности"] },
+                    { name: "Оперативная работа", items: ["Наряд-задание", "Управление рейсами", "Карта 2D", "КРВ", "3D визуализация"] },
+                    { name: "Отчеты", items: ["Сменная статистика", "Эффективность"] }
+                ]
+            },
+            bort: {
+                title: "Бортовой терминал",
+                headerTitle: "Инструкция бортового терминала",
+                headerDesc: "Интерфейс оператора техники. Управление статусами, рейсами и простоями.",
+                steps: [
+                    {
+                        title: "Авторизация",
+                        desc: "Вход в систему",
+                        details: ["Введите логин и пароль", "Управление с помощью манипулятора (стрелки, кнопка подтверждения)", "Нажмите кнопку «ВОЙТИ»"],
+                        screenshots: ["screenshots/instructions/1_login.PNG"]
+                    },
+                    {
+                        title: "Главный экран",
+                        desc: "Обзор интерфейса",
+                        details: ["Счетчик рейсов (ФАКТ / ПЛАН)", "Статус техники и таймер", "Активный маршрут (ОТКУДА → КУДА)", "Нижнее меню (4 кнопки)"],
+                        screenshots: ["screenshots/instructions/2_main.PNG"]
+                    },
+                    {
+                        title: "Наряд-задания",
+                        desc: "Просмотр маршрутов",
+                        details: ["Перейдите к списку (иконка [✓])", "Просмотр таблицы маршрутов", "Коснитесь маршрута для деталей"],
+                        screenshots: ["screenshots/instructions/4_work-orfers.PNG"]
+                    },
+                    {
+                        title: "Переключение статусов",
+                        desc: "Как переключать статусы",
+                        details: ["Коснитесь панели статуса слева внизу", "Цепочка из 6 статусов (Движение, Стоянка, Погрузка и т.д.)", "Нажмите [→] СТАТУС ВПЕРЕД после завершения действия"],
+                        screenshots: ["screenshots/instructions/3_vehicle-status.PNG"]
+                    },
+                    {
+                        title: "Регистрация простоев",
+                        desc: "Как зарегистрировать простой",
+                        details: ["На экране статусов коснитесь [⏸] ПРОСТОИ", "Выберите причину простоя из списка", "Нажмите «ЗАВЕРШИТЬ ПРОСТОЙ», когда простой закончился"],
+                        screenshots: [] // Без скриншота в исходнике
+                    }
+                ],
+                sidebar: [
+                    { name: "Начало работы", items: ["Авторизация", "Главный экран"] },
+                    { name: "Работа с заданиями", items: ["Наряд-задания", "Управление заданием"] },
+                    { name: "Статусы и простои", items: ["Переключение статусов", "Регистрация простоев"] }
+                ]
+            },
+            admin: {
+                title: "Администратор",
+                headerTitle: "Руководство администратора",
+                headerDesc: "Первоначальная настройка системы, заполнение справочников и конфигурация.",
+                steps: [
+                    {
+                        title: "Первый запуск",
+                        desc: "Вход и знакомство",
+                        details: ["Откройте браузер и перейдите на главную страницу", "Нажмите на карточку «АСУ ПГР»", "Заполните форму авторизации", "Нажмите «Войти»"],
+                        screenshots: ["screenshots/admin/1.1_ecosystem_main.png", "screenshots/admin/1.3_login_form.png"]
+                    },
+                    {
+                        title: "Знакомство с главным меню",
+                        desc: "Структура разделов",
+                        details: ["Изучите структуру (Оперативная работа, Отчеты, Справочники, Диагностика, Настройки)", "Обратите внимание на левую боковую панель", "Для начала настройки перейдите в «Справочники»"],
+                        screenshots: ["screenshots/admin/2.1_main_menu.png"]
+                    },
+                    {
+                        title: "Настройка видов груза",
+                        desc: "Первичный справочник",
+                        details: ["В разделе «Справочники» выберите «Виды груза»", "Нажмите «+ Добавить»", "Заполните Наименование, Категорию, Плотность (кг/м³)"], 
+                        screenshots: ["screenshots/admin/3.3_cargo_form.png"]
+                    },
+                    {
+                        title: "Настройка горизонтов",
+                        desc: " Пространственная модель",
+                        details: ["В разделе «Справочники» выберите «Горизонты»", "Укажите Название и Высотную отметку", "Привяжите шахтные стволы"],
+                        screenshots: ["screenshots/admin/6.2_horizons_empty.png"]
+                    }
+                ],
+                sidebar: [
+                    { name: "Начало работы", items: ["Первый запуск", "Знакомство с интерфейсом"] },
+                    { name: "Настройка справочников", items: ["Виды груза", "Статусы", "Горизонты", "Участки", "Места работ", "Метки"] },
+                    { name: "Система", items: ["Диагностика", "Настройки предприятия"] }
+                ]
+            },
+            ai: {
+                sidebar: [
+                    { name: "История чатов", items: ["Как создать маршрут", "Настройка видов груза"] },
+                    { name: "Быстрые команды", items: ["Открыть справочники", "Перейти к КРВ"] }
+                ]
+            }
+        };
+
+        // --- ФУНКЦИЯ ГЕНЕРАЦИИ КОНТЕНТА ---
+        function renderScreenshots(screenshots) {
+            if (!screenshots || screenshots.length === 0) return '';
+            
+            let html = '<div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">';
+            screenshots.forEach(src => {
+                html += `
+                    <div class="screenshot-placeholder rounded-lg p-6 flex flex-col items-center justify-center text-center h-40">
+                        <svg class="w-8 h-8 text-pgr-muted mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <p class="text-xs text-pgr-muted font-mono break-all">${src}</p>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderContent(role) {
+            const data = siteData[role];
+            if (role === 'ai') return; // Для AI контент не рендерим
+
+            let html = `
+                <div class="mb-12">
+                    <h1 class="text-5xl font-bold text-white mb-4 tracking-tight">
+                        ${data.headerTitle}
+                    </h1>
+                    <p class="text-lg text-pgr-text max-w-2xl leading-relaxed">${data.headerDesc}</p>
+                    <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pgr-orange/10 border border-pgr-orange/20 text-pgr-orange text-sm font-medium">
+                        Режим: ${data.title}
+                    </div>
+                </div>
+
+                <div class="mb-16">
+                    <h2 class="text-3xl font-bold text-white mb-8">Быстрый старт</h2>
+                    <div class="space-y-8">
+            `;
+
+            data.steps.forEach((step, index) => {
+                const stepNum = index + 1;
+                html += `
+                    <div class="flex gap-6 relative step-line">
+                        <div class="w-8 h-8 rounded-full bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold text-sm shrink-0 z-10 shadow-lg shadow-orange-500/20">${stepNum}</div>
+                        <div class="glass-card rounded-xl p-6 flex-1">
+                            <h3 class="text-xl font-semibold text-white mb-2">${step.title}</h3>
+                            <p class="text-pgr-muted mb-4">${step.desc}</p>
+                            <ul class="space-y-3 text-sm text-pgr-text">
+                `;
+                step.details.forEach((detail, i) => {
+                    html += `<li class="flex gap-2"><span class="text-pgr-orange">${i+1}.</span> ${detail}</li>`;
+                });
+                html += `
+                            </ul>
+                            ${renderScreenshots(step.screenshots)}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            document.getElementById('dynamic-content').innerHTML = html;
+        }
+
+        // --- ПЕРЕКЛЮЧЕНИЕ РОЛЕЙ ---
+        function switchRole(role, btnElement) {
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            const contentView = document.getElementById('content-view');
+            const chatView = document.getElementById('chat-view');
+            
+            if (role === 'ai') {
+                contentView.classList.add('hidden');
+                chatView.classList.remove('hidden');
+            } else {
+                contentView.classList.remove('hidden');
+                chatView.classList.add('hidden');
+                renderContent(role); // Перерисовываем главную страницу
+            }
+
+            // Перерисовываем сайдбар
+            const sidebar = document.getElementById('sidebar-nav');
+            const data = siteData[role];
+            let navHtml = '';
+            data.sidebar.forEach((section, index) => {
+                navHtml += `<p class="text-xs font-semibold text-pgr-muted uppercase tracking-wider mb-2 ml-3 ${index > 0 ? 'mt-6' : ''}">${section.name}</p>`;
+                section.items.forEach((item, i) => {
+                    const isActive = (index === 0 && i === 0);
+                    navHtml += `
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg ${isActive ? 'text-white bg-pgr-orange/10 font-medium' : 'text-pgr-text hover:text-white hover:bg-white/5'} text-sm transition-all">
+                            <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-pgr-orange' : 'bg-pgr-muted'}"></span> ${item}
+                        </a>
+                    `;
+                });
+            });
+            sidebar.innerHTML = navHtml;
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultBtn = document.querySelector('.role-btn.active');
+            switchRole('user', defaultBtn);
+        });
+    </script>
+</body>
+</html>
