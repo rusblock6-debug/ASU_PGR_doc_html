@@ -2229,15 +2229,15 @@
             sidebar.classList.toggle('collapsed');
         }
         
-        // Переход на главную (Быстрый старт)
+        // Переход на главную (О руководстве)
         function navigateToHome() {
-            showSection('quickstart');
+            showSection('about');
             document.querySelector('.content-pane').scrollTo({ top: 0, behavior: 'auto' });
             // Убираем активность со всех ссылок
             document.querySelectorAll('.toc-level-1 a').forEach(link => link.classList.remove('active'));
-            // Устанавливаем активность на ссылку "Быстрый старт"
-            const quickstartLink = document.querySelector('a[href="#section-quickstart"]');
-            if (quickstartLink) quickstartLink.classList.add('active');
+            // Устанавливаем активность на ссылку "О руководстве"
+            const aboutLink = document.querySelector('a[href="#section-about"]');
+            if (aboutLink) aboutLink.classList.add('active');
         }
 
         // Глобальный поиск с интерактивными результатами
@@ -5155,6 +5155,11 @@
             const sectionId = window.location.hash.replace('#section-', '');
             setTimeout(() => {
                 showSection(sectionId);
+            }, 100);
+        } else {
+            // Если hash нет, показываем "О руководстве" по умолчанию
+            setTimeout(() => {
+                showSection('about');
             }, 100);
         }
 
