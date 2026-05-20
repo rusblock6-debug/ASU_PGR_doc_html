@@ -640,7 +640,8 @@
                 html += `<h3 class="text-xl font-semibold text-white mb-1">${card.title}</h3>`;
                 if (card.subtitle) html += `<p class="text-sm text-pgr-orange mb-3 font-medium">${card.subtitle}</p>`;
                 html += `<p class="text-base text-pgr-text mb-4 leading-relaxed">${card.description || ''}</p>`;
-                if (card.items?.length) {
+                // Only show items if there are no steps (to avoid duplication)
+                if (card.items?.length && !card.steps?.length) {
                     html += `<ul class="space-y-2 text-sm text-pgr-text mb-4">`;
                     card.items.forEach(item => { html += `<li class="flex gap-3 items-start"><span class="text-pgr-orange mt-1 shrink-0">•</span><span class="leading-relaxed">${item}</span></li>`; });
                     html += '</ul>';
