@@ -68,8 +68,22 @@
         }
         .img-modal.active { display: flex; }
         .img-modal img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
-        .search-hl { background: rgba(237, 141, 72, 0.3); border-radius: 2px; }
+        .search-hl { background: rgba(237, 141, 72, 0.35); border-radius: 2px; box-shadow: 0 0 0 1px rgba(237,141,72,0.2); }
+        .search-hl-current { background: rgba(237, 141, 72, 0.75); color: #0b0e14; font-weight: 600; border-radius: 2px; }
         #content-view { scroll-behavior: smooth; }
+        .search-dropdown { position: absolute; right: 0; top: calc(100% + 8px); width: 420px; max-height: 70vh; overflow-y: auto; background: #141820; border: 1px solid #1e2530; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 200; display: none; }
+        .search-dropdown.active { display: block; }
+        .search-dropdown-group { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .search-dropdown-group:last-child { border-bottom: none; }
+        .search-dropdown-group-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #5c6577; padding: 4px 16px; }
+        .search-dropdown-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+        .search-dropdown-item:hover { background: rgba(237,141,72,0.06); border-left-color: #ed8d48; }
+        .search-dropdown-item-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ed8d48; flex-shrink: 0; }
+        .search-dropdown-item-text { min-width: 0; }
+        .search-dropdown-item-title { font-size: 13px; font-weight: 500; color: #e8ecf1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-dropdown-item-meta { font-size: 11px; color: #5c6577; margin-top: 2px; }
+        .search-dropdown-empty { padding: 24px 16px; text-align: center; color: #5c6577; font-size: 13px; }
+        .search-dropdown-query { color: #ed8d48; font-weight: 500; }
         .nav-active { background: linear-gradient(90deg, rgba(237,141,72,0.12) 0%, rgba(237,141,72,0.02) 100%) !important; color: #ed8d48 !important; border-left: 3px solid #ed8d48 !important; padding-left: 9px !important; }
         .nav-active .nav-chevron { color: #ed8d48 !important; }
         .resize-handle { width: 4px; cursor: col-resize; background: transparent; transition: background 0.2s; position: relative; z-index: 20; }
@@ -136,12 +150,9 @@
     </button>
 
     <main class="flex-1 flex flex-col overflow-hidden min-w-0">
-        <header class="h-16 bg-pgr-sidebar/80 backdrop-blur-md border-b border-pgr-border px-8 flex items-center justify-between shrink-0">
+        <header class="h-16 bg-pgr-sidebar/80 backdrop-blur-md border-b border-pgr-border px-8 flex items-center justify-between shrink-0 relative z-[100]">
             <div class="flex items-center gap-1.5 bg-pgr-dark p-1 rounded-lg border border-pgr-border">
-                <button class="role-btn active px-4 py-1.5 rounded-md text-sm font-medium text-gray-400 flex items-center gap-1.5" onclick="switchRole('home', this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    Главная
-                </button>
+                <button class="role-btn active px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('home', this)">Главная</button>
                 <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('user', this)">Диспетчер</button>
                 <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('bort', this)">Борт</button>
                 <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('admin', this)">Админ</button>
@@ -149,9 +160,13 @@
                     <span class="w-2 h-2 rounded-full bg-pgr-orange animate-pulse"></span> AI
                 </button>
             </div>
-            <div class="relative w-72">
-                <input id="searchInput" type="text" placeholder="Поиск..." oninput="handleSearch(this.value)"
-                    class="w-full bg-pgr-dark border border-pgr-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-pgr-orange focus:ring-1 focus:ring-pgr-orange placeholder-pgr-muted transition-all">
+            <div class="relative w-72 z-50" id="searchContainer">
+                <input id="searchInput" type="text" placeholder="Поиск по документу..." oninput="handleSearchDebounced(this.value)" onkeydown="onSearchKey(event)"
+                    class="w-full bg-pgr-dark border border-pgr-border rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:border-pgr-orange focus:ring-1 focus:ring-pgr-orange placeholder-pgr-muted transition-all">
+                <button id="searchClear" onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded text-pgr-muted hover:text-white hidden" title="Очистить">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+                <div id="searchDropdown" class="search-dropdown"></div>
             </div>
         </header>
 
@@ -247,19 +262,31 @@
             let sections = [];
 
             if (role === 'home') {
-                sections = [
-                    { name: 'Навигация', items: [
-                        { name: 'О руководстве', anchor: 'home-about' },
-                        { name: 'Выбор роли', anchor: 'home-roles' },
-                        { name: 'Содержание', anchor: 'home-contents' }
-                    ]},
-                    { name: 'Разделы', items: [
-                        { name: 'Диспетчер', anchor: 'home-role-user' },
-                        { name: 'Борт', anchor: 'home-role-bort' },
-                        { name: 'Администрирование', anchor: 'home-role-admin' },
-                        { name: 'AI-ассистент', anchor: 'home-role-ai' }
-                    ]}
+                const roleCards = [
+                    { key: 'user', title: 'Диспетчер', desc: 'Оперативное планирование', icon: '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>', color: '#ed8d48' },
+                    { key: 'bort', title: 'Борт', desc: 'Бортовой терминал', icon: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.38 6.06a1 1 0 0 0 0 1.88l8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88a1 1 0 0 0 0-1.88Z"/><path d="m2.38 11.94 8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88"/><path d="m2.38 17.06 8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88"/>', color: '#3b82f6' },
+                    { key: 'admin', title: 'Администрирование', desc: 'Настройка системы', icon: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>', color: '#10b981' },
+                    { key: 'ai', title: 'AI-ассистент', desc: 'Задать вопрос ИИ', icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>', color: '#8b5cf6' }
                 ];
+                html += '<p class="text-xs font-semibold text-pgr-muted uppercase tracking-wider mb-3 ml-3">Разделы</p>';
+                roleCards.forEach(r => {
+                    const btnIdx = r.key === 'user' ? 1 : r.key === 'bort' ? 2 : r.key === 'admin' ? 3 : 4;
+                    html += `<div onclick="switchRole('${r.key}', document.querySelectorAll('.role-btn')[${btnIdx}])" class="mx-3 mb-2 p-3 rounded-lg cursor-pointer transition-all hover:bg-white/5 group" style="border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-md flex items-center justify-center shrink-0" style="background: ${r.color}15; border: 1px solid ${r.color}30;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${r.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-sm font-medium text-white group-hover:text-pgr-orange transition-colors truncate">${r.title}</div>
+                                <div class="text-xs text-pgr-muted truncate">${r.desc}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                html += '<p class="text-xs font-semibold text-pgr-muted uppercase tracking-wider mt-5 mb-3 ml-3">Навигация</p>';
+                html += `<div class="mx-3 mb-1"><a href="#" onclick="event.preventDefault(); scrollToSection('home-about');" class="sidebar-link text-sm">О руководстве</a></div>`;
+                html += `<div class="mx-3 mb-1"><a href="#" onclick="event.preventDefault(); scrollToSection('home-roles');" class="sidebar-link text-sm">Выбор роли</a></div>`;
+                html += `<div class="mx-3 mb-1"><a href="#" onclick="event.preventDefault(); scrollToSection('home-contents');" class="sidebar-link text-sm">Содержание</a></div>`;
             } else if (role === 'user' && appData?.cards?.quickstart) {
                 sections = [];
                 sections.push({ name: 'Быстрый старт', items: appData.cards.quickstart.steps.map((s, i) => ({
@@ -773,9 +800,7 @@
                     if (appData.cards?.descriptive?.length) {
                         html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderDescriptive(appData.cards.descriptive) + '</div>';
                     }
-                    if (directoryData?.directories) {
-                        html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderDirectoryList() + '</div>';
-                    }
+                    // Removed renderDirectoryList from admin overview to prevent duplicate sections
                 }
                 if (appData.cards?.about?.length && !currentDirectoryKey) {
                     html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderAbout(appData.cards.about) + '</div>';
@@ -824,25 +849,299 @@
         }
         function closeImageModal() { document.getElementById('img-modal').classList.remove('active'); }
 
-        function handleSearch(query) {
+        let searchIndex = [];
+        let searchMatches = [];
+        let searchCurrentIndex = -1;
+        let searchDebounceTimer = null;
+
+        function handleSearchDebounced(query) {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => handleSearch(query), 150);
+        }
+
+        function clearSearchHighlights() {
             const container = document.getElementById('dynamic-content');
-            container.querySelectorAll('.search-hl').forEach(el => {
+            container.querySelectorAll('.search-hl, .search-hl-current').forEach(el => {
                 const parent = el.parentNode;
                 parent.replaceChild(document.createTextNode(el.textContent), el);
                 parent.normalize();
             });
-            if (!query.trim()) return;
+        }
+
+        function buildSearchIndex() {
+            searchIndex = [];
+            let id = 0;
+            const add = (role, category, title, text, anchor, icon) => {
+                if (!text) return;
+                searchIndex.push({ id: id++, role, category, title, text: text.toLowerCase(), anchor, icon, originalTitle: title });
+            };
+
+            const join = (arr) => (arr || []).join(' ');
+            const detailsText = (details) => (details || []).map(d => typeof d === 'string' ? d : '').join(' ');
+
+            // About
+            if (appData?.cards?.about) {
+                appData.cards.about.forEach((a, i) => {
+                    add('home', 'О руководстве', a.navTitle || a.title, (a.title || '') + ' ' + (a.content || ''), 'home-about', '📖');
+                });
+            }
+
+            // Quickstart (user)
+            if (appData?.cards?.quickstart) {
+                const qs = appData.cards.quickstart;
+                add('user', 'Быстрый старт', qs.title, qs.title + ' ' + (qs.description || ''), 'step-0', '⚡');
+                qs.steps?.forEach((step, si) => {
+                    add('user', 'Быстрый старт', step.title, step.title, `step-${si}`, '⚡');
+                    step.substeps?.forEach((sub, subi) => {
+                        const anchor = subi === 0 ? `step-${si}` : `step-${si}-sub-${subi}`;
+                        add('user', 'Быстрый старт', sub.text || step.title, (sub.text || '') + ' ' + detailsText(sub.details), anchor, '⚡');
+                    });
+                });
+            }
+
+            // Instructions (user)
+            if (appData?.cards?.instructions) {
+                appData.cards.instructions.forEach((instr, ci) => {
+                    add('user', 'Инструкции', instr.title, (instr.title || '') + ' ' + (instr.description || ''), `instr-${ci}`, '📋');
+                    instr.steps?.forEach((step, si) => {
+                        add('user', 'Инструкции', step.text, (step.text || '') + ' ' + detailsText(step.details), `instr-step-${ci}-${si}`, '📋');
+                    });
+                });
+            }
+
+            // Bort quickstart
+            if (appData?.cards?.quickstart_bort) {
+                const qb = appData.cards.quickstart_bort;
+                add('bort', 'Быстрый старт (Борт)', qb.title, qb.title + ' ' + (qb.description || ''), 'bort-step-0', '📡');
+                qb.steps?.forEach((step, si) => {
+                    add('bort', 'Быстрый старт (Борт)', step.title, step.title, `bort-step-${si}`, '📡');
+                    step.substeps?.forEach((sub, subi) => {
+                        const anchor = subi === 0 ? `bort-step-${si}` : `bort-sub-${si}-${subi}`;
+                        add('bort', 'Быстрый старт (Борт)', sub.text || step.title, (sub.text || '') + ' ' + detailsText(sub.details), anchor, '📡');
+                    });
+                });
+            }
+
+            // Admin instructions
+            if (appData?.cards?.admin_instructions) {
+                appData.cards.admin_instructions.forEach((instr, ci) => {
+                    add('admin', 'Администрирование', instr.title, (instr.title || '') + ' ' + (instr.description || '') + ' ' + join(instr.items), `admin-instr-${ci}`, '⚙️');
+                    instr.steps?.forEach((step, si) => {
+                        add('admin', 'Администрирование', step.text, (step.text || '') + ' ' + detailsText(step.details), `admin-step-${ci}-${si}`, '⚙️');
+                    });
+                });
+            }
+
+            // Descriptive (admin)
+            if (appData?.cards?.descriptive) {
+                appData.cards.descriptive.forEach((d, i) => {
+                    add('admin', 'Обзор разделов', d.title, (d.title || '') + ' ' + (d.subtitle || '') + ' ' + (d.description || '') + ' ' + join(d.items), `desc-${i}`, '🗺️');
+                });
+            }
+
+            // Directories
+            if (directoryData?.directories) {
+                Object.entries(directoryData.directories).forEach(([key, dir], di) => {
+                    add('admin', 'Справочники', dir.title, (dir.title || '') + ' ' + (dir.description || ''), `dir-${di}`, '📚');
+                    dir.parameters?.forEach((p, pi) => {
+                        add('admin', `Справочник: ${dir.title}`, p.name, (p.name || '') + ' ' + (p.unit || '') + ' ' + (p.description || '') + ' ' + join(p.impact), `dir-param-${key}-${pi}`, '📚');
+                    });
+                });
+            }
+        }
+
+        function highlightQuery(text, query) {
+            if (!query) return text;
+            const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const re = new RegExp('(' + esc + ')', 'gi');
+            return text.replace(re, '<span class="search-dropdown-query">$1</span>');
+        }
+
+        function handleSearch(query) {
+            const dropdown = document.getElementById('searchDropdown');
+            const clearBtn = document.getElementById('searchClear');
+            const q = query.trim();
+            clearBtn.classList.toggle('hidden', !q);
+            if (!q) { dropdown.classList.remove('active'); return; }
+
+            const qLower = q.toLowerCase();
+            const searchTerms = qLower.split(/\s+/).filter(t => t.length > 0);
+            
+            // Score each item based on how many search terms it contains
+            const scoredItems = searchIndex.map(item => {
+                let score = 0;
+                const text = item.text;
+                const title = item.originalTitle.toLowerCase();
+                
+                searchTerms.forEach(term => {
+                    // Exact match in title gets highest score
+                    if (title === term) {
+                        score += 100;
+                    }
+                    // Title starts with term
+                    else if (title.startsWith(term)) {
+                        score += 50;
+                    }
+                    // Title contains term as whole word
+                    else if (new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(title)) {
+                        score += 40;
+                    }
+                    // Title contains term
+                    else if (title.includes(term)) {
+                        score += 30;
+                    }
+                    // Text contains term as whole word
+                    else if (new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(text)) {
+                        score += 15;
+                    }
+                    // Text contains term
+                    else if (text.includes(term)) {
+                        score += 10;
+                    }
+                });
+                
+                // Bonus for matching all terms
+                if (searchTerms.length > 1) {
+                    const allMatch = searchTerms.every(term => text.includes(term) || title.includes(term));
+                    if (allMatch) score += 20;
+                }
+                
+                return { item, score };
+            }).filter(({ score }) => score > 0);
+            
+            // Sort by score (highest first) and take top 50
+            scoredItems.sort((a, b) => b.score - a.score);
+            const matches = scoredItems.slice(0, 50).map(({ item }) => item);
+
+            if (!matches.length) {
+                dropdown.innerHTML = `<div class="search-dropdown-empty">По запросу «<span class="search-dropdown-query">${q}</span>» ничего не найдено</div>`;
+                dropdown.classList.add('active');
+                return;
+            }
+
+            // Group by role
+            const roleNames = { home: 'Главная', user: 'Диспетчер', bort: 'Борт', admin: 'Администрирование' };
+            const roleIcons = { home: '📖', user: '⚡', bort: '📡', admin: '⚙️' };
+            const groups = {};
+            matches.forEach(m => {
+                const roleLabel = roleNames[m.role] || m.role;
+                if (!groups[roleLabel]) groups[roleLabel] = [];
+                groups[roleLabel].push(m);
+            });
+
+            let html = '';
+            // Add results count
+            html += `<div class="search-dropdown-group"><div class="search-dropdown-group-title">Найдено результатов: ${matches.length}</div></div>`;
+            
+            Object.entries(groups).forEach(([roleLabel, items]) => {
+                html += `<div class="search-dropdown-group">`;
+                html += `<div class="search-dropdown-group-title">${roleLabel} (${items.length})</div>`;
+                items.forEach(item => {
+                    const displayTitle = highlightQuery(item.originalTitle, q);
+                    html += `<div onclick="navigateToSearchResult(${item.id})" class="search-dropdown-item">
+                        <div class="search-dropdown-item-text">
+                            <div class="search-dropdown-item-title">${displayTitle}</div>
+                            <div class="search-dropdown-item-meta">${item.category}</div>
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+            });
+
+            dropdown.innerHTML = html;
+            dropdown.classList.add('active');
+        }
+
+        function navigateToSearchResult(id) {
+            const item = searchIndex.find(i => i.id === id);
+            if (!item) return;
+            const query = document.getElementById('searchInput').value.trim();
+            clearSearch();
+            document.getElementById('searchDropdown').classList.remove('active');
+
+            // Switch role
+            if (item.role === 'ai') return;
+            const roleBtnMap = { home: 0, user: 1, bort: 2, admin: 3 };
+            const btnIdx = roleBtnMap[item.role] ?? 1;
+            const btn = document.querySelectorAll('.role-btn')[btnIdx];
+            // Reset directory view when navigating to admin non-directory results
+            if (item.role === 'admin' && !item.anchor.startsWith('dir-')) currentDirectoryKey = null;
+            switchRole(item.role, btn);
+
+            // Wait for render then scroll and highlight
+            setTimeout(() => {
+                const contentView = document.getElementById('content-view');
+                const el = document.getElementById(item.anchor);
+                if (el && contentView) {
+                    const top = el.offsetTop - 20;
+                    contentView.scrollTo({ top, behavior: 'smooth' });
+                    // Flash highlight
+                    el.style.transition = 'box-shadow 0.5s ease';
+                    el.style.boxShadow = '0 0 0 2px rgba(237,141,72,0.5), 0 0 20px rgba(237,141,72,0.2)';
+                    setTimeout(() => { el.style.boxShadow = ''; }, 2000);
+                }
+                // Highlight the actual search query text inside content
+                if (query) {
+                    highlightTextInContent(document.getElementById('dynamic-content'), query);
+                }
+            }, 350);
+        }
+
+        function highlightTextInContent(container, text) {
+            if (!container || !text) return;
+            clearSearchHighlights();
+            const esc = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const re = new RegExp('(' + esc + ')', 'gi');
             const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
             const nodes = [];
             while (walker.nextNode()) nodes.push(walker.currentNode);
-            const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
             nodes.forEach(node => {
-                if (re.test(node.textContent)) {
-                    const span = document.createElement('span');
-                    span.innerHTML = node.textContent.replace(re, '<span class="search-hl">$1</span>');
-                    node.parentNode.replaceChild(span, node);
-                }
+                const parts = node.textContent.split(re);
+                if (parts.length <= 1) return;
+                const frag = document.createDocumentFragment();
+                parts.forEach((part, i) => {
+                    if (i % 2 === 1) {
+                        const span = document.createElement('span');
+                        span.className = 'search-hl';
+                        span.textContent = part;
+                        frag.appendChild(span);
+                    } else {
+                        frag.appendChild(document.createTextNode(part));
+                    }
+                });
+                node.parentNode.replaceChild(frag, node);
             });
+        }
+
+        function onSearchKey(e) {
+            if (e.key === 'Escape') { clearSearch(); document.getElementById('searchDropdown').classList.remove('active'); }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchClear').classList.add('hidden');
+            document.getElementById('searchDropdown').classList.remove('active');
+            clearSearchHighlights();
+            searchMatches = [];
+            searchCurrentIndex = -1;
+        }
+
+        function nextSearchResult() {
+            if (!searchMatches.length) return;
+            if (searchCurrentIndex >= 0 && searchCurrentIndex < searchMatches.length) {
+                searchMatches[searchCurrentIndex].classList.replace('search-hl-current', 'search-hl');
+            }
+            searchCurrentIndex = (searchCurrentIndex + 1) % searchMatches.length;
+            searchMatches[searchCurrentIndex].classList.replace('search-hl', 'search-hl-current');
+        }
+
+        function prevSearchResult() {
+            if (!searchMatches.length) return;
+            if (searchCurrentIndex >= 0 && searchCurrentIndex < searchMatches.length) {
+                searchMatches[searchCurrentIndex].classList.replace('search-hl-current', 'search-hl');
+            }
+            searchCurrentIndex = (searchCurrentIndex - 1 + searchMatches.length) % searchMatches.length;
+            searchMatches[searchCurrentIndex].classList.replace('search-hl', 'search-hl-current');
         }
 
         async function sendChat() {
@@ -964,8 +1263,16 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await loadData();
             await loadDirectoryData();
+            buildSearchIndex();
             const defaultBtn = document.querySelector('.role-btn.active');
             switchRole('home', defaultBtn);
+        });
+
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('searchContainer');
+            if (container && !container.contains(e.target)) {
+                document.getElementById('searchDropdown').classList.remove('active');
+            }
         });
     </script>
 </body>
