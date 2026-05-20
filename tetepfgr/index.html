@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация АСУ ПГР</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        pgr: {
+                            orange: '#ed8d48',
+                            dark: '#0b0e14',
+                            sidebar: '#0f1219',
+                            card: '#141820',
+                            border: '#1e2530',
+                            text: '#8b95a5',
+                            muted: '#5c6577'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0e14; }
+        ::-webkit-scrollbar-thumb { background: #1e2530; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ed8d48; }
+        .glass-card {
+            background: rgba(20, 24, 32, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(237, 141, 72, 0.3);
+            box-shadow: 0 4px 20px rgba(237, 141, 72, 0.05);
+            transform: translateY(-2px);
+        }
+        .role-btn {
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .role-btn.active {
+            background: rgba(237, 141, 72, 0.1);
+            color: #ed8d48;
+            border-color: rgba(237, 141, 72, 0.2);
+            font-weight: 600;
+            box-shadow: none;
+        }
+        .chat-bubble-ai {
+            background: #141820;
+            border: 1px solid #1e2530;
+            border-left: 3px solid #ed8d48;
+        }
+        .chat-bubble-user {
+            background: rgba(237, 141, 72, 0.15);
+            border: 1px solid rgba(237, 141, 72, 0.3);
+        }
+        .img-modal {
+            display: none; position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.9); align-items: center; justify-content: center; cursor: zoom-out;
+        }
+        .img-modal.active { display: flex; }
+        .img-modal img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+        .search-hl { background: rgba(237, 141, 72, 0.3); border-radius: 2px; }
+        #content-view { scroll-behavior: smooth; }
+        .nav-active { background: linear-gradient(90deg, rgba(237,141,72,0.12) 0%, rgba(237,141,72,0.02) 100%) !important; color: #ed8d48 !important; border-left: 3px solid #ed8d48 !important; padding-left: 9px !important; }
+        .nav-active .nav-chevron { color: #ed8d48 !important; }
+        .resize-handle { width: 4px; cursor: col-resize; background: transparent; transition: background 0.2s; position: relative; z-index: 20; }
+        .resize-handle:hover, .resize-handle.resizing { background: rgba(237, 141, 72, 0.3); }
+        .sidebar-wrapper { display: flex; flex-shrink: 0; transition: width 0.2s ease; }
+        .sidebar-wrapper.collapsed { width: 0 !important; overflow: hidden; }
+        .sidebar-wrapper.collapsed aside { opacity: 0; pointer-events: none; }
+        .sidebar-toggle { transition: all 0.2s; color: #5c6577; }
+        .sidebar-toggle:hover { color: #ed8d48; }
+        .sidebar-section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #5c6577; padding: 0 12px; margin: 20px 0 8px; display: flex; align-items: center; gap: 8px; }
+        .sidebar-section::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, #1e2530 0%, transparent 100%); }
+        .sidebar-link { display: block; padding: 7px 12px; margin: 1px 8px; border-radius: 6px; font-size: 13px; color: #8b95a5; transition: all 0.15s ease; border-left: 3px solid transparent; line-height: 1.4; cursor: pointer; text-decoration: none; }
+        .sidebar-link:hover { color: #e8ecf1; background: rgba(255,255,255,0.04); }
+        .sidebar-link-child { display: block; padding: 5px 12px 5px 24px; margin: 1px 8px 1px 20px; border-radius: 6px; font-size: 12px; color: #5c6577; transition: all 0.15s ease; border-left: 2px solid #1e2530; position: relative; line-height: 1.4; cursor: pointer; text-decoration: none; }
+        .sidebar-link-child::before { content: ''; position: absolute; left: -1px; top: 0; bottom: 0; width: 8px; border-left: 1px solid #1e2530; border-bottom: 1px solid #1e2530; border-bottom-left-radius: 4px; }
+        .sidebar-link-child:hover { color: #8b95a5; background: rgba(255,255,255,0.03); border-left-color: rgba(237,141,72,0.3); }
+        .nav-active.sidebar-link-child { border-left-color: #ed8d48 !important; padding-left: 24px !important; background: linear-gradient(90deg, rgba(237,141,72,0.08) 0%, transparent 100%) !important; }
+        .sidebar-group { margin-bottom: 4px; }
+        .dir-table-wrap { overflow: visible; }
+        .dir-table thead th { position: sticky; top: 0; background: #141820; z-index: 10; box-shadow: 0 2px 0 #1e2530; }
+        .dir-table tbody tr:nth-child(odd) { background: rgba(255,255,255,0.015); }
+        .dir-table tbody tr:hover { background: rgba(237,141,72,0.04); }
+        .dir-table tr:last-child td { border-bottom: none; }
+        .dir-table td { border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .param-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(237,141,72,0.1); color: #ed8d48; font-size: 11px; font-weight: 500; margin-left: 8px; vertical-align: middle; }
+        .dir-search { background: #0b0e14; border: 1px solid #1e2530; border-radius: 8px; padding: 10px 14px; color: #8b95a5; font-size: 14px; width: 320px; transition: all 0.2s; }
+        .dir-search:focus { outline: none; border-color: #ed8d48; box-shadow: 0 0 0 3px rgba(237,141,72,0.1); }
+        .empty-state { text-align: center; padding: 60px 20px; color: #5c6577; }
+        .glass-card h4 { font-size: 15px; font-weight: 700; color: #e8ecf1; margin: 20px 0 10px; letter-spacing: 0.02em; }
+        .glass-card h4:first-child { margin-top: 0; }
+        .glass-card p { margin-bottom: 12px; line-height: 1.7; }
+        .glass-card p:last-child { margin-bottom: 0; }
+        .glass-card ul { list-style: none; padding: 0; margin: 0 0 12px; }
+        .glass-card li { position: relative; padding-left: 20px; margin-bottom: 8px; line-height: 1.6; }
+        .glass-card li:last-child { margin-bottom: 0; }
+        .glass-card li::before { content: ''; position: absolute; left: 6px; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: #ed8d48; }
+        .glass-card strong { color: #e8ecf1; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-pgr-dark text-pgr-text font-sans flex h-screen overflow-hidden">
+
+    <div id="sidebar-wrapper" class="sidebar-wrapper" style="width: 288px;">
+        <aside class="w-full bg-pgr-sidebar border-r border-pgr-border flex flex-col overflow-y-auto h-full">
+            <div class="p-6 border-b border-pgr-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold shadow-lg shadow-orange-500/20 text-xs">ПГР</div>
+                        <div>
+                            <h1 class="text-md font-semibold text-white tracking-tight">НАВИГАТОР.ПГР</h1>
+                            <p class="text-xs text-pgr-muted">Документация</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleSidebar()" class="sidebar-toggle p-1 rounded hover:bg-white/5" title="Скрыть навигацию">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/></svg>
+                    </button>
+                </div>
+            </div>
+            <nav id="sidebar-nav" class="flex flex-col gap-1 p-4 flex-1"></nav>
+        </aside>
+        <div id="resize-handle" class="resize-handle h-full" onmousedown="initResize(event)"></div>
+    </div>
+    <button id="sidebar-show-btn" onclick="toggleSidebar()" class="fixed left-0 top-20 z-30 p-2 bg-pgr-sidebar border border-pgr-border border-l-0 rounded-r-lg text-pgr-muted hover:text-pgr-orange transition-all hidden" title="Показать навигацию">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 17 5-5-5-5"/><path d="m6 17 5-5-5-5"/></svg>
+    </button>
+
+    <main class="flex-1 flex flex-col overflow-hidden min-w-0">
+        <header class="h-16 bg-pgr-sidebar/80 backdrop-blur-md border-b border-pgr-border px-8 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-1.5 bg-pgr-dark p-1 rounded-lg border border-pgr-border">
+                <button class="role-btn active px-4 py-1.5 rounded-md text-sm font-medium text-gray-400 flex items-center gap-1.5" onclick="switchRole('home', this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Главная
+                </button>
+                <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('user', this)">Диспетчер</button>
+                <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('bort', this)">Борт</button>
+                <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400" onclick="switchRole('admin', this)">Админ</button>
+                <button class="role-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400 flex items-center gap-1.5" onclick="switchRole('ai', this)">
+                    <span class="w-2 h-2 rounded-full bg-pgr-orange animate-pulse"></span> AI
+                </button>
+            </div>
+            <div class="relative w-72">
+                <input id="searchInput" type="text" placeholder="Поиск..." oninput="handleSearch(this.value)"
+                    class="w-full bg-pgr-dark border border-pgr-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-pgr-orange focus:ring-1 focus:ring-pgr-orange placeholder-pgr-muted transition-all">
+            </div>
+        </header>
+
+        <div id="content-view" class="flex-1 overflow-y-auto">
+            <div id="dynamic-content" class="max-w-6xl mx-auto px-8 py-10">
+            </div>
+        </div>
+
+        <div id="chat-view" class="flex-1 flex flex-col hidden bg-pgr-sidebar/30">
+            <div class="p-4 border-b border-pgr-border bg-pgr-sidebar/50 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-pgr-orange/10 border border-pgr-orange/30 flex items-center justify-center text-pgr-orange font-bold text-xs">AI</div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white">Ассистент АСУ ПГР</h3>
+                    <p class="text-xs text-pgr-orange flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-pgr-orange animate-pulse"></span> Онлайн</p>
+                </div>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-8 space-y-6">
+                <div class="max-w-3xl mx-auto flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold text-xs shrink-0">AI</div>
+                    <div class="chat-bubble-ai rounded-xl p-4 text-sm text-gray-300 max-w-[85%]">
+                        Привет! Я AI-ассистент АСУ ПГР. Чем могу помочь?
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-pgr-border bg-pgr-sidebar">
+                <div class="max-w-3xl mx-auto relative flex gap-3">
+                    <input id="chat-input" type="text" placeholder="Задайте вопрос по системе АСУ ПГР..." onkeydown="if(event.key==='Enter') sendChat()"
+                        class="flex-1 bg-pgr-card border border-pgr-border rounded-xl pl-4 pr-4 py-4 text-sm focus:outline-none focus:border-pgr-orange focus:ring-1 focus:ring-pgr-orange placeholder-pgr-muted transition-all">
+                    <button onclick="sendChat()" class="px-5 py-2 bg-pgr-orange text-pgr-dark rounded-xl font-semibold text-sm hover:bg-orange-400 transition-colors">Отправить</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="img-modal" class="img-modal" onclick="closeImageModal()">
+        <img id="img-modal-src" src="" alt="">
+    </div>
+
+    <script>
+        let appData = null;
+        let directoryData = null;
+        let currentRole = 'user';
+        let chatHistory = [];
+        let currentChatId = null;
+        let currentDirectoryKey = null;
+
+        async function loadData() {
+            try {
+                const res = await fetch('data.json?t=' + Date.now());
+                if (!res.ok) throw new Error('data.json error');
+                appData = await res.json();
+            } catch (e) {
+                console.error('loadData', e);
+                appData = { title: 'Документация', cards: {} };
+            }
+        }
+
+        async function loadDirectoryData() {
+            try {
+                const res = await fetch('directory_data.json?t=' + Date.now());
+                if (res.ok) directoryData = await res.json();
+            } catch (e) { console.error('loadDirectoryData', e); }
+        }
+
+        function renderNavItem(item, level = 0) {
+            const name = item.name || item;
+            const anchor = item.anchor || item;
+            const cls = level > 0 ? 'sidebar-link-child' : 'sidebar-link';
+            const click = item.type === 'directory' ? `event.preventDefault(); showDirectory('${item.key}');` :
+                          item.type === 'directory-back' ? `event.preventDefault(); showDirectory(null);` :
+                          item.type === 'param' ? `event.preventDefault(); scrollToParam('${item.anchor}');` :
+                          `event.preventDefault(); scrollToSection('${anchor}');`;
+            const dataAttr = item.type === 'directory' ? `data-anchor="${item.key}"` :
+                             item.anchor ? `data-anchor="${item.anchor}"` :
+                             anchor ? `data-anchor="${anchor}"` : '';
+            if (item.type === 'directory-back') {
+                return `<a href="#" onclick="${click}" class="sidebar-link text-pgr-orange font-medium" style="color:#ed8d48"><span style="margin-right:6px">←</span>${name}</a>`;
+            }
+            let result = `<a href="#" ${dataAttr} onclick="${click}" class="sidebar-link ${cls}">${name}</a>`;
+            if (item.children?.length) {
+                result += '<div class="sidebar-group">';
+                item.children.forEach(child => {
+                    result += renderNavItem(child, level + 1);
+                });
+                result += '</div>';
+            }
+            return result;
+        }
+
+        function renderSidebar(role) {
+            const nav = document.getElementById('sidebar-nav');
+            let html = '';
+            let sections = [];
+
+            if (role === 'home') {
+                sections = [
+                    { name: 'Навигация', items: [
+                        { name: 'О руководстве', anchor: 'home-about' },
+                        { name: 'Выбор роли', anchor: 'home-roles' },
+                        { name: 'Содержание', anchor: 'home-contents' }
+                    ]},
+                    { name: 'Разделы', items: [
+                        { name: 'Диспетчер', anchor: 'home-role-user' },
+                        { name: 'Борт', anchor: 'home-role-bort' },
+                        { name: 'Администрирование', anchor: 'home-role-admin' },
+                        { name: 'AI-ассистент', anchor: 'home-role-ai' }
+                    ]}
+                ];
+            } else if (role === 'user' && appData?.cards?.quickstart) {
+                sections = [];
+                sections.push({ name: 'Быстрый старт', items: appData.cards.quickstart.steps.map((s, i) => ({
+                    name: s.title,
+                    anchor: `step-${i}`,
+                    children: s.substeps?.slice(1).map((sub, si) => ({
+                        name: (sub.text?.length > 40 ? sub.text.substring(0, 40) + '...' : sub.text) || `Подшаг ${si + 2}`,
+                        anchor: `step-${i}-sub-${si + 1}`
+                    })) || []
+                })) });
+                if (appData.cards.instructions?.length) {
+                    sections.push({ name: 'Инструкции', items: appData.cards.instructions.map((instr, idx) => ({
+                        name: instr.navTitle || instr.title,
+                        anchor: `instr-${idx}`,
+                        children: instr.steps?.map((s, si) => ({ name: (s.text?.length > 40 ? s.text.substring(0, 40) + '...' : s.text) || `Шаг ${si + 1}`, anchor: `instr-step-${idx}-${si}` })) || []
+                    })) });
+                }
+            } else if (role === 'bort' && appData?.cards?.quickstart_bort) {
+                sections = [{
+                    name: 'Быстрый старт (Борт)',
+                    items: appData.cards.quickstart_bort.steps.map((s, i) => ({
+                        name: s.title,
+                        anchor: `bort-step-${i}`,
+                        children: s.substeps?.map((sub, si) => ({ name: (sub.text?.length > 40 ? sub.text.substring(0, 40) + '...' : sub.text) || `Подшаг ${si + 1}`, anchor: `bort-sub-${i}-${si}` })) || []
+                    }))
+                }];
+            } else if (role === 'admin') {
+                if (appData?.cards?.admin_instructions?.length) sections.push({
+                    name: 'Администрирование',
+                    items: appData.cards.admin_instructions.map((a, i) => ({
+                        name: a.navTitle || a.title,
+                        anchor: `admin-instr-${i}`,
+                        children: a.steps?.map((s, si) => ({ name: (s.text?.length > 40 ? s.text.substring(0, 40) + '...' : s.text) || `Шаг ${si + 1}`, anchor: `admin-step-${i}-${si}` })) || []
+                    }))
+                });
+                if (appData?.cards?.descriptive?.length) sections.push({ name: 'Обзор разделов', items: appData.cards.descriptive.map((d, i) => ({ name: d.title, anchor: `desc-${i}` })) });
+                if (directoryData?.directories) {
+                    if (currentDirectoryKey && directoryData.directories[currentDirectoryKey]) {
+                        const dir = directoryData.directories[currentDirectoryKey];
+                        const paramItems = dir.parameters?.map((p, i) => ({ name: p.name, anchor: `dir-param-${currentDirectoryKey}-${i}`, type: 'param' })) || [];
+                        sections.push({ name: `Справочник: ${dir.title}`, items: paramItems });
+                    } else {
+                        const dirItems = Object.entries(directoryData.directories).map(([key, d], i) => ({ name: d.title, anchor: `dir-${i}`, key, type: 'directory' }));
+                        if (dirItems.length) sections.push({ name: 'Справочники', items: dirItems });
+                    }
+                }
+                if (appData?.cards?.about?.length && !currentDirectoryKey) sections.push({ name: 'О руководстве', items: appData.cards.about.map((a, idx) => ({ name: a.navTitle || a.title, anchor: `about-${idx}` })) });
+            }
+
+            sections.forEach((sec, si) => {
+                html += `<div class="sidebar-section"><span>${sec.name}</span></div>`;
+                sec.items.forEach((item) => {
+                    html += renderNavItem(item);
+                });
+            });
+            nav.innerHTML = html || '<p class="text-xs text-pgr-muted p-4">Нет данных</p>';
+        }
+
+        function renderScreenshots(images) {
+            if (!images || !images.length) return '';
+            let html = '<div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">';
+            images.forEach(src => {
+                html += `<div class="rounded-lg overflow-hidden border border-pgr-border cursor-pointer hover:border-pgr-orange transition-colors bg-pgr-dark flex items-center justify-center" onclick="openImageModal('${src}')"><img src="${src}" loading="lazy" class="w-full h-48 object-contain" alt="" onerror="this.style.display='none'"></div>`;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function formatDetails(details) {
+            if (!details?.length) return '';
+            let html = '<div class="mt-3">';
+            let warningBlock = [];
+            let inWarningBlock = false;
+
+            details.forEach((line, index) => {
+                const trimmed = line.trim();
+
+                if (!trimmed) {
+                    if (inWarningBlock && warningBlock.length > 0) {
+                        html += `<div class="my-3 pl-4 border-l-2 border-pgr-orange bg-pgr-orange/5 rounded-r-lg py-3 space-y-1">${warningBlock.map(l => `<div class="text-sm text-pgr-text">${l}</div>`).join('')}</div>`;
+                        warningBlock = [];
+                        inWarningBlock = false;
+                    }
+                    html += '<div class="h-3"></div>';
+                    return;
+                }
+
+                if (trimmed.startsWith('⚠️')) {
+                    const text = trimmed.substring(2).trim();
+                    if (!inWarningBlock) inWarningBlock = true;
+                    warningBlock.push(text);
+                } else if (trimmed.startsWith('💡')) {
+                    const text = trimmed.substring(2).trim();
+                    html += `<div class="my-3 pl-4 border-l-2 border-pgr-orange bg-pgr-orange/5 rounded-r-lg py-3"><div class="text-sm text-pgr-text">💡 ${text}</div></div>`;
+                } else {
+                    if (inWarningBlock && warningBlock.length > 0) {
+                        html += `<div class="my-3 pl-4 border-l-2 border-pgr-orange bg-pgr-orange/5 rounded-r-lg py-3 space-y-1">${warningBlock.map(l => `<div class="text-sm text-pgr-text">${l}</div>`).join('')}</div>`;
+                        warningBlock = [];
+                        inWarningBlock = false;
+                    }
+
+                    if (trimmed.startsWith('—') || trimmed.startsWith('-') || trimmed.startsWith('▸')) {
+                        const text = trimmed.substring(1).trim();
+                        html += `<div class="flex gap-2 pl-5 text-sm text-pgr-text leading-relaxed"><span class="text-pgr-orange shrink-0 mt-0.5">▸</span><span>${text}</span></div>`;
+                    } else if (trimmed.startsWith('•')) {
+                        const text = trimmed.substring(1).trim();
+                        html += `<div class="flex gap-2 pl-8 text-sm text-pgr-text leading-relaxed"><span class="text-pgr-orange shrink-0 mt-0.5">•</span><span>${text}</span></div>`;
+                    } else if (/^\d+\./.test(trimmed)) {
+                        const m = trimmed.match(/^(\d+\.\s*)(.+)/);
+                        if (m) {
+                            html += `<div class="mt-4 mb-1 text-sm leading-relaxed"><span class="text-pgr-orange font-semibold">${m[1]}</span><span class="text-white font-medium">${m[2]}</span></div>`;
+                        } else {
+                            html += `<div class="mt-4 mb-1 text-sm text-white font-medium leading-relaxed">${trimmed}</div>`;
+                        }
+                    } else if (trimmed.startsWith('<')) {
+                        if ((trimmed.includes("class='step-images'") || trimmed.includes('class="step-images"')) && trimmed.includes('<img')) {
+                            const srcRegex = /<img[^>]*?src=(['"])([^'"]*)\1[^>]*?>/g;
+                            const matches = [...trimmed.matchAll(srcRegex)];
+                            if (matches.length > 0) {
+                                html += '<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">';
+                                matches.forEach(m => {
+                                    const src = m[2];
+                                    html += `<div class="rounded-lg overflow-hidden border border-pgr-border cursor-pointer hover:border-pgr-orange transition-colors bg-pgr-dark flex items-center justify-center" onclick="openImageModal('${src}')"><img src="${src}" loading="lazy" class="w-full h-48 object-contain" alt="" onerror="this.style.display='none'"></div>`;
+                                });
+                                html += '</div>';
+                            }
+                        } else {
+                            html += trimmed;
+                        }
+                    } else {
+                        html += `<div class="text-sm text-pgr-text leading-relaxed">${trimmed}</div>`;
+                    }
+                }
+
+                if (index === details.length - 1 && inWarningBlock && warningBlock.length > 0) {
+                    html += `<div class="my-3 pl-4 border-l-2 border-pgr-orange bg-pgr-orange/5 rounded-r-lg py-3 space-y-1">${warningBlock.map(l => `<div class="text-sm text-pgr-text">${l}</div>`).join('')}</div>`;
+                }
+            });
+
+            html += '</div>';
+            html = html.replace(/<img\s+([^>]*?)src=(['"])([^'"]*)\2([^>]*?)>/g, (match, before, quote, src, after) => {
+                if (match.includes('onclick=')) return match;
+                return `<img ${before}src=${quote}${src}${quote}${after} onclick="openImageModal('${src}')" style="cursor:pointer;" onerror="this.style.display='none'">`;
+            });
+            html = html.replace(/(\(ТРЕБУЕТСЯ УТОЧНЕНИЯ.*?\)|\(От балды.*?\)|\(под вопросом.*?\)|\(дополнить.*?\))/gi, '<span style="color:#ef4444;font-weight:600;">$1</span>');
+            return html;
+        }
+
+        function renderSectionHeader(title, desc, svgContent) {
+            return `<div class="mb-12">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pgr-orange/20 to-pgr-orange/5 border border-pgr-orange/20 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ed8d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgContent}</svg>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl font-bold text-white tracking-tight">${title}</h1>
+                        <p class="text-sm text-pgr-muted mt-1">${desc || ''}</p>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderBortSteps(steps, title, desc) {
+            let html = renderSectionHeader(title, desc, '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.38 6.06a1 1 0 0 0 0 1.88l8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88a1 1 0 0 0 0-1.88Z"/><path d="m2.38 11.94 8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88"/><path d="m2.38 17.06 8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88"/>');
+            html += '<div class="space-y-6">';
+            steps.forEach((step, stepIdx) => {
+                step.substeps?.forEach((sub, subIdx) => {
+                    const anchorId = subIdx === 0 ? `bort-step-${stepIdx}` : `bort-sub-${stepIdx}-${subIdx}`;
+                    html += `<div id="${anchorId}" class="glass-card rounded-xl p-5 mb-4">`;
+                    html += `<h3 class="text-xl font-semibold text-white mb-1">${step.title}${sub.text && sub.text !== step.title ? ' — ' + sub.text : ''}</h3>`;
+                    html += formatDetails(sub.details);
+                    html += renderScreenshots(sub.images);
+                    html += '</div>';
+                });
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderSteps(steps, title, desc) {
+            let html = renderSectionHeader(title, desc, '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>');
+            html += '<div class="space-y-6">';
+            steps.forEach((step, stepIdx) => {
+                step.substeps?.forEach((sub, subIdx) => {
+                    const anchorId = subIdx === 0 ? `step-${stepIdx}` : `step-${stepIdx}-sub-${subIdx}`;
+                    html += `<div id="${anchorId}" class="glass-card rounded-xl p-5 mb-4">`;
+                    html += `<h3 class="text-xl font-semibold text-white mb-1">${step.title}${sub.text && sub.text !== step.title ? ' — ' + sub.text : ''}</h3>`;
+                    html += formatDetails(sub.details);
+                    html += renderScreenshots(sub.images);
+                    html += '</div>';
+                });
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderInstructions(cards) {
+            let html = renderSectionHeader('Пошаговые инструкции', 'Детальные руководства по работе с системой.', '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>');
+            html += '<div class="space-y-6">';
+            cards.forEach((card, ci) => {
+                html += `<div id="instr-${ci}" class="glass-card rounded-xl p-6">`;
+                html += `<h3 class="text-xl font-semibold text-white mb-1">${card.title}</h3>`;
+                html += `<p class="text-pgr-muted mb-4">${card.description || ''}</p>`;
+                if (card.steps?.length) {
+                    html += '<div class="space-y-4">';
+                    card.steps.forEach((step, si) => {
+                        html += `<div id="instr-step-${ci}-${si}" class="glass-card rounded-lg p-4">`;
+                        html += `<h4 class="text-base font-semibold text-white mb-1">${step.text}</h4>`;
+                        html += formatDetails(step.details);
+                        html += renderScreenshots(step.images);
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                if (card.keyIndicators?.length) {
+                    html += '<div class="mt-4 pt-4 border-t border-pgr-border"><p class="text-xs text-pgr-muted uppercase mb-2">Ключевые показатели</p><ul class="space-y-1 text-sm text-pgr-text">';
+                    card.keyIndicators.forEach(k => { html += `<li class="flex gap-2"><span class="text-pgr-orange">✓</span>${k}</li>`; });
+                    html += '</ul></div>';
+                }
+                html += '</div>';
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderDescriptive(cards) {
+            let html = renderSectionHeader('Обзор разделов', 'Описание основных модулей системы.', '<path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/>');
+            html += '<div class="space-y-6">';
+            cards.forEach((card, ci) => {
+                html += `<div id="desc-${ci}" class="glass-card rounded-xl p-6">`;
+                html += `<h2 class="text-xl font-semibold text-white mb-1">${card.title}</h2>`;
+                if (card.subtitle) html += `<p class="text-sm text-pgr-orange mb-3 font-medium">${card.subtitle}</p>`;
+                html += `<p class="text-base text-pgr-text mb-4 leading-relaxed">${card.description || ''}</p>`;
+                if (card.items?.length) {
+                    html += `<ul class="space-y-2 text-sm text-pgr-text mb-4">`;
+                    card.items.forEach(item => { html += `<li class="flex gap-3 items-start"><span class="text-pgr-orange mt-1 shrink-0">•</span><span class="leading-relaxed">${item}</span></li>`; });
+                    html += '</ul>';
+                }
+                html += renderScreenshots(card.images);
+                html += '</div>';
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderDirectoryTable(dirKey, dirData) {
+            const params = dirData.parameters || [];
+            let html = `<div class="mb-6 flex items-center gap-4">
+                <button onclick="showDirectory(null)" class="px-4 py-2 rounded-lg bg-pgr-orange/10 border border-pgr-orange/30 text-pgr-orange hover:bg-pgr-orange/20 hover:border-pgr-orange/50 text-sm font-medium transition-all flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    Назад к справочникам
+                </button>
+            </div>`;
+            html += `<div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">${dirData.title}</h1>
+                    <p class="text-lg text-pgr-text max-w-2xl leading-relaxed">Параметры справочника и их влияние на систему.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="dir-counter" class="text-xs text-pgr-muted">Всего параметров: ${params.length}</span>
+                </div>
+            </div>`;
+            if (params.length) {
+                html += `<div class="mb-4">
+                    <input type="text" id="dir-filter" placeholder="Поиск по параметрам..." class="dir-search"
+                        oninput="filterDirectoryParams(this.value)">
+                </div>`;
+                html += `<div class="glass-card rounded-xl overflow-hidden">
+                    <div class="dir-table-wrap">
+                        <table class="w-full border-collapse dir-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left p-4 text-xs font-semibold text-pgr-muted uppercase tracking-wider" style="width:42%;">Параметр</th>
+                                    <th class="text-left p-4 text-xs font-semibold text-pgr-muted uppercase tracking-wider" style="width:58%;">Влияние на результаты</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dir-table-body">`;
+                params.forEach((param, idx) => {
+                    const unitTag = param.unit ? `<span class="param-tag">${param.unit}</span>` : '';
+                    const descBlock = param.description ? `<div class="text-sm text-pgr-text mt-1.5 leading-relaxed">${param.description}</div>` : '';
+                    const impactList = param.impact?.length
+                        ? `<ul class="space-y-1.5 text-sm text-pgr-text list-disc pl-4 leading-relaxed">${param.impact.map(i => `<li>${i}</li>`).join('')}</ul>`
+                        : '<span class="text-sm text-pgr-muted">—</span>';
+                    html += `<tr id="dir-param-${dirKey}-${idx}" class="dir-param-row" data-search="${(param.name + ' ' + (param.description||'') + ' ' + (param.unit||'') + ' ' + (param.impact||[]).join(' ')).toLowerCase()}">
+                                <td class="p-4 align-top">
+                                    <div class="flex items-center flex-wrap gap-1">
+                                        <span class="font-semibold text-white text-[15px]">${param.name}</span>
+                                        ${unitTag}
+                                    </div>
+                                    ${descBlock}
+                                </td>
+                                <td class="p-4 align-top">${impactList}</td>
+                            </tr>`;
+                });
+                html += `</tbody></table></div>
+                    <div id="dir-empty" class="empty-state hidden">По запросу ничего не найдено</div>
+                </div>`;
+            } else {
+                html += `<div class="empty-state">В этом справочнике пока нет параметров</div>`;
+            }
+            return html;
+        }
+
+        function filterDirectoryParams(query) {
+            const rows = document.querySelectorAll('.dir-param-row');
+            const empty = document.getElementById('dir-empty');
+            const counter = document.getElementById('dir-counter');
+            const q = query.trim().toLowerCase();
+            let visible = 0;
+            rows.forEach(row => {
+                const match = !q || row.dataset.search.includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            if (empty) empty.classList.toggle('hidden', visible > 0 || !q);
+            if (counter) counter.textContent = q ? `Найдено: ${visible} из ${rows.length}` : `Всего параметров: ${rows.length}`;
+        }
+
+        function renderDirectoryList() {
+            const dirs = directoryData?.directories ? Object.entries(directoryData.directories) : [];
+            const totalParams = dirs.reduce((sum, [,d]) => sum + (d.parameters?.length||0), 0);
+            let html = `<div class="mb-8">
+                <h2 class="text-3xl font-bold text-white mb-1 tracking-tight">Справочники</h2>
+                <p class="text-sm text-pgr-muted">${dirs.length} справочников · ${totalParams} параметров</p>
+            </div>`;
+            html += '<div class="space-y-2">';
+            dirs.forEach(([key, dir]) => {
+                const paramCount = dir.parameters?.length || 0;
+                html += `<div onclick="showDirectory('${key}')" class="glass-card rounded-xl px-5 py-4 cursor-pointer hover:border-pgr-orange/40 transition-all flex items-center justify-between group" role="button" tabindex="0">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-pgr-dark border border-pgr-border flex items-center justify-center text-pgr-orange font-bold text-sm shrink-0">${dir.title.split(/\s+/)[1]?.charAt(0) || dir.title.charAt(0)}</div>
+                        <div>
+                            <h3 class="text-base font-semibold text-white group-hover:text-pgr-orange transition-colors">${dir.title}</h3>
+                            <p class="text-xs text-pgr-muted">${paramCount} параметров</p>
+                        </div>
+                    </div>
+                    <span class="text-pgr-orange opacity-0 group-hover:opacity-100 transition-opacity text-sm">Открыть →</span>
+                </div>`;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function formatAdminDetails(details) { return formatDetails(details); }
+
+        function renderAdminInstructions(cards) {
+            let html = renderSectionHeader('Администрирование', 'Настройка системы перед началом работы', '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>');
+            html += '<div class="space-y-6">';
+            cards.forEach((card, ci) => {
+                html += `<div id="admin-instr-${ci}" class="glass-card rounded-xl p-6">`;
+                html += `<h3 class="text-xl font-semibold text-white mb-1">${card.title}</h3>`;
+                if (card.subtitle) html += `<p class="text-sm text-pgr-orange mb-3 font-medium">${card.subtitle}</p>`;
+                html += `<p class="text-base text-pgr-text mb-4 leading-relaxed">${card.description || ''}</p>`;
+                if (card.items?.length) {
+                    html += `<ul class="space-y-2 text-sm text-pgr-text mb-4">`;
+                    card.items.forEach(item => { html += `<li class="flex gap-3 items-start"><span class="text-pgr-orange mt-1 shrink-0">•</span><span class="leading-relaxed">${item}</span></li>`; });
+                    html += '</ul>';
+                }
+                if (card.steps?.length) {
+                    html += '<div class="space-y-4">';
+                    card.steps.forEach((step, si) => {
+                        html += `<div id="admin-step-${ci}-${si}" class="glass-card rounded-lg p-4">`;
+                        html += `<h4 class="text-base font-semibold text-white mb-1">${step.text}</h4>`;
+                        html += formatDetails(step.details);
+                        html += renderScreenshots(step.images);
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                if (card.keyIndicators?.length) {
+                    html += '<div class="mt-4 pt-4 border-t border-pgr-border"><p class="text-xs text-pgr-muted uppercase mb-2">Ключевые показатели</p><ul class="space-y-1 text-sm text-pgr-text">';
+                    card.keyIndicators.forEach(k => { html += `<li class="flex gap-2"><span class="text-pgr-orange">✓</span>${k}</li>`; });
+                    html += '</ul></div>';
+                }
+                html += '</div>';
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderAbout(cards) {
+            if (!cards?.length) return '';
+            const card = cards[0];
+            let html = `<div id="about-0">`;
+            html += renderSectionHeader(card.title, '', '<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M9 10h6"/><path d="M9 14h6"/><path d="M12 10v8"/>');
+            html += `<div class="glass-card rounded-xl p-6 text-sm text-pgr-text leading-relaxed">${card.content || ''}</div></div>`;
+            return html;
+        }
+
+        function renderHome() {
+            const about = appData.cards?.about?.[0];
+            let html = '<div id="home-about">';
+            html += renderSectionHeader(about?.title || 'О руководстве', '', '<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M9 10h6"/><path d="M9 14h6"/><path d="M12 10v8"/>');
+            if (about?.content) {
+                html += `<div class="glass-card rounded-xl p-6 text-sm text-pgr-text leading-relaxed mb-10">${about.content}</div>`;
+            }
+            html += '</div>';
+
+            html += '<div id="home-roles">';
+            html += `<h2 class="text-2xl font-bold text-white mb-6 tracking-tight">Выберите роль</h2>`;
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">`;
+
+            const roles = [
+                { key: 'user', title: 'Диспетчер', desc: 'Оперативное планирование, наряд-задания, мониторинг техники и 2D-карта рудника.', icon: '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>', color: 'from-pgr-orange/20 to-pgr-orange/5' },
+                { key: 'bort', title: 'Борт', desc: 'Бортовой терминал. Вход в систему, наряд-задания, статистика смены.', icon: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.38 6.06a1 1 0 0 0 0 1.88l8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88a1 1 0 0 0 0-1.88Z"/><path d="m2.38 11.94 8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88"/><path d="m2.38 17.06 8.79 3.88a2 2 0 0 0 1.66 0l8.79-3.88"/>', color: 'from-blue-500/20 to-blue-500/5' },
+                { key: 'admin', title: 'Администратор', desc: 'Настройка справочников, управление пользователями и конфигурация системы.', icon: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>', color: 'from-emerald-500/20 to-emerald-500/5' },
+                { key: 'ai', title: 'AI-ассистент', desc: 'Задайте вопрос ИИ по работе с системой АСУ ПГР.', icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>', color: 'from-violet-500/20 to-violet-500/5' }
+            ];
+
+            roles.forEach(r => {
+                html += `<div onclick="switchRole('${r.key}', document.querySelectorAll('.role-btn')[${r.key === 'user' ? 1 : r.key === 'bort' ? 2 : r.key === 'admin' ? 3 : 4}])" class="glass-card rounded-xl p-5 cursor-pointer hover:border-pgr-orange/40 transition-all group" role="button" tabindex="0">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br ${r.color} border border-white/5 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ed8d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-pgr-orange transition-colors">${r.title}</h3>
+                    <p class="text-sm text-pgr-muted leading-relaxed">${r.desc}</p>
+                    <div class="mt-4 flex items-center gap-1 text-sm text-pgr-orange opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Перейти</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </div>
+                </div>`;
+            });
+            html += '</div></div>';
+
+            html += '<div id="home-contents">';
+            html += `<div class="mt-12 pt-8 border-t border-pgr-border">`;
+            html += `<h2 class="text-2xl font-bold text-white mb-6 tracking-tight">Содержание</h2>`;
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+
+            const sections = [
+                { title: 'Быстрый старт', role: 'user', desc: 'Первые шаги: вход, главное меню, создание заданий, мониторинг.', icon: '⚡' },
+                { title: 'Пошаговые инструкции', role: 'user', desc: 'Персонализация рабочей области, закрепление и избранное.', icon: '📋' },
+                { title: 'Быстрый старт (Борт)', role: 'bort', desc: 'Работа с бортовым терминалом: вход, задания, статистика.', icon: '📡' },
+                { title: 'Администрирование', role: 'admin', desc: 'Настройка справочников: горизонты, места, оборудование, статусы.', icon: '⚙️' },
+                { title: 'Обзор разделов', role: 'admin', desc: 'Описание модулей: справочники, оперативная работа, отчеты, диагностика.', icon: '🗺️' },
+                { title: 'Справочники', role: 'admin', desc: 'Параметры и поля всех справочников системы.', icon: '📚' }
+            ];
+
+            sections.forEach(s => {
+                const btnIdx = s.role === 'user' ? 1 : s.role === 'bort' ? 2 : 3;
+                html += `<div onclick="switchRole('${s.role}', document.querySelectorAll('.role-btn')[${btnIdx}])" class="glass-card rounded-xl p-5 cursor-pointer hover:border-pgr-orange/40 transition-all group flex items-start gap-4" role="button" tabindex="0">
+                    <div class="w-10 h-10 rounded-lg bg-pgr-dark border border-pgr-border flex items-center justify-center text-xl shrink-0">${s.icon}</div>
+                    <div>
+                        <h3 class="text-base font-semibold text-white mb-1 group-hover:text-pgr-orange transition-colors">${s.title}</h3>
+                        <p class="text-sm text-pgr-muted leading-relaxed">${s.desc}</p>
+                    </div>
+                </div>`;
+            });
+            html += '</div></div></div>';
+
+            return html;
+        }
+
+        let activeSectionObserver = null;
+
+        function updateActiveNav() {
+            const contentView = document.getElementById('content-view');
+            if (!contentView) return;
+            const validAnchors = new Set();
+            document.querySelectorAll('.sidebar-link[data-anchor]').forEach(link => validAnchors.add(link.dataset.anchor));
+            let bestId = null;
+            let bestOffset = -Infinity;
+            const threshold = contentView.scrollTop + 120;
+            validAnchors.forEach(anchor => {
+                const el = document.getElementById(anchor);
+                if (!el) return;
+                const offset = el.offsetTop;
+                if (offset <= threshold && offset > bestOffset) {
+                    bestOffset = offset;
+                    bestId = anchor;
+                }
+            });
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.toggle('nav-active', link.dataset.anchor === bestId);
+            });
+        }
+
+        function setupActiveNavTracking() {
+            const contentView = document.getElementById('content-view');
+            if (!contentView) return;
+            contentView.removeEventListener('scroll', updateActiveNav);
+            contentView.addEventListener('scroll', updateActiveNav, { passive: true });
+            updateActiveNav();
+        }
+
+        function renderContent(role) {
+            const container = document.getElementById('dynamic-content');
+            if (!appData) { container.innerHTML = '<p class="text-pgr-muted">Загрузка...</p>'; return; }
+
+            let html = '';
+            if (role === 'home') {
+                html += renderHome();
+            } else if (role === 'user') {
+                if (appData.cards?.quickstart) {
+                    html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderSteps(appData.cards.quickstart.steps, appData.cards.quickstart.title, appData.cards.quickstart.description) + '</div>';
+                }
+                if (appData.cards?.instructions?.length) {
+                    html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderInstructions(appData.cards.instructions) + '</div>';
+                }
+            } else if (role === 'bort') {
+                if (appData.cards?.quickstart_bort) {
+                    html += renderBortSteps(appData.cards.quickstart_bort.steps, appData.cards.quickstart_bort.title, appData.cards.quickstart_bort.description);
+                }
+            } else if (role === 'admin') {
+                if (currentDirectoryKey && directoryData?.directories?.[currentDirectoryKey]) {
+                    html += `<div id="dir-view">${renderDirectoryTable(currentDirectoryKey, directoryData.directories[currentDirectoryKey])}</div>`;
+                } else {
+                    if (appData.cards?.admin_instructions?.length) {
+                        html += renderAdminInstructions(appData.cards.admin_instructions);
+                    }
+                    if (appData.cards?.descriptive?.length) {
+                        html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderDescriptive(appData.cards.descriptive) + '</div>';
+                    }
+                    if (directoryData?.directories) {
+                        html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderDirectoryList() + '</div>';
+                    }
+                }
+                if (appData.cards?.about?.length && !currentDirectoryKey) {
+                    html += '<div class="mt-12 pt-8 border-t border-pgr-border">' + renderAbout(appData.cards.about) + '</div>';
+                }
+            }
+            container.innerHTML = html || '<p class="text-pgr-muted">Нет данных для отображения.</p>';
+            const contentView = document.getElementById('content-view');
+            if (contentView) contentView.scrollTop = 0;
+            setTimeout(setupActiveNavTracking, 50);
+        }
+
+        function switchRole(role, btnElement) {
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            currentRole = role;
+
+            const contentView = document.getElementById('content-view');
+            const chatView = document.getElementById('chat-view');
+
+            if (role === 'ai') {
+                contentView.classList.add('hidden');
+                chatView.classList.remove('hidden');
+                document.getElementById('sidebar-nav').innerHTML = `
+                    <p class="text-xs font-semibold text-pgr-muted uppercase tracking-wider mb-2 ml-3">История</p>
+                    <a href="#" onclick="event.preventDefault(); createNewChat();" class="flex items-center gap-3 px-3 py-2 rounded-lg text-pgr-text hover:text-white hover:bg-white/5 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-pgr-orange"></span>+ Новый чат</a>
+                `;
+            } else if (role === 'home') {
+                contentView.classList.remove('hidden');
+                chatView.classList.add('hidden');
+                renderSidebar(role);
+                renderContent(role);
+                if (contentView) contentView.scrollTop = 0;
+            } else {
+                contentView.classList.remove('hidden');
+                chatView.classList.add('hidden');
+                renderSidebar(role);
+                renderContent(role);
+                if (contentView) contentView.scrollTop = 0;
+            }
+        }
+
+        function openImageModal(src) {
+            const modal = document.getElementById('img-modal');
+            document.getElementById('img-modal-src').src = src;
+            modal.classList.add('active');
+        }
+        function closeImageModal() { document.getElementById('img-modal').classList.remove('active'); }
+
+        function handleSearch(query) {
+            const container = document.getElementById('dynamic-content');
+            container.querySelectorAll('.search-hl').forEach(el => {
+                const parent = el.parentNode;
+                parent.replaceChild(document.createTextNode(el.textContent), el);
+                parent.normalize();
+            });
+            if (!query.trim()) return;
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+            const nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+            nodes.forEach(node => {
+                if (re.test(node.textContent)) {
+                    const span = document.createElement('span');
+                    span.innerHTML = node.textContent.replace(re, '<span class="search-hl">$1</span>');
+                    node.parentNode.replaceChild(span, node);
+                }
+            });
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+
+            const msgs = document.getElementById('chat-messages');
+            msgs.innerHTML += `<div class="max-w-3xl mx-auto flex gap-4 justify-end"><div class="chat-bubble-user rounded-xl p-4 text-sm text-gray-300 max-w-[85%]">${text.replace(/</g,'&lt;')}</div><div class="w-8 h-8 rounded-full bg-pgr-muted flex items-center justify-center text-white font-bold text-xs shrink-0">Вы</div></div>`;
+            msgs.innerHTML += `<div id="typing" class="max-w-3xl mx-auto flex gap-4"><div class="w-8 h-8 rounded-full bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold text-xs shrink-0">AI</div><div class="chat-bubble-ai rounded-xl p-4 text-sm text-gray-300"><span class="animate-pulse">Печатает...</span></div></div>`;
+            msgs.scrollTop = msgs.scrollHeight;
+
+            try {
+                const res = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: text, chat_id: currentChatId || undefined })
+                });
+                const data = await res.json();
+                document.getElementById('typing').remove();
+                const reply = data.answer || data.response || data.message || 'Нет ответа от сервера';
+                msgs.innerHTML += `<div class="max-w-3xl mx-auto flex gap-4"><div class="w-8 h-8 rounded-full bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold text-xs shrink-0">AI</div><div class="chat-bubble-ai rounded-xl p-4 text-sm text-gray-300 max-w-[85%] whitespace-pre-wrap">${reply.replace(/</g,'&lt;')}</div></div>`;
+            } catch (e) {
+                document.getElementById('typing').remove();
+                msgs.innerHTML += `<div class="max-w-3xl mx-auto flex gap-4"><div class="w-8 h-8 rounded-full bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold text-xs shrink-0">AI</div><div class="chat-bubble-ai rounded-xl p-4 text-sm text-red-400 max-w-[85%]">Ошибка подключения к AI-серверу</div></div>`;
+            }
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function scrollToSection(anchor) {
+            const contentView = document.getElementById('content-view');
+            const el = document.getElementById(anchor);
+            if (contentView && el) {
+                const top = el.offsetTop - 20;
+                contentView.scrollTo({ top, behavior: 'smooth' });
+            }
+        }
+
+        function scrollToParam(anchorId) {
+            const contentView = document.getElementById('content-view');
+            const el = document.getElementById(anchorId);
+            if (contentView && el) {
+                const wrap = el.closest('.dir-table-wrap');
+                if (wrap) {
+                    const top = el.offsetTop - 10;
+                    wrap.scrollTo({ top, behavior: 'smooth' });
+                } else {
+                    const top = el.offsetTop - 20;
+                    contentView.scrollTo({ top, behavior: 'smooth' });
+                }
+                el.style.background = 'rgba(237,141,72,0.15)';
+                setTimeout(() => { el.style.background = ''; }, 1500);
+            }
+        }
+
+        function toggleSidebar() {
+            const wrapper = document.getElementById('sidebar-wrapper');
+            const showBtn = document.getElementById('sidebar-show-btn');
+            if (wrapper.classList.contains('collapsed')) {
+                wrapper.classList.remove('collapsed');
+                showBtn.classList.add('hidden');
+            } else {
+                wrapper.classList.add('collapsed');
+                showBtn.classList.remove('hidden');
+            }
+        }
+
+        let isResizing = false;
+        function initResize(e) {
+            isResizing = true;
+            const wrapper = document.getElementById('sidebar-wrapper');
+            const handle = document.getElementById('resize-handle');
+            handle.classList.add('resizing');
+            const startX = e.clientX;
+            const startWidth = wrapper.offsetWidth;
+
+            function onMouseMove(e) {
+                if (!isResizing) return;
+                const newWidth = startWidth + (e.clientX - startX);
+                if (newWidth >= 200 && newWidth <= 500) {
+                    wrapper.style.width = newWidth + 'px';
+                    wrapper.style.transition = 'none';
+                }
+            }
+
+            function onMouseUp() {
+                isResizing = false;
+                handle.classList.remove('resizing');
+                wrapper.style.transition = '';
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        function showDirectory(key) {
+            currentDirectoryKey = key || null;
+            if (currentRole !== 'admin') {
+                switchRole('admin', document.querySelectorAll('.role-btn')[2]);
+            } else {
+                renderSidebar('admin');
+                renderContent('admin');
+                const contentView = document.getElementById('content-view');
+                if (contentView) contentView.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function createNewChat() {
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="max-w-3xl mx-auto flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-pgr-orange flex items-center justify-center text-pgr-dark font-bold text-xs shrink-0">AI</div>
+                    <div class="chat-bubble-ai rounded-xl p-4 text-sm text-gray-300 max-w-[85%]">Привет! Я AI-ассистент АСУ ПГР. Чем могу помочь?</div>
+                </div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadData();
+            await loadDirectoryData();
+            const defaultBtn = document.querySelector('.role-btn.active');
+            switchRole('home', defaultBtn);
+        });
+    </script>
+</body>
+</html>
